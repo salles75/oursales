@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Pedidos</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body data-page="pedidos">
+    <header>
+      <h1>Pedidos</h1>
+      <p>
+        Registre pedidos fechados vinculando cliente, transportadora e valor
+        faturado. Acompanhe datas previstas de entrega.
+      </p>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <section>
+        <div class="section-header">
+          <div>
+            <h2>Pedidos registrados</h2>
+            <p>Controle pedidos fechados, valores e entrega prevista.</p>
+          </div>
+          <div class="toolbar">
+            <button type="button" id="pedidoCriar">Novo pedido</button>
+            <button
+              type="button"
+              id="pedidoEditar"
+              class="button-secondary"
+              disabled
+            >
+              Editar selecionado
+            </button>
+            <button
+              type="button"
+              id="pedidoRemover"
+              class="button-danger"
+              disabled
+            >
+              Remover selecionado
+            </button>
+          </div>
+        </div>
+        <div class="list" id="pedidosLista"></div>
+      </section>
+    </main>
+
+    <div class="overlay" id="pedidoOverlay" hidden></div>
+
+    <section class="drawer" id="pedidoDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2 id="pedidoDrawerTitulo">Novo pedido</h2>
+          <p id="pedidoDrawerDescricao">
+            Informe código, cliente, transportadora e detalhes financeiros do
+            pedido.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="pedidoDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="pedidoForm" autocomplete="off">
+        <input type="hidden" id="pedidoId" />
+        <div class="grouped three">
+          <label>
+            Código do Pedido
+            <input
+              type="text"
+              id="pedidoCodigo"
+              required
+              placeholder="PED-2024-0001"
+            />
+          </label>
+          <label>
+            Cliente
+            <select id="pedidoCliente" required></select>
+          </label>
+          <label>
+            Transportadora
+            <select id="pedidoTransportadora" required></select>
+          </label>
+        </div>
+        <div class="grouped two">
+          <label>
+            Valor Total (R$)
+            <input
+              type="number"
+              id="pedidoValor"
+              min="0"
+              step="0.01"
+              required
+              placeholder="18450,00"
+            />
+          </label>
+          <label>
+            Data Prevista de Entrega
+            <input type="date" id="pedidoEntrega" required />
+          </label>
+        </div>
+        <label>
+          Observações
+          <textarea
+            id="pedidoObservacoes"
+            placeholder="Informações sobre faturamento, endereço de entrega, parcelas..."
+          ></textarea>
+        </label>
+        <div class="hero-actions">
+          <button type="submit">Salvar pedido</button>
+          <button
+            type="button"
+            id="pedidoCancelar"
+            class="button-secondary"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <footer>Dados mantidos localmente, ideais para um protótipo de CRM.</footer>
+
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>
