@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Novo Orçamento</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body data-page="orcamento-form">
+    <header>
+      <h1 id="orcamentoFormTitle">🛒 Orçamento - Novo</h1>
+      <p>
+        Preencha as informações do orçamento, adicione produtos e calcule os
+        totais.
+      </p>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <form id="orcamentoForm" autocomplete="off">
+        <input type="hidden" id="orcamentoId" />
+
+        <!-- Ações do formulário -->
+        <section class="card">
+          <div class="hero-actions">
+            <button type="submit" id="orcamentoSalvar">Salvar</button>
+            <button
+              type="button"
+              id="orcamentoSalvarEnviar"
+              class="button-secondary"
+            >
+              Salvar e Enviar
+            </button>
+            <button
+              type="button"
+              id="orcamentoVisualizar"
+              class="button-secondary"
+            >
+              Visualizar
+            </button>
+            <a href="orcamentos.html" class="button button-danger">Voltar</a>
+          </div>
+        </section>
+
+        <!-- Informações sobre o Orçamento -->
+        <section class="card">
+          <h3>Informações sobre o Orçamento</h3>
+          <div class="grouped three">
+            <label>
+              Cliente *
+              <select id="orcamentoCliente" required></select>
+            </label>
+            <label>
+              Comprador
+              <select id="orcamentoComprador">
+                <option value="">Selecione</option>
+              </select>
+            </label>
+            <label>
+              Transportadora
+              <select id="orcamentoTransportadora"></select>
+            </label>
+          </div>
+
+          <div class="grouped four">
+            <label>
+              Frete
+              <select id="orcamentoTipoFrete">
+                <option value="">Selecione</option>
+                <option value="cif">CIF</option>
+                <option value="fob">FOB</option>
+                <option value="sem">Sem Frete</option>
+              </select>
+            </label>
+            <label>
+              Dt. Orçamento *
+              <input type="date" id="orcamentoData" required />
+            </label>
+            <label>
+              Dt. Validade
+              <input type="date" id="orcamentoValidade" />
+            </label>
+            <label>
+              Previsão Entrega
+              <input type="date" id="orcamentoPrevisaoEntrega" />
+            </label>
+          </div>
+
+          <div class="grouped two">
+            <label>
+              Nota Fiscal
+              <input
+                type="text"
+                id="orcamentoNotaFiscal"
+                placeholder="Número da NF"
+              />
+            </label>
+            <label>
+              Descrição do Orçamento
+              <input
+                type="text"
+                id="orcamentoDescricao"
+                placeholder="Ex: 120 unidades linha Evolution"
+              />
+            </label>
+          </div>
+        </section>
+
+        <!-- Itens do Orçamento -->
+        <section class="card">
+          <div class="section-header">
+            <div>
+              <h3>Itens do Orçamento</h3>
+            </div>
+            <div class="toolbar">
+              <button
+                type="button"
+                id="buscarProdutos"
+                class="button-secondary"
+              >
+                🔍 Buscar Produtos
+              </button>
+            </div>
+          </div>
+
+          <div class="search-product-container">
+            <input
+              type="text"
+              id="produtoSearch"
+              placeholder="Nome do produto, código ou SKU"
+              class="search-product-input"
+            />
+            <button
+              type="button"
+              id="adicionarProduto"
+              class="button-secondary"
+            >
+              ➕ Adicionar
+            </button>
+          </div>
+
+          <div class="table-wrapper" style="margin-top: 1rem">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 40px"></th>
+                  <th>Código</th>
+                  <th>Descrição</th>
+                  <th>R$ Tabela</th>
+                  <th>Preço Final</th>
+                  <th>Qtde</th>
+                  <th>Total R$</th>
+                  <th style="width: 60px">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="orcamentoItensList">
+                <tr>
+                  <td colspan="8" class="empty-state">
+                    Nenhum produto adicionado neste orçamento!
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Totais do Orçamento -->
+        <section class="card">
+          <h3>Totais do Orçamento</h3>
+
+          <div class="totals-grid">
+            <div class="totals-column">
+              <div class="total-item">
+                <span class="total-label">Qtde. Itens</span>
+                <span class="total-value" id="totalItens">0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Qtde Produtos</span>
+                <span class="total-value" id="totalProdutos">0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total Peso Líquido</span>
+                <span class="total-value" id="totalPesoLiquido">0,000 Kg</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total IPI</span>
+                <span class="total-value" id="totalIPI">R$ 0,00</span>
+              </div>
+            </div>
+
+            <div class="totals-column">
+              <div class="total-item">
+                <span class="total-label">Acréscimo</span>
+                <span class="total-value" id="totalAcrescimo">R$ 0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total Peso Bruto</span>
+                <span class="total-value" id="totalPesoBruto">0,000 Kg</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total S/ Impostos</span>
+                <span class="total-value" id="totalSemImpostos">R$ 0,00</span>
+              </div>
+            </div>
+
+            <div class="totals-column">
+              <div class="total-item">
+                <span class="total-label">Frete</span>
+                <span class="total-value" id="totalFrete">R$ 0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Desconto</span>
+                <span class="total-value" id="totalDesconto">R$ 0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total ST</span>
+                <span class="total-value" id="totalST">R$ 0,00</span>
+              </div>
+              <div class="total-item highlight">
+                <span class="total-label"><strong>Total Final</strong></span>
+                <span class="total-value"
+                  ><strong id="totalFinal">R$ 0,00</strong></span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="frete-calculator">
+            <h4>Calcular Frete</h4>
+            <div class="grouped three">
+              <label>
+                Valor do Frete (R$)
+                <input
+                  type="number"
+                  id="valorFrete"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                />
+              </label>
+              <label>
+                Acréscimo (R$)
+                <input
+                  type="number"
+                  id="valorAcrescimo"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                />
+              </label>
+              <label>
+                Desconto (R$)
+                <input
+                  type="number"
+                  id="valorDesconto"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                />
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Informações Complementares -->
+        <section class="card">
+          <h3>Informações Complementares</h3>
+
+          <div class="grouped two">
+            <label class="checkbox-label">
+              <input type="checkbox" id="orcamentoCancelado" />
+              Orçamento Cancelado
+            </label>
+            <label>
+              Nº Ordem de Compra
+              <input
+                type="text"
+                id="orcamentoOrdemCompra"
+                placeholder="Número da OC"
+              />
+            </label>
+          </div>
+
+          <div class="grouped two">
+            <label>
+              Status
+              <select id="orcamentoStatus">
+                <option value="pendente">Pendente</option>
+                <option value="aprovado">Aprovado</option>
+                <option value="negociacao">Em Negociação</option>
+                <option value="cancelado">Cancelado</option>
+                <option value="convertido">Convertido em Pedido</option>
+              </select>
+            </label>
+            <label>
+              Vendedor
+              <select id="orcamentoVendedor">
+                <option value="">Selecione</option>
+                <option value="vendedor1">Vendedor 1</option>
+                <option value="vendedor2">Vendedor 2</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Observações
+            <textarea
+              id="orcamentoObservacoes"
+              rows="3"
+              placeholder="Condições comerciais, detalhes da proposta..."
+            ></textarea>
+          </label>
+
+          <label>
+            Condição de Pagamento
+            <textarea
+              id="orcamentoCondicaoPagamento"
+              rows="2"
+              placeholder="Ex: 30% entrada, 70% em 3x"
+            ></textarea>
+          </label>
+
+          <label>
+            Observação Privada
+            <textarea
+              id="orcamentoObservacaoPrivada"
+              rows="2"
+              placeholder="Anotações internas (não aparece no orçamento)"
+            ></textarea>
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="considerarCondicaoCliente" />
+            Considerar condição de pagamento do Cliente no orçamento
+          </label>
+        </section>
+
+        <!-- Anexos -->
+        <section class="card">
+          <h3>Anexos do Orçamento</h3>
+          <div class="attachments-area">
+            <p class="muted">Ainda não há arquivos anexados!</p>
+            <p class="muted" style="font-size: 0.9rem">
+              Selecione arquivos do seu computador para anexar ao orçamento.
+            </p>
+            <div style="margin-top: 1rem">
+              <button
+                type="button"
+                id="selecionarArquivos"
+                class="button-secondary"
+              >
+                Selecionar Arquivos
+              </button>
+              <button
+                type="button"
+                id="vincularArquivo"
+                class="button-secondary"
+              >
+                Vincular arquivo existente
+              </button>
+            </div>
+          </div>
+          <div id="arquivosAnexados" style="margin-top: 1rem"></div>
+        </section>
+
+        <!-- Ações finais -->
+        <section class="card">
+          <div class="hero-actions">
+            <button type="submit">Salvar Orçamento</button>
+            <a href="orcamentos.html" class="button button-secondary"
+              >Cancelar</a
+            >
+          </div>
+        </section>
+      </form>
+    </main>
+
+    <footer>
+      Garanta que os clientes e produtos estejam cadastrados para criar
+      orçamentos completos.
+    </footer>
+
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>

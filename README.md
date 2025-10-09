@@ -73,6 +73,38 @@ OurSales é um sistema profissional de gestão comercial que oferece:
 4. **PostgreSQL**: Banco de dados relacional principal
 5. **Redis**: Cache de queries, sessões, rate limiting
 
+### Estrutura de Diretórios
+
+```
+OurSales/
+├── frontend/             # Interface do usuário (HTML, CSS, JS)
+│   ├── assets/           # Recursos estáticos
+│   │   ├── css/          # Folhas de estilo
+│   │   └── js/           # Scripts JavaScript
+│   ├── index.html        # Dashboard principal
+│   ├── clientes.html     # Gestão de clientes
+│   ├── produtos.html     # Catálogo de produtos
+│   └── ...               # Outras páginas
+│
+├── backend/              # API RESTful Node.js
+│   ├── src/
+│   │   ├── config/       # Configurações (DB, Redis, Logger)
+│   │   ├── controllers/  # Lógica de negócio
+│   │   ├── routes/       # Definição de rotas da API
+│   │   ├── middlewares/  # Auth, Error Handler, Rate Limiter
+│   │   └── server.js     # Ponto de entrada da API
+│   ├── prisma/           # ORM e Schema do banco
+│   └── uploads/          # Arquivos enviados pelos usuários
+│
+├── database/             # Scripts SQL e migrations
+├── nginx/                # Configuração do proxy reverso
+├── docs/                 # Documentação técnica completa
+├── docker-compose.yml    # Orquestração de containers
+└── README.md             # Este arquivo
+```
+
+> 📖 Para mais detalhes sobre a estrutura, veja [docs/ESTRUTURA_PASTAS.md](docs/ESTRUTURA_PASTAS.md)
+
 ## 🛠️ Tecnologias
 
 ### Backend
