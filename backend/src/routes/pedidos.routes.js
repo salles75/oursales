@@ -4,61 +4,31 @@
 
 import express from "express";
 import { authenticate } from "../middlewares/auth.js";
+import {
+  getPedidos,
+  getPedidosStats,
+  getPedido,
+  createPedido,
+  updatePedido,
+  updateStatusPedido,
+  deletePedido,
+} from "../controllers/pedidos.controller.js";
 
 const router = express.Router();
 
 router.use(authenticate);
 
-router.get("/", async (req, res) => {
-  res.json({
-    success: true,
-    data: [],
-    message: "Implementar listagem de pedidos",
-  });
-});
+// Estatísticas (deve vir antes de /:id)
+router.get("/stats", getPedidosStats);
 
-router.get("/stats", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar estatísticas de pedidos",
-  });
-});
+// CRUD
+router.get("/", getPedidos);
+router.get("/:id", getPedido);
+router.post("/", createPedido);
+router.put("/:id", updatePedido);
+router.delete("/:id", deletePedido);
 
-router.get("/:id", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar obtenção de pedido",
-  });
-});
-
-router.post("/", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar criação de pedido",
-  });
-});
-
-router.put("/:id", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar atualização de pedido",
-  });
-});
-
-router.put("/:id/status", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar atualização de status do pedido",
-  });
-});
-
-router.delete("/:id", async (req, res) => {
-  res.json({ success: true, message: "Implementar exclusão de pedido" });
-});
+// Atualização de status
+router.put("/:id/status", updateStatusPedido);
 
 export default router;

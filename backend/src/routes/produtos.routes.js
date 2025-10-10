@@ -4,53 +4,33 @@
 
 import express from "express";
 import { authenticate } from "../middlewares/auth.js";
+import {
+  getProdutos,
+  getProdutosStats,
+  getProduto,
+  createProduto,
+  updateProduto,
+  deleteProduto,
+  ajustarEstoque,
+  getMovimentosEstoque,
+} from "../controllers/produtos.controller.js";
 
 const router = express.Router();
 
 router.use(authenticate);
 
-router.get("/", async (req, res) => {
-  res.json({
-    success: true,
-    data: [],
-    message: "Implementar listagem de produtos",
-  });
-});
+// Estatísticas (deve vir antes de /:id)
+router.get("/stats", getProdutosStats);
 
-router.get("/stats", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar estatísticas de produtos",
-  });
-});
+// CRUD
+router.get("/", getProdutos);
+router.get("/:id", getProduto);
+router.post("/", createProduto);
+router.put("/:id", updateProduto);
+router.delete("/:id", deleteProduto);
 
-router.get("/:id", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar obtenção de produto",
-  });
-});
-
-router.post("/", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar criação de produto",
-  });
-});
-
-router.put("/:id", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar atualização de produto",
-  });
-});
-
-router.delete("/:id", async (req, res) => {
-  res.json({ success: true, message: "Implementar exclusão de produto" });
-});
+// Estoque
+router.post("/:id/estoque", ajustarEstoque);
+router.get("/:id/movimentos", getMovimentosEstoque);
 
 export default router;

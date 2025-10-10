@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Cadastrar Indústria</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body data-page="industria-form">
+    <header>
+      <h1 id="industriaFormTitle">🏭 Fornecedor - Cadastrando</h1>
+      <p>
+        Preencha as informações completas da indústria/fornecedor para gestão
+        comercial.
+      </p>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <form id="industriaForm" autocomplete="off">
+        <input type="hidden" id="industriaId" />
+
+        <!-- Ações do formulário -->
+        <section class="card">
+          <div class="hero-actions">
+            <button type="submit" id="industriaSalvar">Salvar</button>
+            <a href="industrias.html" class="button button-secondary"
+              >Cancelar</a
+            >
+          </div>
+        </section>
+
+        <!-- Informações sobre a Indústria -->
+        <section class="card">
+          <h3>Informações sobre a Indústria</h3>
+
+          <div class="grouped two">
+            <label>
+              Razão Social *
+              <input
+                type="text"
+                id="industriaRazaoSocial"
+                required
+                placeholder="Ex: Indústria ABC LTDA"
+              />
+            </label>
+            <label>
+              Nome Fantasia *
+              <input
+                type="text"
+                id="industriaNomeFantasia"
+                required
+                placeholder="Ex: ABC Indústria"
+              />
+            </label>
+          </div>
+
+          <div class="grouped three">
+            <label>
+              CNPJ
+              <input
+                type="text"
+                id="industriaCNPJ"
+                placeholder="00.000.000/0000-00"
+              />
+            </label>
+            <label>
+              Inscrição Estadual
+              <input
+                type="text"
+                id="industriaInscricaoEstadual"
+                placeholder="000.000.000.000"
+              />
+            </label>
+            <label>
+              E-mail
+              <input
+                type="email"
+                id="industriaEmail"
+                placeholder="contato@industria.com.br"
+              />
+            </label>
+          </div>
+
+          <div class="grouped three">
+            <label>
+              Comissão (%)
+              <input
+                type="number"
+                id="industriaComissao"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+            <label>
+              Pagamento da comissão
+              <select id="industriaPagamentoComissao">
+                <option value="">Selecione</option>
+                <option value="recebimento">No Recebimento</option>
+                <option value="faturamento">No Faturamento</option>
+                <option value="mensal">Mensal</option>
+              </select>
+            </label>
+            <label>
+              Status *
+              <select id="industriaStatus" required>
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <!-- Logomarca -->
+        <section class="card">
+          <h3>Logomarca</h3>
+          <p style="color: #666; margin-bottom: 1rem">
+            Selecione a logomarca que deseja adicionar a este Fornecedor. Esta
+            logomarca será mostrada no pedido.
+          </p>
+
+          <div class="grouped two">
+            <label>
+              Logomarca
+              <input
+                type="url"
+                id="industriaLogoURL"
+                placeholder="URL da logomarca"
+              />
+            </label>
+            <div style="display: flex; align-items: flex-end">
+              <button
+                type="button"
+                id="uploadLogo"
+                class="button-secondary"
+                style="width: 100%"
+              >
+                Browse
+              </button>
+            </div>
+          </div>
+          <p style="font-size: 0.875rem; color: #666; margin-top: 0.5rem">
+            A imagem deve ser no formato JPEG, GIF, PNG ou BMP.
+          </p>
+        </section>
+
+        <!-- Tabelas de Preço -->
+        <section class="card">
+          <h3>Tabelas de Preço</h3>
+          <p style="color: #666; margin-bottom: 1rem">
+            Cadastre as Tabelas de Preço para esta Indústria.
+          </p>
+
+          <div class="grouped two" style="align-items: flex-end">
+            <label>
+              Nome da Tabela
+              <input
+                type="text"
+                id="tabelaPrecoNome"
+                placeholder="Ex: Tabela Padrão"
+              />
+            </label>
+            <button
+              type="button"
+              id="adicionarTabelaPreco"
+              class="button-secondary"
+              style="height: fit-content"
+            >
+              ➕ Adicionar
+            </button>
+          </div>
+
+          <div class="table-wrapper" style="margin-top: 1rem">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome da Tabela</th>
+                  <th style="width: 80px">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelasPrecosLista">
+                <tr>
+                  <td colspan="2" class="empty-state">
+                    Nenhuma tabela de preço cadastrada
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Condições de Pagamento -->
+        <section class="card">
+          <h3>Condições de Pagamento</h3>
+          <p style="color: #666; margin-bottom: 1rem">
+            Cadastre as Condições de Pagamento para este Fornecedor.
+          </p>
+
+          <div class="grouped five">
+            <label>
+              Descrição
+              <input
+                type="text"
+                id="condicaoPagamentoDescricao"
+                placeholder="Ex: À Vista"
+              />
+            </label>
+            <label>
+              Nº de Parcelas
+              <input
+                type="number"
+                id="condicaoPagamentoParcelas"
+                min="1"
+                placeholder="1"
+              />
+            </label>
+            <label>
+              Intervalo Dias
+              <input
+                type="number"
+                id="condicaoPagamentoIntervalo"
+                min="0"
+                placeholder="0"
+              />
+            </label>
+            <label>
+              Desconto ou Acréscimo (-)
+              <input
+                type="number"
+                id="condicaoPagamentoDesconto"
+                step="0.01"
+                placeholder="0"
+              />
+            </label>
+            <label>
+              Pedido Mínimo (R$)
+              <input
+                type="number"
+                id="condicaoPagamentoPedidoMinimo"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+          </div>
+
+          <button
+            type="button"
+            id="adicionarCondicaoPagamento"
+            class="button-secondary"
+            style="margin-top: 1rem"
+          >
+            ➕ Adicionar
+          </button>
+
+          <div class="table-wrapper" style="margin-top: 1rem">
+            <table>
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Nº de Parcelas</th>
+                  <th>Intervalo Dias</th>
+                  <th>Desconto ou Acréscimo (-)</th>
+                  <th>Pedido Mínimo (R$)</th>
+                  <th style="width: 80px">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="condicoesPagamentoLista">
+                <tr>
+                  <td colspan="6" class="empty-state">
+                    Nenhuma condição de pagamento cadastrada
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Contatos -->
+        <section class="card">
+          <h3>Contatos</h3>
+
+          <div class="grouped four">
+            <label>
+              Nome *
+              <input
+                type="text"
+                id="contatoNome"
+                placeholder="Nome do contato"
+              />
+            </label>
+            <label>
+              E-mail *
+              <input
+                type="email"
+                id="contatoEmail"
+                placeholder="email@exemplo.com"
+              />
+            </label>
+            <label>
+              Telefone *
+              <input
+                type="tel"
+                id="contatoTelefone"
+                placeholder="(11) 98888-8888"
+              />
+            </label>
+            <label>
+              Data Aniversário
+              <input type="date" id="contatoAniversario" />
+            </label>
+          </div>
+
+          <button
+            type="button"
+            id="adicionarContato"
+            class="button-secondary"
+            style="margin-top: 1rem"
+          >
+            Adicionar
+          </button>
+
+          <div class="table-wrapper" style="margin-top: 1rem">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Telefone</th>
+                  <th>Data Aniversário</th>
+                  <th style="width: 80px">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="contatosLista">
+                <tr>
+                  <td colspan="5" class="empty-state">
+                    Nenhum contato cadastrado
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Outras Informações -->
+        <section class="card">
+          <h3>Outras Informações</h3>
+
+          <div class="grouped two">
+            <label>
+              Endereço
+              <input
+                type="text"
+                id="industriaEndereco"
+                placeholder="Rua, Avenida..."
+              />
+            </label>
+            <label>
+              Bairro
+              <input type="text" id="industriaBairro" placeholder="Bairro" />
+            </label>
+          </div>
+
+          <div class="grouped three">
+            <label>
+              CEP
+              <input type="text" id="industriaCEP" placeholder="00000-000" />
+            </label>
+            <label>
+              Cidade
+              <input type="text" id="industriaCidade" placeholder="Cidade" />
+            </label>
+            <label>
+              Estado
+              <select id="industriaEstado">
+                <option value="">Selecione</option>
+                <option value="AC">AC</option>
+                <option value="AL">AL</option>
+                <option value="AP">AP</option>
+                <option value="AM">AM</option>
+                <option value="BA">BA</option>
+                <option value="CE">CE</option>
+                <option value="DF">DF</option>
+                <option value="ES">ES</option>
+                <option value="GO">GO</option>
+                <option value="MA">MA</option>
+                <option value="MT">MT</option>
+                <option value="MS">MS</option>
+                <option value="MG">MG</option>
+                <option value="PA">PA</option>
+                <option value="PB">PB</option>
+                <option value="PR">PR</option>
+                <option value="PE">PE</option>
+                <option value="PI">PI</option>
+                <option value="RJ">RJ</option>
+                <option value="RN">RN</option>
+                <option value="RS">RS</option>
+                <option value="RO">RO</option>
+                <option value="RR">RR</option>
+                <option value="SC">SC</option>
+                <option value="SP">SP</option>
+                <option value="SE">SE</option>
+                <option value="TO">TO</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grouped two">
+            <label>
+              Telefone
+              <input
+                type="tel"
+                id="industriaTelefone"
+                placeholder="(11) 3333-3333"
+              />
+            </label>
+            <label>
+              Telefone Adicional
+              <input
+                type="tel"
+                id="industriaTelefoneAdicional"
+                placeholder="(11) 98888-8888"
+              />
+            </label>
+          </div>
+
+          <label>
+            Observações
+            <textarea
+              id="industriaObservacoes"
+              rows="4"
+              placeholder="Informações adicionais, acordos comerciais, notas importantes..."
+            ></textarea>
+          </label>
+
+          <div style="margin-top: 1rem">
+            <label class="checkbox-label">
+              <input type="checkbox" id="industriaValidarEmbalagem" />
+              Validar quantidade da embalagem ao inserir no pedido
+            </label>
+          </div>
+        </section>
+
+        <!-- Ações finais -->
+        <section class="card">
+          <div class="hero-actions">
+            <button type="submit">Salvar Fornecedor</button>
+            <a href="industrias.html" class="button button-secondary"
+              >Cancelar</a
+            >
+          </div>
+        </section>
+      </form>
+    </main>
+
+    <footer>
+      Mantenha o cadastro de fornecedores atualizado para otimizar a gestão
+      comercial.
+    </footer>
+
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>

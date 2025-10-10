@@ -2,6 +2,7 @@ const storageKey = "oursales:data";
 const defaultState = {
   clientes: [],
   transportadoras: [],
+  industrias: [],
   orcamentos: [],
   pedidos: [],
   produtos: [],
@@ -217,6 +218,7 @@ function seedDataIfEmpty() {
         cobertura: "Brasil inteiro",
       },
     ],
+    industrias: [],
     orcamentos: [
       {
         id: "orc-evolution",
@@ -2346,6 +2348,524 @@ function initTransportadorasPage() {
   render();
 }
 
+function initIndustriasPage() {
+  const openBtn = document.querySelector("#industriaCriar");
+  const editBtn = document.querySelector("#industriaEditar");
+  const removeBtn = document.querySelector("#industriaRemover");
+  const listContainer = document.querySelector("#industriasLista");
+
+  let selectedId = "";
+
+  const updateActionsState = () => {
+    const hasSelection = Boolean(selectedId);
+    if (editBtn) editBtn.disabled = !hasSelection;
+    if (removeBtn) removeBtn.disabled = !hasSelection;
+  };
+
+  openBtn?.addEventListener("click", () => {
+    window.location.href = "industria-form.html";
+  });
+
+  editBtn?.addEventListener("click", () => {
+    if (!selectedId) {
+      window.alert("Selecione uma indústria para editar.");
+      return;
+    }
+    window.sessionStorage.setItem("oursales:editIndustria", selectedId);
+    window.location.href = "industria-form.html";
+  });
+
+  removeBtn?.addEventListener("click", () => {
+    if (!selectedId) {
+      window.alert("Selecione uma indústria para remover.");
+      return;
+    }
+
+    if (!window.confirm("Confirma remover esta indústria?")) {
+      return;
+    }
+
+    storage.update((draft) => {
+      draft.industrias = draft.industrias.filter(
+        (industria) => industria.id !== selectedId
+      );
+    });
+
+    selectedId = "";
+    render();
+  });
+
+  listContainer?.addEventListener("change", (event) => {
+    const input = event.target.closest(
+      'input[type="radio"][name="industriaSelecionada"]'
+    );
+    if (!input) return;
+    selectedId = input.value;
+    syncSelection(listContainer, "industriaSelecionada", selectedId);
+    updateActionsState();
+  });
+
+  listContainer?.addEventListener("click", (event) => {
+    const row = event.target.closest("tr[data-id]");
+    if (!row) return;
+    const input = row.querySelector(
+      'input[type="radio"][name="industriaSelecionada"]'
+    );
+    if (input) {
+      // Toggle: se já está selecionado, desmarcar
+      if (selectedId === input.value) {
+        input.checked = false;
+        selectedId = "";
+      } else {
+        input.checked = true;
+        selectedId = input.value;
+      }
+      syncSelection(listContainer, "industriaSelecionada", selectedId);
+      updateActionsState();
+    }
+  });
+
+  function render() {
+    const industrias = storage.load().industrias;
+    if (
+      selectedId &&
+      !industrias.some((industria) => industria.id === selectedId)
+    ) {
+      selectedId = "";
+    }
+
+    if (!industrias.length) {
+      listContainer.innerHTML =
+        '<div class="empty-state">Nenhuma indústria cadastrada.</div>';
+      updateActionsState();
+      return;
+    }
+
+    const linhas = industrias
+      .map(
+        (industria) => `
+          <tr class="table-row${
+            industria.id === selectedId ? " is-selected" : ""
+          }" data-id="${industria.id}">
+            <td class="select-cell">
+              <label class="select-radio">
+                <input type="radio" name="industriaSelecionada" value="${
+                  industria.id
+                }" ${industria.id === selectedId ? "checked" : ""} />
+                <span class="bubble"></span>
+              </label>
+            </td>
+            <td>
+              <strong>${industria.nome}</strong>
+              <div class="muted">${industria.cnpj || "CNPJ não informado"}</div>
+            </td>
+            <td>${industria.telefone || "-"}</td>
+            <td>${industria.email || "-"}</td>
+            <td>${
+              industria.prazoEntrega ? industria.prazoEntrega + " dias" : "-"
+            }</td>
+            <td>${industria.condicaoPagamento || "-"}</td>
+          </tr>
+        `
+      )
+      .join("");
+
+    listContainer.innerHTML = `
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="select-cell">Selecionar</th>
+              <th>Indústria / Fornecedor</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+              <th>Prazo Entrega</th>
+              <th>Condição Pagamento</th>
+            </tr>
+          </thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      </div>
+    `;
+
+    syncSelection(listContainer, "industriaSelecionada", selectedId);
+    updateActionsState();
+  }
+
+  render();
+}
+
+/**
+ * Industria Form Page - Página separada para criar/editar indústrias
+ */
+function initIndustriaFormPage() {
+  const form = document.querySelector("#industriaForm");
+  if (!form) return;
+
+  const formTitle = document.querySelector("#industriaFormTitle");
+
+  const fields = {
+    id: document.querySelector("#industriaId"),
+    razaoSocial: document.querySelector("#industriaRazaoSocial"),
+    nomeFantasia: document.querySelector("#industriaNomeFantasia"),
+    cnpj: document.querySelector("#industriaCNPJ"),
+    inscricaoEstadual: document.querySelector("#industriaInscricaoEstadual"),
+    email: document.querySelector("#industriaEmail"),
+    comissao: document.querySelector("#industriaComissao"),
+    pagamentoComissao: document.querySelector("#industriaPagamentoComissao"),
+    status: document.querySelector("#industriaStatus"),
+    logoURL: document.querySelector("#industriaLogoURL"),
+    endereco: document.querySelector("#industriaEndereco"),
+    bairro: document.querySelector("#industriaBairro"),
+    cep: document.querySelector("#industriaCEP"),
+    cidade: document.querySelector("#industriaCidade"),
+    estado: document.querySelector("#industriaEstado"),
+    telefone: document.querySelector("#industriaTelefone"),
+    telefoneAdicional: document.querySelector("#industriaTelefoneAdicional"),
+    observacoes: document.querySelector("#industriaObservacoes"),
+    validarEmbalagem: document.querySelector("#industriaValidarEmbalagem"),
+  };
+
+  let tabelasPrecos = [];
+  let condicoesPagamento = [];
+  let contatos = [];
+  let editingIndustriaId =
+    window.sessionStorage.getItem("oursales:editIndustria") || null;
+
+  if (editingIndustriaId) {
+    window.sessionStorage.removeItem("oursales:editIndustria");
+  }
+
+  // Funções para Tabelas de Preço
+  const renderTabelasPrecos = () => {
+    const tbody = document.querySelector("#tabelasPrecosLista");
+    if (!tbody) return;
+
+    if (tabelasPrecos.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="2" class="empty-state">
+            Nenhuma tabela de preço cadastrada
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = tabelasPrecos
+      .map(
+        (tabela, index) => `
+        <tr>
+          <td>${tabela.nome}</td>
+          <td style="text-align: center;">
+            <button
+              type="button"
+              class="button-danger button-small"
+              onclick="window.removeTabelaPreco(${index})"
+            >
+              remover
+            </button>
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+  };
+
+  const adicionarTabelaPrecoBtn = document.querySelector(
+    "#adicionarTabelaPreco"
+  );
+  adicionarTabelaPrecoBtn?.addEventListener("click", () => {
+    const nome = document.querySelector("#tabelaPrecoNome")?.value.trim();
+
+    if (!nome) {
+      window.alert("Preencha o nome da tabela.");
+      return;
+    }
+
+    tabelasPrecos.push({ nome });
+    renderTabelasPrecos();
+
+    // Limpar campo
+    document.querySelector("#tabelaPrecoNome").value = "";
+  });
+
+  window.removeTabelaPreco = (index) => {
+    if (window.confirm("Confirma remover esta tabela de preço?")) {
+      tabelasPrecos.splice(index, 1);
+      renderTabelasPrecos();
+    }
+  };
+
+  // Funções para Condições de Pagamento
+  const renderCondicoesPagamento = () => {
+    const tbody = document.querySelector("#condicoesPagamentoLista");
+    if (!tbody) return;
+
+    if (condicoesPagamento.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty-state">
+            Nenhuma condição de pagamento cadastrada
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = condicoesPagamento
+      .map(
+        (condicao, index) => `
+        <tr>
+          <td>${condicao.descricao}</td>
+          <td>${condicao.parcelas}</td>
+          <td>${condicao.intervalo}</td>
+          <td>${condicao.desconto}</td>
+          <td>${formatCurrency(condicao.pedidoMinimo)}</td>
+          <td style="text-align: center;">
+            <button
+              type="button"
+              class="button-danger button-small"
+              onclick="window.removeCondicaoPagamento(${index})"
+            >
+              Remover
+            </button>
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+  };
+
+  const adicionarCondicaoPagamentoBtn = document.querySelector(
+    "#adicionarCondicaoPagamento"
+  );
+  adicionarCondicaoPagamentoBtn?.addEventListener("click", () => {
+    const descricao = document
+      .querySelector("#condicaoPagamentoDescricao")
+      ?.value.trim();
+    const parcelas =
+      document.querySelector("#condicaoPagamentoParcelas")?.value || "1";
+    const intervalo =
+      document.querySelector("#condicaoPagamentoIntervalo")?.value || "0";
+    const desconto =
+      document.querySelector("#condicaoPagamentoDesconto")?.value || "0";
+    const pedidoMinimo =
+      document.querySelector("#condicaoPagamentoPedidoMinimo")?.value || "0";
+
+    if (!descricao) {
+      window.alert("Preencha a descrição da condição.");
+      return;
+    }
+
+    condicoesPagamento.push({
+      descricao,
+      parcelas: Number.parseInt(parcelas),
+      intervalo: Number.parseInt(intervalo),
+      desconto: Number.parseFloat(desconto),
+      pedidoMinimo: Number.parseFloat(pedidoMinimo),
+    });
+
+    renderCondicoesPagamento();
+
+    // Limpar campos
+    document.querySelector("#condicaoPagamentoDescricao").value = "";
+    document.querySelector("#condicaoPagamentoParcelas").value = "";
+    document.querySelector("#condicaoPagamentoIntervalo").value = "";
+    document.querySelector("#condicaoPagamentoDesconto").value = "";
+    document.querySelector("#condicaoPagamentoPedidoMinimo").value = "";
+  });
+
+  window.removeCondicaoPagamento = (index) => {
+    if (window.confirm("Confirma remover esta condição de pagamento?")) {
+      condicoesPagamento.splice(index, 1);
+      renderCondicoesPagamento();
+    }
+  };
+
+  // Funções para Contatos
+  const renderContatos = () => {
+    const tbody = document.querySelector("#contatosLista");
+    if (!tbody) return;
+
+    if (contatos.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="empty-state">
+            Nenhum contato cadastrado
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = contatos
+      .map(
+        (contato, index) => `
+        <tr>
+          <td>${contato.nome}</td>
+          <td>${contato.email}</td>
+          <td>${contato.telefone}</td>
+          <td>${
+            contato.aniversario
+              ? new Date(contato.aniversario).toLocaleDateString("pt-BR")
+              : "-"
+          }</td>
+          <td style="text-align: center;">
+            <button
+              type="button"
+              class="button-danger button-small"
+              onclick="window.removeContato(${index})"
+            >
+              Remover
+            </button>
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+  };
+
+  const adicionarContatoBtn = document.querySelector("#adicionarContato");
+  adicionarContatoBtn?.addEventListener("click", () => {
+    const nome = document.querySelector("#contatoNome")?.value.trim();
+    const email = document.querySelector("#contatoEmail")?.value.trim();
+    const telefone = document.querySelector("#contatoTelefone")?.value.trim();
+    const aniversario = document.querySelector("#contatoAniversario")?.value;
+
+    if (!nome || !email || !telefone) {
+      window.alert("Preencha nome, e-mail e telefone do contato.");
+      return;
+    }
+
+    contatos.push({
+      nome,
+      email,
+      telefone,
+      aniversario: aniversario || null,
+    });
+
+    renderContatos();
+
+    // Limpar campos
+    document.querySelector("#contatoNome").value = "";
+    document.querySelector("#contatoEmail").value = "";
+    document.querySelector("#contatoTelefone").value = "";
+    document.querySelector("#contatoAniversario").value = "";
+  });
+
+  window.removeContato = (index) => {
+    if (window.confirm("Confirma remover este contato?")) {
+      contatos.splice(index, 1);
+      renderContatos();
+    }
+  };
+
+  // Submit do formulário
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = {
+      razaoSocial: fields.razaoSocial.value.trim(),
+      nomeFantasia: fields.nomeFantasia.value.trim(),
+      cnpj: fields.cnpj.value.trim(),
+      inscricaoEstadual: fields.inscricaoEstadual.value.trim(),
+      email: fields.email.value.trim(),
+      comissao: Number.parseFloat(fields.comissao.value) || 0,
+      pagamentoComissao: fields.pagamentoComissao.value,
+      status: fields.status.value,
+      logoURL: fields.logoURL.value.trim(),
+      endereco: fields.endereco.value.trim(),
+      bairro: fields.bairro.value.trim(),
+      cep: fields.cep.value.trim(),
+      cidade: fields.cidade.value.trim(),
+      estado: fields.estado.value,
+      telefone: fields.telefone.value.trim(),
+      telefoneAdicional: fields.telefoneAdicional.value.trim(),
+      observacoes: fields.observacoes.value.trim(),
+      validarEmbalagem: fields.validarEmbalagem.checked,
+      tabelasPrecos: tabelasPrecos,
+      condicoesPagamento: condicoesPagamento,
+      contatos: contatos,
+      // Campos compatíveis com a versão antiga
+      nome: fields.nomeFantasia.value.trim(),
+    };
+
+    if (editingIndustriaId) {
+      storage.update((draft) => {
+        const industria = draft.industrias.find(
+          (item) => item.id === editingIndustriaId
+        );
+        if (industria) {
+          Object.assign(industria, data);
+        }
+      });
+      window.alert("Indústria atualizada com sucesso!");
+    } else {
+      storage.update((draft) => {
+        const nova = { id: generateId("ind"), ...data };
+        draft.industrias.push(nova);
+      });
+      window.alert("Indústria cadastrada com sucesso!");
+    }
+
+    window.location.href = "industrias.html";
+  });
+
+  // Inicialização
+  if (editingIndustriaId) {
+    const industria = storage
+      .load()
+      .industrias.find((item) => item.id === editingIndustriaId);
+    if (industria) {
+      formTitle.textContent = `🏭 Fornecedor - Editando ${
+        industria.nomeFantasia || industria.nome
+      }`;
+      fields.razaoSocial.value = industria.razaoSocial || "";
+      fields.nomeFantasia.value =
+        industria.nomeFantasia || industria.nome || "";
+      fields.cnpj.value = industria.cnpj || "";
+      fields.inscricaoEstadual.value = industria.inscricaoEstadual || "";
+      fields.email.value = industria.email || "";
+      fields.comissao.value = industria.comissao || 0;
+      fields.pagamentoComissao.value = industria.pagamentoComissao || "";
+      fields.status.value = industria.status || "ativo";
+      fields.logoURL.value = industria.logoURL || "";
+      fields.endereco.value = industria.endereco || "";
+      fields.bairro.value = industria.bairro || "";
+      fields.cep.value = industria.cep || "";
+      fields.cidade.value = industria.cidade || "";
+      fields.estado.value = industria.estado || "";
+      fields.telefone.value = industria.telefone || "";
+      fields.telefoneAdicional.value = industria.telefoneAdicional || "";
+      fields.observacoes.value = industria.observacoes || "";
+      fields.validarEmbalagem.checked = industria.validarEmbalagem || false;
+
+      // Carregar tabelas de preço
+      if (industria.tabelasPrecos) {
+        tabelasPrecos = [...industria.tabelasPrecos];
+        renderTabelasPrecos();
+      }
+
+      // Carregar condições de pagamento
+      if (industria.condicoesPagamento) {
+        condicoesPagamento = [...industria.condicoesPagamento];
+        renderCondicoesPagamento();
+      }
+
+      // Carregar contatos
+      if (industria.contatos) {
+        contatos = [...industria.contatos];
+        renderContatos();
+      }
+    }
+  }
+
+  renderTabelasPrecos();
+  renderCondicoesPagamento();
+  renderContatos();
+}
+
 function initProdutosPage() {
   const form = document.querySelector("#produtoForm");
   if (!form) return;
@@ -2403,28 +2923,8 @@ function initProdutosPage() {
       window.alert("Selecione um produto para editar.");
       return;
     }
-    const produto = storage
-      .load()
-      .produtos.find((item) => item.id === selectedId);
-    if (!produto) {
-      window.alert("O produto selecionado não está mais disponível.");
-      selectedId = "";
-      updateActionsState();
-      render();
-      return;
-    }
-    fields.id.value = produto.id;
-    fields.nome.value = produto.nome;
-    fields.sku.value = produto.sku;
-    fields.categoria.value = produto.categoria || "";
-    fields.preco.value = produto.preco;
-    fields.estoque.value = produto.estoque;
-    fields.descricao.value = produto.descricao || "";
-    titleEl.textContent = "Editar produto";
-    descEl.textContent = "Atualize as informações comerciais do produto.";
-    submitBtn.textContent = "Atualizar produto";
-    showDrawer(drawer, overlay);
-    focusFirstInput(fields.nome);
+    window.sessionStorage.setItem("oursales:editProduto", selectedId);
+    window.location.href = "produto-form.html";
   });
 
   removeBtn?.addEventListener("click", () => {
@@ -2597,6 +3097,280 @@ function initProdutosPage() {
   }
 
   render();
+}
+
+/**
+ * Produto Form Page - Página separada para criar/editar produtos
+ */
+function initProdutoFormPage() {
+  const form = document.querySelector("#produtoForm");
+  if (!form) return;
+
+  const formTitle = document.querySelector("#produtoFormTitle");
+
+  const fields = {
+    id: document.querySelector("#produtoId"),
+    industria: document.querySelector("#produtoIndustria"),
+    sku: document.querySelector("#produtoSKU"),
+    nome: document.querySelector("#produtoNome"),
+    precoVenda: document.querySelector("#produtoPrecoVenda"),
+    ncm: document.querySelector("#produtoNCM"),
+    precoPromocao: document.querySelector("#produtoPrecoPromocao"),
+    cores: document.querySelector("#produtoCores"),
+    marca: document.querySelector("#produtoMarca"),
+    markup: document.querySelector("#produtoMarkup"),
+    margemLucro: document.querySelector("#produtoMargemLucro"),
+    precoCompra: document.querySelector("#produtoPrecoCompra"),
+    custoMedio: document.querySelector("#produtoCustoMedio"),
+    margemMinima: document.querySelector("#produtoMargemMinima"),
+    margemSeguranca: document.querySelector("#produtoMargemSeguranca"),
+    ipi: document.querySelector("#produtoIPI"),
+    unidadeMedida: document.querySelector("#produtoUnidadeMedida"),
+    embalagem: document.querySelector("#produtoEmbalagem"),
+    observacoes: document.querySelector("#produtoObservacoes"),
+    tabelaPreco: document.querySelector("#produtoTabelaPreco"),
+    categoria: document.querySelector("#produtoCategoria"),
+    status: document.querySelector("#produtoStatus"),
+    altura: document.querySelector("#produtoAltura"),
+    largura: document.querySelector("#produtoLargura"),
+    comprimento: document.querySelector("#produtoComprimento"),
+    codigoOriginal: document.querySelector("#produtoCodigoOriginal"),
+    modelo: document.querySelector("#produtoModelo"),
+    pesoLiquido: document.querySelector("#produtoPesoLiquido"),
+    fatorCubagem: document.querySelector("#produtoFatorCubagem"),
+    fotoURL: document.querySelector("#produtoFotoURL"),
+  };
+
+  let substituicoesTributarias = [];
+  let editingProdutoId =
+    window.sessionStorage.getItem("oursales:editProduto") || null;
+
+  if (editingProdutoId) {
+    window.sessionStorage.removeItem("oursales:editProduto");
+  }
+
+  // Funções auxiliares
+  const calcularPrecoVenda = () => {
+    const precoCompra = Number.parseFloat(fields.precoCompra.value) || 0;
+    const markup = Number.parseFloat(fields.markup.value) || 0;
+
+    if (precoCompra > 0 && markup > 0) {
+      const precoCalculado = precoCompra * markup;
+      fields.precoVenda.value = precoCalculado.toFixed(2);
+    }
+  };
+
+  const calcularPrecoVendaPorMargem = () => {
+    const precoCompra = Number.parseFloat(fields.precoCompra.value) || 0;
+    const margemLucro = Number.parseFloat(fields.margemLucro.value) || 0;
+
+    if (precoCompra > 0 && margemLucro > 0) {
+      const precoCalculado = precoCompra / (1 - margemLucro / 100);
+      fields.precoVenda.value = precoCalculado.toFixed(2);
+    }
+  };
+
+  const gerarCodigo = () => {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, "0");
+    fields.sku.value = `PROD-${timestamp}-${random}`;
+  };
+
+  const renderSubstituicoesTributarias = () => {
+    const tbody = document.querySelector("#stListaEstados");
+    if (!tbody) return;
+
+    if (substituicoesTributarias.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="3" class="empty-state">
+            Nenhuma substituição tributária cadastrada
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = substituicoesTributarias
+      .map(
+        (st, index) => `
+        <tr>
+          <td>${st.estado}</td>
+          <td>${st.aliquota}%</td>
+          <td style="text-align: center;">
+            <button
+              type="button"
+              class="button-danger button-small"
+              onclick="window.removeST(${index})"
+            >
+              🗑️
+            </button>
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+  };
+
+  // Event Listeners para Cálculos
+  const calcularBtn = document.querySelector("#calcularPrecoVenda");
+  calcularBtn?.addEventListener("click", calcularPrecoVenda);
+
+  const calcularMargemBtn = document.querySelector("#calcularPrecoVendaMargem");
+  calcularMargemBtn?.addEventListener("click", calcularPrecoVendaPorMargem);
+
+  const gerarCodigoBtn = document.querySelector("#gerarCodigo");
+  gerarCodigoBtn?.addEventListener("click", gerarCodigo);
+
+  // Adicionar ST
+  const adicionarSTBtn = document.querySelector("#adicionarST");
+  adicionarSTBtn?.addEventListener("click", () => {
+    const estado = document.querySelector("#stEstado")?.value;
+    const aliquota = document.querySelector("#stAliquota")?.value;
+
+    if (!estado || !aliquota) {
+      window.alert("Preencha o estado e a alíquota.");
+      return;
+    }
+
+    // Verificar se o estado já foi adicionado
+    const jaExiste = substituicoesTributarias.some(
+      (st) => st.estado === estado
+    );
+    if (jaExiste) {
+      window.alert("Este estado já possui substituição tributária cadastrada.");
+      return;
+    }
+
+    substituicoesTributarias.push({
+      estado,
+      aliquota: Number.parseFloat(aliquota),
+    });
+
+    renderSubstituicoesTributarias();
+
+    // Limpar campos
+    document.querySelector("#stAliquota").value = "";
+  });
+
+  // Função global para remover ST
+  window.removeST = (index) => {
+    if (window.confirm("Confirma remover esta substituição tributária?")) {
+      substituicoesTributarias.splice(index, 1);
+      renderSubstituicoesTributarias();
+    }
+  };
+
+  // Submit do formulário
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = {
+      industria: fields.industria.value,
+      sku: fields.sku.value.trim(),
+      nome: fields.nome.value.trim(),
+      precoVenda: Number.parseFloat(fields.precoVenda.value) || 0,
+      ncm: fields.ncm?.value.trim() || "",
+      precoPromocao: Number.parseFloat(fields.precoPromocao.value) || 0,
+      cores: fields.cores?.value.trim() || "",
+      marca: fields.marca?.value.trim() || "",
+      markup: Number.parseFloat(fields.markup.value) || 0,
+      margemLucro: Number.parseFloat(fields.margemLucro.value) || 0,
+      precoCompra: Number.parseFloat(fields.precoCompra.value) || 0,
+      custoMedio: fields.custoMedio?.value || "ultimo",
+      margemMinima: Number.parseFloat(fields.margemMinima.value) || 0,
+      margemSeguranca: Number.parseFloat(fields.margemSeguranca.value) || 0,
+      ipi: Number.parseFloat(fields.ipi.value) || 0,
+      unidadeMedida: fields.unidadeMedida?.value.trim() || "",
+      embalagem: fields.embalagem?.value.trim() || "",
+      observacoes: fields.observacoes?.value.trim() || "",
+      tabelaPreco: fields.tabelaPreco?.value || "",
+      categoria: fields.categoria?.value || "",
+      status: fields.status.value,
+      altura: Number.parseFloat(fields.altura.value) || 0,
+      largura: Number.parseFloat(fields.largura.value) || 0,
+      comprimento: Number.parseFloat(fields.comprimento.value) || 0,
+      codigoOriginal: fields.codigoOriginal?.value.trim() || "",
+      modelo: fields.modelo?.value.trim() || "",
+      pesoLiquido: Number.parseFloat(fields.pesoLiquido.value) || 0,
+      fatorCubagem: Number.parseFloat(fields.fatorCubagem.value) || 0,
+      fotoURL: fields.fotoURL?.value.trim() || "",
+      substituicoesTributarias: substituicoesTributarias,
+      // Campos legados para compatibilidade
+      preco: Number.parseFloat(fields.precoVenda.value) || 0,
+      estoque: 0, // Campo não está no formulário, mas mantido para compatibilidade
+      descricao: fields.observacoes?.value.trim() || "",
+    };
+
+    if (editingProdutoId) {
+      storage.update((draft) => {
+        const produto = draft.produtos.find(
+          (item) => item.id === editingProdutoId
+        );
+        if (produto) {
+          Object.assign(produto, data);
+        }
+      });
+      window.alert("Produto atualizado com sucesso!");
+    } else {
+      storage.update((draft) => {
+        const novo = { id: generateId("pro"), ...data };
+        draft.produtos.push(novo);
+      });
+      window.alert("Produto criado com sucesso!");
+    }
+
+    window.location.href = "produtos.html";
+  });
+
+  // Inicialização
+  if (editingProdutoId) {
+    const produto = storage
+      .load()
+      .produtos.find((item) => item.id === editingProdutoId);
+    if (produto) {
+      formTitle.textContent = `📦 Produto - Editando ${produto.nome}`;
+      fields.industria.value = produto.industria || "";
+      fields.sku.value = produto.sku || "";
+      fields.nome.value = produto.nome || "";
+      fields.precoVenda.value = produto.precoVenda || produto.preco || 0;
+      fields.ncm.value = produto.ncm || "";
+      fields.precoPromocao.value = produto.precoPromocao || 0;
+      fields.cores.value = produto.cores || "";
+      fields.marca.value = produto.marca || "";
+      fields.markup.value = produto.markup || 0;
+      fields.margemLucro.value = produto.margemLucro || 0;
+      fields.precoCompra.value = produto.precoCompra || 0;
+      fields.custoMedio.value = produto.custoMedio || "ultimo";
+      fields.margemMinima.value = produto.margemMinima || 0;
+      fields.margemSeguranca.value = produto.margemSeguranca || 0;
+      fields.ipi.value = produto.ipi || 0;
+      fields.unidadeMedida.value = produto.unidadeMedida || "";
+      fields.embalagem.value = produto.embalagem || "";
+      fields.observacoes.value = produto.observacoes || produto.descricao || "";
+      fields.tabelaPreco.value = produto.tabelaPreco || "";
+      fields.categoria.value = produto.categoria || "";
+      fields.status.value = produto.status || "ativo";
+      fields.altura.value = produto.altura || 0;
+      fields.largura.value = produto.largura || 0;
+      fields.comprimento.value = produto.comprimento || 0;
+      fields.codigoOriginal.value = produto.codigoOriginal || "";
+      fields.modelo.value = produto.modelo || "";
+      fields.pesoLiquido.value = produto.pesoLiquido || 0;
+      fields.fatorCubagem.value = produto.fatorCubagem || 0;
+      fields.fotoURL.value = produto.fotoURL || "";
+
+      // Carregar substituições tributárias
+      if (produto.substituicoesTributarias) {
+        substituicoesTributarias = [...produto.substituicoesTributarias];
+        renderSubstituicoesTributarias();
+      }
+    }
+  }
+
+  renderSubstituicoesTributarias();
 }
 
 function initOrcamentosPage() {
@@ -4266,7 +5040,10 @@ const pageInitializers = {
   "cliente-pj": initClientePJPage,
   "cliente-pf": initClientePFPage,
   transportadoras: initTransportadorasPage,
+  industrias: initIndustriasPage,
+  "industria-form": initIndustriaFormPage,
   produtos: initProdutosPage,
+  "produto-form": initProdutoFormPage,
   orcamentos: initOrcamentosPage,
   "orcamento-form": initOrcamentoFormPage,
   pedidos: initPedidosPage,

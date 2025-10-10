@@ -1,0 +1,38 @@
+# =====================================================
+# OurSales Backend - Variáveis de Ambiente
+# Copie este arquivo para backend/.env e configure
+# =====================================================
+
+# Ambiente
+NODE_ENV=development
+
+# Servidor
+PORT=3000
+HOST=0.0.0.0
+
+# Banco de Dados PostgreSQL
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/oursales
+
+# Redis
+REDIS_URL=redis://localhost:6379
+REDIS_PASSWORD=
+
+# JWT
+JWT_SECRET=seu_secret_super_seguro_aqui
+JWT_EXPIRES_IN=7d
+
+# CORS
+CORS_ORIGIN=http://localhost:8080,http://localhost:3001
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Logs
+LOG_LEVEL=info
+LOG_FILE_PATH=./logs
+
+# Upload de Arquivos
+UPLOAD_DIR=./uploads
+MAX_FILE_SIZE=10485760
+
