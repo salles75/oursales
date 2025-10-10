@@ -2,6 +2,7 @@ const storageKey = "oursales:data";
 const defaultState = {
   clientes: [],
   transportadoras: [],
+  industrias: [],
   orcamentos: [],
   pedidos: [],
   produtos: [],
@@ -217,6 +218,7 @@ function seedDataIfEmpty() {
         cobertura: "Brasil inteiro",
       },
     ],
+    industrias: [],
     orcamentos: [
       {
         id: "orc-evolution",
@@ -432,18 +434,10 @@ function initClientesPage() {
       render();
       return;
     }
-    fields.id.value = cliente.id;
-    fields.nome.value = cliente.nome;
-    fields.documento.value = cliente.documento;
-    fields.email.value = cliente.email;
-    fields.telefone.value = cliente.telefone;
-    fields.observacoes.value = cliente.observacoes || "";
-    titleEl.textContent = "Editar cliente";
-    descEl.textContent =
-      "Atualize as informações cadastrais do cliente selecionado.";
-    submitBtn.textContent = "Atualizar cliente";
-    showDrawer(drawer, overlay);
-    focusFirstInput(fields.nome);
+    // Redirecionar para a página correta baseado no tipo
+    const pagina =
+      cliente.tipo === "PJ" ? "cliente-pj.html" : "cliente-pf.html";
+    window.location.href = `${pagina}?id=${selectedId}`;
   });
 
   removeBtn?.addEventListener("click", () => {
@@ -646,6 +640,7 @@ function initClientePJPage() {
   if (!form) return;
 
   const fields = {
+    id: document.querySelector("#pjClienteId"),
     razaoSocial: document.querySelector("#pjRazaoSocial"),
     nomeFantasia: document.querySelector("#pjNomeFantasia"),
     rede: document.querySelector("#pjRede"),
@@ -1001,8 +996,110 @@ function initClientePJPage() {
   addIndustriaRow();
   addTransportadoraRow();
 
+  // Verificar se está editando um cliente existente
+  const urlParams = new URLSearchParams(window.location.search);
+  const clienteId = urlParams.get("id");
+
+  if (clienteId) {
+    const cliente = storage.load().clientes.find((c) => c.id === clienteId);
+    if (cliente && cliente.tipo === "PJ" && cliente.dadosPJ) {
+      // Atualizar título e botão
+      document.querySelector("#pjFormTitle").textContent =
+        "Editar Cliente (Pessoa Jurídica)";
+      document.querySelector("header h1").textContent =
+        "Editar Cliente • Pessoa Jurídica";
+      document.querySelector("#pjSalvar").textContent = "Atualizar";
+
+      // Carregar ID
+      fields.id.value = cliente.id;
+
+      // Carregar informações básicas
+      const info = cliente.dadosPJ.informacoes || {};
+      fields.razaoSocial.value = info.razaoSocial || "";
+      fields.nomeFantasia.value = info.nomeFantasia || "";
+      fields.rede.value = info.rede || "";
+      fields.cnpj.value = info.cnpj || "";
+      fields.inscricaoEstadual.value = info.inscricaoEstadual || "";
+      fields.codigo.value = info.codigo || "";
+      fields.matriz.value = info.matriz || "";
+      fields.segmento.value = info.segmento || "";
+
+      // Carregar endereço
+      const end = cliente.dadosPJ.endereco || {};
+      fields.endereco.value = end.endereco || "";
+      fields.bairro.value = end.bairro || "";
+      fields.numero.value = end.numero || "";
+      fields.cep.value = end.cep || "";
+      fields.cidade.value = end.cidade || "";
+      fields.estado.value = end.estado || "";
+
+      // Carregar comunicação
+      const com = cliente.dadosPJ.comunicacao || {};
+      fields.telefone.value = com.telefone || "";
+      fields.fax.value = com.fax || "";
+      fields.telefoneAdicional.value = com.telefoneAdicional || "";
+      fields.website.value = com.website || "";
+      fields.email.value = com.email || "";
+      fields.emailNfe.value = com.emailNfe || "";
+
+      // Carregar status
+      const st = cliente.dadosPJ.status || {};
+      fields.status.value = st.status || "Ativo";
+      fields.observacoes.value = st.observacoes || "";
+      fields.dataAbertura.value = st.dataAbertura || "";
+      fields.regiao.value = st.regiao || "";
+
+      // Limpar tabelas antes de carregar
+      contatosBody.innerHTML = "";
+      pagamentosBody.innerHTML = "";
+      vendedoresBody.innerHTML = "";
+      industriasBody.innerHTML = "";
+      transportadorasBody.innerHTML = "";
+
+      // Carregar contatos
+      const contatos = cliente.dadosPJ.contatos || [];
+      if (contatos.length > 0) {
+        contatos.forEach((contato) => addContatoRow(contato));
+      } else {
+        addContatoRow();
+      }
+
+      // Carregar pagamentos
+      const pagamentos = cliente.dadosPJ.pagamentos || [];
+      if (pagamentos.length > 0) {
+        pagamentos.forEach((pag) => addPagamentoRow(pag));
+      } else {
+        addPagamentoRow();
+      }
+
+      // Carregar vendedores
+      const vendedores = cliente.dadosPJ.vendedores || [];
+      if (vendedores.length > 0) {
+        vendedores.forEach((vend) => addVendedorRow(vend));
+      } else {
+        addVendedorRow();
+      }
+
+      // Carregar indústrias
+      const industrias = cliente.dadosPJ.industrias || [];
+      if (industrias.length > 0) {
+        industrias.forEach((ind) => addIndustriaRow(ind));
+      } else {
+        addIndustriaRow();
+      }
+
+      // Carregar transportadoras
+      const transportadoras = cliente.dadosPJ.transportadoras || [];
+      if (transportadoras.length > 0) {
+        transportadoras.forEach((transp) => addTransportadoraRow(transp));
+      } else {
+        addTransportadoraRow();
+      }
+    }
+  }
+
   gerarCodigoBtn?.addEventListener("click", () => {
-    fields.codigo.value = `CLI-${Date.now().toString(36).toUpperCase()}`;
+    fields.codigo.value = `CLI-PJ-${Date.now().toString(36).toUpperCase()}`;
   });
 
   cancelarBtn?.addEventListener("click", () => {
@@ -1186,26 +1283,72 @@ function initClientePJPage() {
       transportadoras,
     };
 
-    storage.update((draft) => {
-      const id = generateId("cli");
-      const cliente = {
-        id,
-        tipo: "PJ",
-        nome: informacoes.razaoSocial || informacoes.nomeFantasia,
-        fantasia: informacoes.nomeFantasia,
-        documento: informacoes.cnpj,
-        email: comunicacao.email,
-        telefone: comunicacao.telefone,
-        observacoes: statusInfo.observacoes,
-        dadosPJ,
-      };
-      draft.clientes.push(cliente);
-      draft.clientes.sort((a, b) =>
-        a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
-      );
-    });
+    const clienteId = fields.id.value;
 
-    window.alert("Cliente PJ cadastrado com sucesso!");
+    if (clienteId) {
+      // Atualizar cliente existente
+      storage.update((draft) => {
+        const clienteExistente = draft.clientes.find((c) => c.id === clienteId);
+        if (clienteExistente) {
+          clienteExistente.nome =
+            informacoes.razaoSocial || informacoes.nomeFantasia;
+          clienteExistente.fantasia = informacoes.nomeFantasia;
+          clienteExistente.documento = informacoes.cnpj;
+          clienteExistente.email = comunicacao.email;
+          clienteExistente.telefone = comunicacao.telefone;
+          clienteExistente.observacoes = statusInfo.observacoes;
+          clienteExistente.dadosPJ = dadosPJ;
+
+          // Atualizar referências em orçamentos
+          draft.orcamentos.forEach((orcamento) => {
+            if (orcamento.clienteId === clienteId) {
+              orcamento.clienteNome = clienteExistente.nome;
+            }
+          });
+
+          // Atualizar referências em pedidos
+          draft.pedidos.forEach((pedido) => {
+            if (pedido.clienteId === clienteId) {
+              pedido.clienteNome = clienteExistente.nome;
+            }
+          });
+
+          // Atualizar referências em CRM
+          draft.crm.forEach((registro) => {
+            if (registro.clienteId === clienteId) {
+              registro.clienteNome = clienteExistente.nome;
+            }
+          });
+
+          draft.clientes.sort((a, b) =>
+            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+          );
+        }
+      });
+      window.alert("Cliente PJ atualizado com sucesso!");
+    } else {
+      // Criar novo cliente
+      storage.update((draft) => {
+        const id = generateId("cli-pj");
+        const cliente = {
+          id,
+          tipo: "PJ",
+          nome: informacoes.razaoSocial || informacoes.nomeFantasia,
+          fantasia: informacoes.nomeFantasia,
+          documento: informacoes.cnpj,
+          email: comunicacao.email,
+          telefone: comunicacao.telefone,
+          observacoes: statusInfo.observacoes,
+          dadosPJ,
+        };
+        draft.clientes.push(cliente);
+        draft.clientes.sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+        );
+      });
+      window.alert("Cliente PJ cadastrado com sucesso!");
+    }
+
     window.location.href = "clientes.html";
   });
 }
@@ -1215,6 +1358,7 @@ function initClientePFPage() {
   if (!form) return;
 
   const fields = {
+    id: document.querySelector("#pfClienteId"),
     nome: document.querySelector("#pfNome"),
     codigo: document.querySelector("#pfCodigo"),
     cpf: document.querySelector("#pfCpf"),
@@ -1577,8 +1721,110 @@ function initClientePFPage() {
   addIndustriaRow();
   addTransportadoraRow();
 
+  // Verificar se está editando um cliente existente
+  const urlParams = new URLSearchParams(window.location.search);
+  const clienteId = urlParams.get("id");
+
+  if (clienteId) {
+    const cliente = storage.load().clientes.find((c) => c.id === clienteId);
+    if (cliente && cliente.tipo === "PF" && cliente.dadosPF) {
+      // Atualizar título e botão
+      document.querySelector("#pfFormTitle").textContent =
+        "Editar Cliente (Pessoa Física)";
+      document.querySelector("header h1").textContent =
+        "Editar Cliente • Pessoa Física";
+      document.querySelector("#pfSalvar").textContent = "Atualizar";
+
+      // Carregar ID
+      fields.id.value = cliente.id;
+
+      // Carregar informações básicas
+      const info = cliente.dadosPF.informacoes || {};
+      fields.nome.value = info.nome || "";
+      fields.codigo.value = info.codigo || "";
+      fields.cpf.value = info.cpf || "";
+      fields.inscricaoEstadual.value = info.inscricaoEstadual || "";
+      fields.rg.value = info.rg || "";
+      fields.estadoCivil.value = info.estadoCivil || "";
+      fields.sexo.value = info.sexo || "";
+      fields.suframa.value = info.suframa || "";
+
+      // Carregar endereço
+      const end = cliente.dadosPF.endereco || {};
+      fields.endereco.value = end.endereco || "";
+      fields.bairro.value = end.bairro || "";
+      fields.numero.value = end.numero || "";
+      fields.cep.value = end.cep || "";
+      fields.cidade.value = end.cidade || "";
+      fields.estado.value = end.estado || "";
+
+      // Carregar comunicação
+      const com = cliente.dadosPF.comunicacao || {};
+      fields.telefone.value = com.telefone || "";
+      fields.fax.value = com.fax || "";
+      fields.telefoneAdicional.value = com.telefoneAdicional || "";
+      fields.website.value = com.website || "";
+      fields.email.value = com.email || "";
+      fields.emailNfe.value = com.emailNfe || "";
+
+      // Carregar status
+      const st = cliente.dadosPF.status || {};
+      fields.status.value = st.status || "Ativo";
+      fields.observacoes.value = st.observacoes || "";
+      fields.dataCadastro.value = st.dataCadastro || "";
+      fields.regiao.value = st.regiao || "";
+
+      // Limpar tabelas antes de carregar
+      contatosBody.innerHTML = "";
+      pagamentosBody.innerHTML = "";
+      vendedoresBody.innerHTML = "";
+      industriasBody.innerHTML = "";
+      transportadorasBody.innerHTML = "";
+
+      // Carregar contatos
+      const contatos = cliente.dadosPF.contatos || [];
+      if (contatos.length > 0) {
+        contatos.forEach((contato) => addContatoRow(contato));
+      } else {
+        addContatoRow();
+      }
+
+      // Carregar pagamentos
+      const pagamentos = cliente.dadosPF.pagamentos || [];
+      if (pagamentos.length > 0) {
+        pagamentos.forEach((pag) => addPagamentoRow(pag));
+      } else {
+        addPagamentoRow();
+      }
+
+      // Carregar vendedores
+      const vendedores = cliente.dadosPF.vendedores || [];
+      if (vendedores.length > 0) {
+        vendedores.forEach((vend) => addVendedorRow(vend));
+      } else {
+        addVendedorRow();
+      }
+
+      // Carregar indústrias
+      const industrias = cliente.dadosPF.industrias || [];
+      if (industrias.length > 0) {
+        industrias.forEach((ind) => addIndustriaRow(ind));
+      } else {
+        addIndustriaRow();
+      }
+
+      // Carregar transportadoras
+      const transportadoras = cliente.dadosPF.transportadoras || [];
+      if (transportadoras.length > 0) {
+        transportadoras.forEach((transp) => addTransportadoraRow(transp));
+      } else {
+        addTransportadoraRow();
+      }
+    }
+  }
+
   gerarCodigoBtn?.addEventListener("click", () => {
-    fields.codigo.value = `CLI-${Date.now().toString(36).toUpperCase()}`;
+    fields.codigo.value = `CLI-PF-${Date.now().toString(36).toUpperCase()}`;
   });
 
   cancelarBtn?.addEventListener("click", () => {
@@ -1761,25 +2007,69 @@ function initClientePFPage() {
       transportadoras,
     };
 
-    storage.update((draft) => {
-      const id = generateId("cli");
-      const cliente = {
-        id,
-        tipo: "PF",
-        nome: informacoes.nome,
-        documento: informacoes.cpf,
-        email: comunicacao.email,
-        telefone: comunicacao.telefone,
-        observacoes: statusInfo.observacoes,
-        dadosPF,
-      };
-      draft.clientes.push(cliente);
-      draft.clientes.sort((a, b) =>
-        a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
-      );
-    });
+    const clienteId = fields.id.value;
 
-    window.alert("Cliente PF cadastrado com sucesso!");
+    if (clienteId) {
+      // Atualizar cliente existente
+      storage.update((draft) => {
+        const clienteExistente = draft.clientes.find((c) => c.id === clienteId);
+        if (clienteExistente) {
+          clienteExistente.nome = informacoes.nome;
+          clienteExistente.documento = informacoes.cpf;
+          clienteExistente.email = comunicacao.email;
+          clienteExistente.telefone = comunicacao.telefone;
+          clienteExistente.observacoes = statusInfo.observacoes;
+          clienteExistente.dadosPF = dadosPF;
+
+          // Atualizar referências em orçamentos
+          draft.orcamentos.forEach((orcamento) => {
+            if (orcamento.clienteId === clienteId) {
+              orcamento.clienteNome = clienteExistente.nome;
+            }
+          });
+
+          // Atualizar referências em pedidos
+          draft.pedidos.forEach((pedido) => {
+            if (pedido.clienteId === clienteId) {
+              pedido.clienteNome = clienteExistente.nome;
+            }
+          });
+
+          // Atualizar referências em CRM
+          draft.crm.forEach((registro) => {
+            if (registro.clienteId === clienteId) {
+              registro.clienteNome = clienteExistente.nome;
+            }
+          });
+
+          draft.clientes.sort((a, b) =>
+            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+          );
+        }
+      });
+      window.alert("Cliente PF atualizado com sucesso!");
+    } else {
+      // Criar novo cliente
+      storage.update((draft) => {
+        const id = generateId("cli-pf");
+        const cliente = {
+          id,
+          tipo: "PF",
+          nome: informacoes.nome,
+          documento: informacoes.cpf,
+          email: comunicacao.email,
+          telefone: comunicacao.telefone,
+          observacoes: statusInfo.observacoes,
+          dadosPF,
+        };
+        draft.clientes.push(cliente);
+        draft.clientes.sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+        );
+      });
+      window.alert("Cliente PF cadastrado com sucesso!");
+    }
+
     window.location.href = "clientes.html";
   });
 }
@@ -2058,6 +2348,524 @@ function initTransportadorasPage() {
   render();
 }
 
+function initIndustriasPage() {
+  const openBtn = document.querySelector("#industriaCriar");
+  const editBtn = document.querySelector("#industriaEditar");
+  const removeBtn = document.querySelector("#industriaRemover");
+  const listContainer = document.querySelector("#industriasLista");
+
+  let selectedId = "";
+
+  const updateActionsState = () => {
+    const hasSelection = Boolean(selectedId);
+    if (editBtn) editBtn.disabled = !hasSelection;
+    if (removeBtn) removeBtn.disabled = !hasSelection;
+  };
+
+  openBtn?.addEventListener("click", () => {
+    window.location.href = "industria-form.html";
+  });
+
+  editBtn?.addEventListener("click", () => {
+    if (!selectedId) {
+      window.alert("Selecione uma indústria para editar.");
+      return;
+    }
+    window.sessionStorage.setItem("oursales:editIndustria", selectedId);
+    window.location.href = "industria-form.html";
+  });
+
+  removeBtn?.addEventListener("click", () => {
+    if (!selectedId) {
+      window.alert("Selecione uma indústria para remover.");
+      return;
+    }
+
+    if (!window.confirm("Confirma remover esta indústria?")) {
+      return;
+    }
+
+    storage.update((draft) => {
+      draft.industrias = draft.industrias.filter(
+        (industria) => industria.id !== selectedId
+      );
+    });
+
+    selectedId = "";
+    render();
+  });
+
+  listContainer?.addEventListener("change", (event) => {
+    const input = event.target.closest(
+      'input[type="radio"][name="industriaSelecionada"]'
+    );
+    if (!input) return;
+    selectedId = input.value;
+    syncSelection(listContainer, "industriaSelecionada", selectedId);
+    updateActionsState();
+  });
+
+  listContainer?.addEventListener("click", (event) => {
+    const row = event.target.closest("tr[data-id]");
+    if (!row) return;
+    const input = row.querySelector(
+      'input[type="radio"][name="industriaSelecionada"]'
+    );
+    if (input) {
+      // Toggle: se já está selecionado, desmarcar
+      if (selectedId === input.value) {
+        input.checked = false;
+        selectedId = "";
+      } else {
+        input.checked = true;
+        selectedId = input.value;
+      }
+      syncSelection(listContainer, "industriaSelecionada", selectedId);
+      updateActionsState();
+    }
+  });
+
+  function render() {
+    const industrias = storage.load().industrias;
+    if (
+      selectedId &&
+      !industrias.some((industria) => industria.id === selectedId)
+    ) {
+      selectedId = "";
+    }
+
+    if (!industrias.length) {
+      listContainer.innerHTML =
+        '<div class="empty-state">Nenhuma indústria cadastrada.</div>';
+      updateActionsState();
+      return;
+    }
+
+    const linhas = industrias
+      .map(
+        (industria) => `
+          <tr class="table-row${
+            industria.id === selectedId ? " is-selected" : ""
+          }" data-id="${industria.id}">
+            <td class="select-cell">
+              <label class="select-radio">
+                <input type="radio" name="industriaSelecionada" value="${
+                  industria.id
+                }" ${industria.id === selectedId ? "checked" : ""} />
+                <span class="bubble"></span>
+              </label>
+            </td>
+            <td>
+              <strong>${industria.nome}</strong>
+              <div class="muted">${industria.cnpj || "CNPJ não informado"}</div>
+            </td>
+            <td>${industria.telefone || "-"}</td>
+            <td>${industria.email || "-"}</td>
+            <td>${
+              industria.prazoEntrega ? industria.prazoEntrega + " dias" : "-"
+            }</td>
+            <td>${industria.condicaoPagamento || "-"}</td>
+          </tr>
+        `
+      )
+      .join("");
+
+    listContainer.innerHTML = `
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="select-cell">Selecionar</th>
+              <th>Indústria / Fornecedor</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+              <th>Prazo Entrega</th>
+              <th>Condição Pagamento</th>
+            </tr>
+          </thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      </div>
+    `;
+
+    syncSelection(listContainer, "industriaSelecionada", selectedId);
+    updateActionsState();
+  }
+
+  render();
+}
+
+/**
+ * Industria Form Page - Página separada para criar/editar indústrias
+ */
+function initIndustriaFormPage() {
+  const form = document.querySelector("#industriaForm");
+  if (!form) return;
+
+  const formTitle = document.querySelector("#industriaFormTitle");
+
+  const fields = {
+    id: document.querySelector("#industriaId"),
+    razaoSocial: document.querySelector("#industriaRazaoSocial"),
+    nomeFantasia: document.querySelector("#industriaNomeFantasia"),
+    cnpj: document.querySelector("#industriaCNPJ"),
+    inscricaoEstadual: document.querySelector("#industriaInscricaoEstadual"),
+    email: document.querySelector("#industriaEmail"),
+    comissao: document.querySelector("#industriaComissao"),
+    pagamentoComissao: document.querySelector("#industriaPagamentoComissao"),
+    status: document.querySelector("#industriaStatus"),
+    logoURL: document.querySelector("#industriaLogoURL"),
+    endereco: document.querySelector("#industriaEndereco"),
+    bairro: document.querySelector("#industriaBairro"),
+    cep: document.querySelector("#industriaCEP"),
+    cidade: document.querySelector("#industriaCidade"),
+    estado: document.querySelector("#industriaEstado"),
+    telefone: document.querySelector("#industriaTelefone"),
+    telefoneAdicional: document.querySelector("#industriaTelefoneAdicional"),
+    observacoes: document.querySelector("#industriaObservacoes"),
+    validarEmbalagem: document.querySelector("#industriaValidarEmbalagem"),
+  };
+
+  let tabelasPrecos = [];
+  let condicoesPagamento = [];
+  let contatos = [];
+  let editingIndustriaId =
+    window.sessionStorage.getItem("oursales:editIndustria") || null;
+
+  if (editingIndustriaId) {
+    window.sessionStorage.removeItem("oursales:editIndustria");
+  }
+
+  // Funções para Tabelas de Preço
+  const renderTabelasPrecos = () => {
+    const tbody = document.querySelector("#tabelasPrecosLista");
+    if (!tbody) return;
+
+    if (tabelasPrecos.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="2" class="empty-state">
+            Nenhuma tabela de preço cadastrada
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = tabelasPrecos
+      .map(
+        (tabela, index) => `
+        <tr>
+          <td>${tabela.nome}</td>
+          <td style="text-align: center;">
+            <button
+              type="button"
+              class="button-danger button-small"
+              onclick="window.removeTabelaPreco(${index})"
+            >
+              remover
+            </button>
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+  };
+
+  const adicionarTabelaPrecoBtn = document.querySelector(
+    "#adicionarTabelaPreco"
+  );
+  adicionarTabelaPrecoBtn?.addEventListener("click", () => {
+    const nome = document.querySelector("#tabelaPrecoNome")?.value.trim();
+
+    if (!nome) {
+      window.alert("Preencha o nome da tabela.");
+      return;
+    }
+
+    tabelasPrecos.push({ nome });
+    renderTabelasPrecos();
+
+    // Limpar campo
+    document.querySelector("#tabelaPrecoNome").value = "";
+  });
+
+  window.removeTabelaPreco = (index) => {
+    if (window.confirm("Confirma remover esta tabela de preço?")) {
+      tabelasPrecos.splice(index, 1);
+      renderTabelasPrecos();
+    }
+  };
+
+  // Funções para Condições de Pagamento
+  const renderCondicoesPagamento = () => {
+    const tbody = document.querySelector("#condicoesPagamentoLista");
+    if (!tbody) return;
+
+    if (condicoesPagamento.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty-state">
+            Nenhuma condição de pagamento cadastrada
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = condicoesPagamento
+      .map(
+        (condicao, index) => `
+        <tr>
+          <td>${condicao.descricao}</td>
+          <td>${condicao.parcelas}</td>
+          <td>${condicao.intervalo}</td>
+          <td>${condicao.desconto}</td>
+          <td>${formatCurrency(condicao.pedidoMinimo)}</td>
+          <td style="text-align: center;">
+            <button
+              type="button"
+              class="button-danger button-small"
+              onclick="window.removeCondicaoPagamento(${index})"
+            >
+              Remover
+            </button>
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+  };
+
+  const adicionarCondicaoPagamentoBtn = document.querySelector(
+    "#adicionarCondicaoPagamento"
+  );
+  adicionarCondicaoPagamentoBtn?.addEventListener("click", () => {
+    const descricao = document
+      .querySelector("#condicaoPagamentoDescricao")
+      ?.value.trim();
+    const parcelas =
+      document.querySelector("#condicaoPagamentoParcelas")?.value || "1";
+    const intervalo =
+      document.querySelector("#condicaoPagamentoIntervalo")?.value || "0";
+    const desconto =
+      document.querySelector("#condicaoPagamentoDesconto")?.value || "0";
+    const pedidoMinimo =
+      document.querySelector("#condicaoPagamentoPedidoMinimo")?.value || "0";
+
+    if (!descricao) {
+      window.alert("Preencha a descrição da condição.");
+      return;
+    }
+
+    condicoesPagamento.push({
+      descricao,
+      parcelas: Number.parseInt(parcelas),
+      intervalo: Number.parseInt(intervalo),
+      desconto: Number.parseFloat(desconto),
+      pedidoMinimo: Number.parseFloat(pedidoMinimo),
+    });
+
+    renderCondicoesPagamento();
+
+    // Limpar campos
+    document.querySelector("#condicaoPagamentoDescricao").value = "";
+    document.querySelector("#condicaoPagamentoParcelas").value = "";
+    document.querySelector("#condicaoPagamentoIntervalo").value = "";
+    document.querySelector("#condicaoPagamentoDesconto").value = "";
+    document.querySelector("#condicaoPagamentoPedidoMinimo").value = "";
+  });
+
+  window.removeCondicaoPagamento = (index) => {
+    if (window.confirm("Confirma remover esta condição de pagamento?")) {
+      condicoesPagamento.splice(index, 1);
+      renderCondicoesPagamento();
+    }
+  };
+
+  // Funções para Contatos
+  const renderContatos = () => {
+    const tbody = document.querySelector("#contatosLista");
+    if (!tbody) return;
+
+    if (contatos.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="empty-state">
+            Nenhum contato cadastrado
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = contatos
+      .map(
+        (contato, index) => `
+        <tr>
+          <td>${contato.nome}</td>
+          <td>${contato.email}</td>
+          <td>${contato.telefone}</td>
+          <td>${
+            contato.aniversario
+              ? new Date(contato.aniversario).toLocaleDateString("pt-BR")
+              : "-"
+          }</td>
+          <td style="text-align: center;">
+            <button
+              type="button"
+              class="button-danger button-small"
+              onclick="window.removeContato(${index})"
+            >
+              Remover
+            </button>
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+  };
+
+  const adicionarContatoBtn = document.querySelector("#adicionarContato");
+  adicionarContatoBtn?.addEventListener("click", () => {
+    const nome = document.querySelector("#contatoNome")?.value.trim();
+    const email = document.querySelector("#contatoEmail")?.value.trim();
+    const telefone = document.querySelector("#contatoTelefone")?.value.trim();
+    const aniversario = document.querySelector("#contatoAniversario")?.value;
+
+    if (!nome || !email || !telefone) {
+      window.alert("Preencha nome, e-mail e telefone do contato.");
+      return;
+    }
+
+    contatos.push({
+      nome,
+      email,
+      telefone,
+      aniversario: aniversario || null,
+    });
+
+    renderContatos();
+
+    // Limpar campos
+    document.querySelector("#contatoNome").value = "";
+    document.querySelector("#contatoEmail").value = "";
+    document.querySelector("#contatoTelefone").value = "";
+    document.querySelector("#contatoAniversario").value = "";
+  });
+
+  window.removeContato = (index) => {
+    if (window.confirm("Confirma remover este contato?")) {
+      contatos.splice(index, 1);
+      renderContatos();
+    }
+  };
+
+  // Submit do formulário
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = {
+      razaoSocial: fields.razaoSocial.value.trim(),
+      nomeFantasia: fields.nomeFantasia.value.trim(),
+      cnpj: fields.cnpj.value.trim(),
+      inscricaoEstadual: fields.inscricaoEstadual.value.trim(),
+      email: fields.email.value.trim(),
+      comissao: Number.parseFloat(fields.comissao.value) || 0,
+      pagamentoComissao: fields.pagamentoComissao.value,
+      status: fields.status.value,
+      logoURL: fields.logoURL.value.trim(),
+      endereco: fields.endereco.value.trim(),
+      bairro: fields.bairro.value.trim(),
+      cep: fields.cep.value.trim(),
+      cidade: fields.cidade.value.trim(),
+      estado: fields.estado.value,
+      telefone: fields.telefone.value.trim(),
+      telefoneAdicional: fields.telefoneAdicional.value.trim(),
+      observacoes: fields.observacoes.value.trim(),
+      validarEmbalagem: fields.validarEmbalagem.checked,
+      tabelasPrecos: tabelasPrecos,
+      condicoesPagamento: condicoesPagamento,
+      contatos: contatos,
+      // Campos compatíveis com a versão antiga
+      nome: fields.nomeFantasia.value.trim(),
+    };
+
+    if (editingIndustriaId) {
+      storage.update((draft) => {
+        const industria = draft.industrias.find(
+          (item) => item.id === editingIndustriaId
+        );
+        if (industria) {
+          Object.assign(industria, data);
+        }
+      });
+      window.alert("Indústria atualizada com sucesso!");
+    } else {
+      storage.update((draft) => {
+        const nova = { id: generateId("ind"), ...data };
+        draft.industrias.push(nova);
+      });
+      window.alert("Indústria cadastrada com sucesso!");
+    }
+
+    window.location.href = "industrias.html";
+  });
+
+  // Inicialização
+  if (editingIndustriaId) {
+    const industria = storage
+      .load()
+      .industrias.find((item) => item.id === editingIndustriaId);
+    if (industria) {
+      formTitle.textContent = `🏭 Fornecedor - Editando ${
+        industria.nomeFantasia || industria.nome
+      }`;
+      fields.razaoSocial.value = industria.razaoSocial || "";
+      fields.nomeFantasia.value =
+        industria.nomeFantasia || industria.nome || "";
+      fields.cnpj.value = industria.cnpj || "";
+      fields.inscricaoEstadual.value = industria.inscricaoEstadual || "";
+      fields.email.value = industria.email || "";
+      fields.comissao.value = industria.comissao || 0;
+      fields.pagamentoComissao.value = industria.pagamentoComissao || "";
+      fields.status.value = industria.status || "ativo";
+      fields.logoURL.value = industria.logoURL || "";
+      fields.endereco.value = industria.endereco || "";
+      fields.bairro.value = industria.bairro || "";
+      fields.cep.value = industria.cep || "";
+      fields.cidade.value = industria.cidade || "";
+      fields.estado.value = industria.estado || "";
+      fields.telefone.value = industria.telefone || "";
+      fields.telefoneAdicional.value = industria.telefoneAdicional || "";
+      fields.observacoes.value = industria.observacoes || "";
+      fields.validarEmbalagem.checked = industria.validarEmbalagem || false;
+
+      // Carregar tabelas de preço
+      if (industria.tabelasPrecos) {
+        tabelasPrecos = [...industria.tabelasPrecos];
+        renderTabelasPrecos();
+      }
+
+      // Carregar condições de pagamento
+      if (industria.condicoesPagamento) {
+        condicoesPagamento = [...industria.condicoesPagamento];
+        renderCondicoesPagamento();
+      }
+
+      // Carregar contatos
+      if (industria.contatos) {
+        contatos = [...industria.contatos];
+        renderContatos();
+      }
+    }
+  }
+
+  renderTabelasPrecos();
+  renderCondicoesPagamento();
+  renderContatos();
+}
+
 function initProdutosPage() {
   const form = document.querySelector("#produtoForm");
   if (!form) return;
@@ -2107,13 +2915,7 @@ function initProdutosPage() {
   cancelBtn?.addEventListener("click", closeForm);
 
   openBtn?.addEventListener("click", () => {
-    clearForm();
-    titleEl.textContent = "Novo produto";
-    descEl.textContent =
-      "Informe os dados do produto para mantê-lo disponível em cotações e pedidos.";
-    submitBtn.textContent = "Salvar produto";
-    showDrawer(drawer, overlay);
-    focusFirstInput(fields.nome);
+    window.location.href = "produto-form.html";
   });
 
   editBtn?.addEventListener("click", () => {
@@ -2121,28 +2923,8 @@ function initProdutosPage() {
       window.alert("Selecione um produto para editar.");
       return;
     }
-    const produto = storage
-      .load()
-      .produtos.find((item) => item.id === selectedId);
-    if (!produto) {
-      window.alert("O produto selecionado não está mais disponível.");
-      selectedId = "";
-      updateActionsState();
-      render();
-      return;
-    }
-    fields.id.value = produto.id;
-    fields.nome.value = produto.nome;
-    fields.sku.value = produto.sku;
-    fields.categoria.value = produto.categoria || "";
-    fields.preco.value = produto.preco;
-    fields.estoque.value = produto.estoque;
-    fields.descricao.value = produto.descricao || "";
-    titleEl.textContent = "Editar produto";
-    descEl.textContent = "Atualize as informações comerciais do produto.";
-    submitBtn.textContent = "Atualizar produto";
-    showDrawer(drawer, overlay);
-    focusFirstInput(fields.nome);
+    window.sessionStorage.setItem("oursales:editProduto", selectedId);
+    window.location.href = "produto-form.html";
   });
 
   removeBtn?.addEventListener("click", () => {
@@ -2317,78 +3099,297 @@ function initProdutosPage() {
   render();
 }
 
-function initOrcamentosPage() {
-  const form = document.querySelector("#orcamentoForm");
+/**
+ * Produto Form Page - Página separada para criar/editar produtos
+ */
+function initProdutoFormPage() {
+  const form = document.querySelector("#produtoForm");
   if (!form) return;
 
-  const overlay = document.querySelector("#orcamentoOverlay");
-  const drawer = document.querySelector("#orcamentoDrawer");
-  const titleEl = document.querySelector("#orcamentoDrawerTitulo");
-  const descEl = document.querySelector("#orcamentoDrawerDescricao");
+  const formTitle = document.querySelector("#produtoFormTitle");
+
+  const fields = {
+    id: document.querySelector("#produtoId"),
+    industria: document.querySelector("#produtoIndustria"),
+    sku: document.querySelector("#produtoSKU"),
+    nome: document.querySelector("#produtoNome"),
+    precoVenda: document.querySelector("#produtoPrecoVenda"),
+    ncm: document.querySelector("#produtoNCM"),
+    precoPromocao: document.querySelector("#produtoPrecoPromocao"),
+    cores: document.querySelector("#produtoCores"),
+    marca: document.querySelector("#produtoMarca"),
+    markup: document.querySelector("#produtoMarkup"),
+    margemLucro: document.querySelector("#produtoMargemLucro"),
+    precoCompra: document.querySelector("#produtoPrecoCompra"),
+    custoMedio: document.querySelector("#produtoCustoMedio"),
+    margemMinima: document.querySelector("#produtoMargemMinima"),
+    margemSeguranca: document.querySelector("#produtoMargemSeguranca"),
+    ipi: document.querySelector("#produtoIPI"),
+    unidadeMedida: document.querySelector("#produtoUnidadeMedida"),
+    embalagem: document.querySelector("#produtoEmbalagem"),
+    observacoes: document.querySelector("#produtoObservacoes"),
+    tabelaPreco: document.querySelector("#produtoTabelaPreco"),
+    categoria: document.querySelector("#produtoCategoria"),
+    status: document.querySelector("#produtoStatus"),
+    altura: document.querySelector("#produtoAltura"),
+    largura: document.querySelector("#produtoLargura"),
+    comprimento: document.querySelector("#produtoComprimento"),
+    codigoOriginal: document.querySelector("#produtoCodigoOriginal"),
+    modelo: document.querySelector("#produtoModelo"),
+    pesoLiquido: document.querySelector("#produtoPesoLiquido"),
+    fatorCubagem: document.querySelector("#produtoFatorCubagem"),
+    fotoURL: document.querySelector("#produtoFotoURL"),
+  };
+
+  let substituicoesTributarias = [];
+  let editingProdutoId =
+    window.sessionStorage.getItem("oursales:editProduto") || null;
+
+  if (editingProdutoId) {
+    window.sessionStorage.removeItem("oursales:editProduto");
+  }
+
+  // Funções auxiliares
+  const calcularPrecoVenda = () => {
+    const precoCompra = Number.parseFloat(fields.precoCompra.value) || 0;
+    const markup = Number.parseFloat(fields.markup.value) || 0;
+
+    if (precoCompra > 0 && markup > 0) {
+      const precoCalculado = precoCompra * markup;
+      fields.precoVenda.value = precoCalculado.toFixed(2);
+    }
+  };
+
+  const calcularPrecoVendaPorMargem = () => {
+    const precoCompra = Number.parseFloat(fields.precoCompra.value) || 0;
+    const margemLucro = Number.parseFloat(fields.margemLucro.value) || 0;
+
+    if (precoCompra > 0 && margemLucro > 0) {
+      const precoCalculado = precoCompra / (1 - margemLucro / 100);
+      fields.precoVenda.value = precoCalculado.toFixed(2);
+    }
+  };
+
+  const gerarCodigo = () => {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, "0");
+    fields.sku.value = `PROD-${timestamp}-${random}`;
+  };
+
+  const renderSubstituicoesTributarias = () => {
+    const tbody = document.querySelector("#stListaEstados");
+    if (!tbody) return;
+
+    if (substituicoesTributarias.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="3" class="empty-state">
+            Nenhuma substituição tributária cadastrada
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = substituicoesTributarias
+      .map(
+        (st, index) => `
+        <tr>
+          <td>${st.estado}</td>
+          <td>${st.aliquota}%</td>
+          <td style="text-align: center;">
+            <button
+              type="button"
+              class="button-danger button-small"
+              onclick="window.removeST(${index})"
+            >
+              🗑️
+            </button>
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+  };
+
+  // Event Listeners para Cálculos
+  const calcularBtn = document.querySelector("#calcularPrecoVenda");
+  calcularBtn?.addEventListener("click", calcularPrecoVenda);
+
+  const calcularMargemBtn = document.querySelector("#calcularPrecoVendaMargem");
+  calcularMargemBtn?.addEventListener("click", calcularPrecoVendaPorMargem);
+
+  const gerarCodigoBtn = document.querySelector("#gerarCodigo");
+  gerarCodigoBtn?.addEventListener("click", gerarCodigo);
+
+  // Adicionar ST
+  const adicionarSTBtn = document.querySelector("#adicionarST");
+  adicionarSTBtn?.addEventListener("click", () => {
+    const estado = document.querySelector("#stEstado")?.value;
+    const aliquota = document.querySelector("#stAliquota")?.value;
+
+    if (!estado || !aliquota) {
+      window.alert("Preencha o estado e a alíquota.");
+      return;
+    }
+
+    // Verificar se o estado já foi adicionado
+    const jaExiste = substituicoesTributarias.some(
+      (st) => st.estado === estado
+    );
+    if (jaExiste) {
+      window.alert("Este estado já possui substituição tributária cadastrada.");
+      return;
+    }
+
+    substituicoesTributarias.push({
+      estado,
+      aliquota: Number.parseFloat(aliquota),
+    });
+
+    renderSubstituicoesTributarias();
+
+    // Limpar campos
+    document.querySelector("#stAliquota").value = "";
+  });
+
+  // Função global para remover ST
+  window.removeST = (index) => {
+    if (window.confirm("Confirma remover esta substituição tributária?")) {
+      substituicoesTributarias.splice(index, 1);
+      renderSubstituicoesTributarias();
+    }
+  };
+
+  // Submit do formulário
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = {
+      industria: fields.industria.value,
+      sku: fields.sku.value.trim(),
+      nome: fields.nome.value.trim(),
+      precoVenda: Number.parseFloat(fields.precoVenda.value) || 0,
+      ncm: fields.ncm?.value.trim() || "",
+      precoPromocao: Number.parseFloat(fields.precoPromocao.value) || 0,
+      cores: fields.cores?.value.trim() || "",
+      marca: fields.marca?.value.trim() || "",
+      markup: Number.parseFloat(fields.markup.value) || 0,
+      margemLucro: Number.parseFloat(fields.margemLucro.value) || 0,
+      precoCompra: Number.parseFloat(fields.precoCompra.value) || 0,
+      custoMedio: fields.custoMedio?.value || "ultimo",
+      margemMinima: Number.parseFloat(fields.margemMinima.value) || 0,
+      margemSeguranca: Number.parseFloat(fields.margemSeguranca.value) || 0,
+      ipi: Number.parseFloat(fields.ipi.value) || 0,
+      unidadeMedida: fields.unidadeMedida?.value.trim() || "",
+      embalagem: fields.embalagem?.value.trim() || "",
+      observacoes: fields.observacoes?.value.trim() || "",
+      tabelaPreco: fields.tabelaPreco?.value || "",
+      categoria: fields.categoria?.value || "",
+      status: fields.status.value,
+      altura: Number.parseFloat(fields.altura.value) || 0,
+      largura: Number.parseFloat(fields.largura.value) || 0,
+      comprimento: Number.parseFloat(fields.comprimento.value) || 0,
+      codigoOriginal: fields.codigoOriginal?.value.trim() || "",
+      modelo: fields.modelo?.value.trim() || "",
+      pesoLiquido: Number.parseFloat(fields.pesoLiquido.value) || 0,
+      fatorCubagem: Number.parseFloat(fields.fatorCubagem.value) || 0,
+      fotoURL: fields.fotoURL?.value.trim() || "",
+      substituicoesTributarias: substituicoesTributarias,
+      // Campos legados para compatibilidade
+      preco: Number.parseFloat(fields.precoVenda.value) || 0,
+      estoque: 0, // Campo não está no formulário, mas mantido para compatibilidade
+      descricao: fields.observacoes?.value.trim() || "",
+    };
+
+    if (editingProdutoId) {
+      storage.update((draft) => {
+        const produto = draft.produtos.find(
+          (item) => item.id === editingProdutoId
+        );
+        if (produto) {
+          Object.assign(produto, data);
+        }
+      });
+      window.alert("Produto atualizado com sucesso!");
+    } else {
+      storage.update((draft) => {
+        const novo = { id: generateId("pro"), ...data };
+        draft.produtos.push(novo);
+      });
+      window.alert("Produto criado com sucesso!");
+    }
+
+    window.location.href = "produtos.html";
+  });
+
+  // Inicialização
+  if (editingProdutoId) {
+    const produto = storage
+      .load()
+      .produtos.find((item) => item.id === editingProdutoId);
+    if (produto) {
+      formTitle.textContent = `📦 Produto - Editando ${produto.nome}`;
+      fields.industria.value = produto.industria || "";
+      fields.sku.value = produto.sku || "";
+      fields.nome.value = produto.nome || "";
+      fields.precoVenda.value = produto.precoVenda || produto.preco || 0;
+      fields.ncm.value = produto.ncm || "";
+      fields.precoPromocao.value = produto.precoPromocao || 0;
+      fields.cores.value = produto.cores || "";
+      fields.marca.value = produto.marca || "";
+      fields.markup.value = produto.markup || 0;
+      fields.margemLucro.value = produto.margemLucro || 0;
+      fields.precoCompra.value = produto.precoCompra || 0;
+      fields.custoMedio.value = produto.custoMedio || "ultimo";
+      fields.margemMinima.value = produto.margemMinima || 0;
+      fields.margemSeguranca.value = produto.margemSeguranca || 0;
+      fields.ipi.value = produto.ipi || 0;
+      fields.unidadeMedida.value = produto.unidadeMedida || "";
+      fields.embalagem.value = produto.embalagem || "";
+      fields.observacoes.value = produto.observacoes || produto.descricao || "";
+      fields.tabelaPreco.value = produto.tabelaPreco || "";
+      fields.categoria.value = produto.categoria || "";
+      fields.status.value = produto.status || "ativo";
+      fields.altura.value = produto.altura || 0;
+      fields.largura.value = produto.largura || 0;
+      fields.comprimento.value = produto.comprimento || 0;
+      fields.codigoOriginal.value = produto.codigoOriginal || "";
+      fields.modelo.value = produto.modelo || "";
+      fields.pesoLiquido.value = produto.pesoLiquido || 0;
+      fields.fatorCubagem.value = produto.fatorCubagem || 0;
+      fields.fotoURL.value = produto.fotoURL || "";
+
+      // Carregar substituições tributárias
+      if (produto.substituicoesTributarias) {
+        substituicoesTributarias = [...produto.substituicoesTributarias];
+        renderSubstituicoesTributarias();
+      }
+    }
+  }
+
+  renderSubstituicoesTributarias();
+}
+
+function initOrcamentosPage() {
   const openBtn = document.querySelector("#orcamentoCriar");
   const editBtn = document.querySelector("#orcamentoEditar");
   const removeBtn = document.querySelector("#orcamentoRemover");
-  const closeBtn = document.querySelector("#orcamentoDrawerFechar");
-  const cancelBtn = document.querySelector("#orcamentoCancelar");
-  const submitBtn = form.querySelector('button[type="submit"]');
   const listContainer = document.querySelector("#orcamentosLista");
 
-  const fields = {
-    id: document.querySelector("#orcamentoId"),
-    cliente: document.querySelector("#orcamentoCliente"),
-    validade: document.querySelector("#orcamentoValidade"),
-    descricao: document.querySelector("#orcamentoDescricao"),
-    valor: document.querySelector("#orcamentoValor"),
-    observacoes: document.querySelector("#orcamentoObservacoes"),
-  };
-
   let selectedId = "";
-
-  const refreshSelect = (selectedClientId = "") => {
-    fillClientesSelect(fields.cliente, selectedClientId);
-    submitBtn.disabled = fields.cliente.disabled;
-  };
 
   const updateActionsState = () => {
     const hasSelection = Boolean(selectedId);
     if (editBtn) editBtn.disabled = !hasSelection;
     if (removeBtn) removeBtn.disabled = !hasSelection;
-    if (openBtn) {
-      const hasClientes = storage.load().clientes.length > 0;
-      openBtn.disabled = !hasClientes;
-      openBtn.title = hasClientes
-        ? ""
-        : "Cadastre um cliente antes de criar orçamentos.";
-    }
   };
 
-  const clearForm = () => {
-    form.reset();
-    fields.id.value = "";
-  };
-
-  const closeForm = () => {
-    clearForm();
-    hideDrawer(drawer, overlay);
-  };
-
-  overlay?.addEventListener("click", closeForm);
-  closeBtn?.addEventListener("click", closeForm);
-  cancelBtn?.addEventListener("click", closeForm);
-
+  // Event Listeners
   openBtn?.addEventListener("click", () => {
-    if (storage.load().clientes.length === 0) {
-      window.alert("Cadastre um cliente antes de criar orçamentos.");
-      return;
-    }
-    clearForm();
-    refreshSelect();
-    titleEl.textContent = "Novo orçamento";
-    descEl.textContent =
-      "Selecione um cliente, defina a validade e informe o valor estimado da proposta.";
-    submitBtn.textContent = "Salvar orçamento";
-    showDrawer(drawer, overlay);
-    focusFirstInput(fields.descricao);
+    window.location.href = "orcamento-form.html";
   });
 
   editBtn?.addEventListener("click", () => {
@@ -2396,28 +3397,8 @@ function initOrcamentosPage() {
       window.alert("Selecione um orçamento para editar.");
       return;
     }
-    const orcamento = storage
-      .load()
-      .orcamentos.find((item) => item.id === selectedId);
-    if (!orcamento) {
-      window.alert("O orçamento selecionado não está mais disponível.");
-      selectedId = "";
-      updateActionsState();
-      render();
-      return;
-    }
-    fields.id.value = orcamento.id;
-    refreshSelect(orcamento.clienteId);
-    fields.validade.value = orcamento.validade;
-    fields.descricao.value = orcamento.descricao;
-    fields.valor.value = orcamento.valor;
-    fields.observacoes.value = orcamento.observacoes || "";
-    titleEl.textContent = "Editar orçamento";
-    descEl.textContent =
-      "Atualize os detalhes do orçamento conforme a negociação evolui.";
-    submitBtn.textContent = "Atualizar orçamento";
-    showDrawer(drawer, overlay);
-    focusFirstInput(fields.descricao);
+    window.sessionStorage.setItem("oursales:editOrcamento", selectedId);
+    window.location.href = "orcamento-form.html";
   });
 
   removeBtn?.addEventListener("click", () => {
@@ -2434,65 +3415,6 @@ function initOrcamentosPage() {
       );
     });
     selectedId = "";
-    render();
-  });
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    if (fields.cliente.disabled) {
-      window.alert("Cadastre um cliente antes de criar orçamentos.");
-      return;
-    }
-
-    const clienteId = fields.cliente.value;
-    const cliente = storage
-      .load()
-      .clientes.find((item) => item.id === clienteId);
-
-    if (!cliente) {
-      window.alert("Selecione um cliente válido.");
-      return;
-    }
-
-    const valor = Number.parseFloat(fields.valor.value);
-    if (!Number.isFinite(valor) || valor < 0) {
-      window.alert("Informe um valor estimado válido.");
-      return;
-    }
-
-    const data = {
-      clienteId,
-      clienteNome: cliente.nome,
-      descricao: fields.descricao.value.trim(),
-      valor,
-      validade: fields.validade.value,
-      observacoes: fields.observacoes.value.trim(),
-    };
-
-    if (!data.descricao || !data.validade) {
-      window.alert("Informe descrição e validade do orçamento.");
-      return;
-    }
-
-    const id = fields.id.value;
-    if (id) {
-      storage.update((draft) => {
-        const orcamento = draft.orcamentos.find((item) => item.id === id);
-        if (!orcamento) return;
-        Object.assign(orcamento, data);
-      });
-      selectedId = id;
-    } else {
-      let createdId = "";
-      storage.update((draft) => {
-        const novo = { id: generateId("orc"), ...data };
-        draft.orcamentos.push(novo);
-        createdId = novo.id;
-      });
-      selectedId = createdId;
-    }
-
-    closeForm();
     render();
   });
 
@@ -2586,8 +3508,375 @@ function initOrcamentosPage() {
     updateActionsState();
   }
 
-  refreshSelect();
+  // Inicialização
   render();
+}
+
+/**
+ * Orçamento Form Page - Página separada para criar/editar orçamentos
+ */
+function initOrcamentoFormPage() {
+  const form = document.querySelector("#orcamentoForm");
+  if (!form) return;
+
+  const formTitle = document.querySelector("#orcamentoFormTitle");
+
+  const fields = {
+    id: document.querySelector("#orcamentoId"),
+    cliente: document.querySelector("#orcamentoCliente"),
+    comprador: document.querySelector("#orcamentoComprador"),
+    transportadora: document.querySelector("#orcamentoTransportadora"),
+    tipoFrete: document.querySelector("#orcamentoTipoFrete"),
+    data: document.querySelector("#orcamentoData"),
+    validade: document.querySelector("#orcamentoValidade"),
+    previsaoEntrega: document.querySelector("#orcamentoPrevisaoEntrega"),
+    notaFiscal: document.querySelector("#orcamentoNotaFiscal"),
+    descricao: document.querySelector("#orcamentoDescricao"),
+    cancelado: document.querySelector("#orcamentoCancelado"),
+    ordemCompra: document.querySelector("#orcamentoOrdemCompra"),
+    status: document.querySelector("#orcamentoStatus"),
+    vendedor: document.querySelector("#orcamentoVendedor"),
+    observacoes: document.querySelector("#orcamentoObservacoes"),
+    condicaoPagamento: document.querySelector("#orcamentoCondicaoPagamento"),
+    observacaoPrivada: document.querySelector("#orcamentoObservacaoPrivada"),
+    valorFrete: document.querySelector("#valorFrete"),
+    valorAcrescimo: document.querySelector("#valorAcrescimo"),
+    valorDesconto: document.querySelector("#valorDesconto"),
+  };
+
+  let orcamentoItens = [];
+  let editingOrcamentoId =
+    window.sessionStorage.getItem("oursales:editOrcamento") || null;
+
+  if (editingOrcamentoId) {
+    window.sessionStorage.removeItem("oursales:editOrcamento");
+  }
+
+  // Funções auxiliares
+  const refreshSelects = () => {
+    fillClientesSelect(fields.cliente);
+    fillTransportadorasSelect(fields.transportadora);
+  };
+
+  const calculateTotals = () => {
+    const frete = Number.parseFloat(fields.valorFrete.value) || 0;
+    const acrescimo = Number.parseFloat(fields.valorAcrescimo.value) || 0;
+    const desconto = Number.parseFloat(fields.valorDesconto.value) || 0;
+
+    let subtotal = 0;
+    orcamentoItens.forEach((item) => {
+      subtotal += (item.precoFinal || 0) * (item.quantidade || 0);
+    });
+
+    const totalSemImpostos = subtotal;
+    const totalFinal = subtotal + frete + acrescimo - desconto;
+
+    // Atualizar visualização
+    const totalItensEl = document.querySelector("#totalItens");
+    const totalProdutosEl = document.querySelector("#totalProdutos");
+    const totalSemImpostosEl = document.querySelector("#totalSemImpostos");
+    const totalFreteEl = document.querySelector("#totalFrete");
+    const totalAcrescimoEl = document.querySelector("#totalAcrescimo");
+    const totalDescontoEl = document.querySelector("#totalDesconto");
+    const totalFinalEl = document.querySelector("#totalFinal");
+
+    if (totalItensEl)
+      totalItensEl.textContent = orcamentoItens.length.toFixed(2);
+    if (totalProdutosEl)
+      totalProdutosEl.textContent = orcamentoItens
+        .reduce((sum, item) => sum + (item.quantidade || 0), 0)
+        .toFixed(2);
+    if (totalSemImpostosEl)
+      totalSemImpostosEl.textContent = formatCurrency(totalSemImpostos);
+    if (totalFreteEl) totalFreteEl.textContent = formatCurrency(frete);
+    if (totalAcrescimoEl)
+      totalAcrescimoEl.textContent = formatCurrency(acrescimo);
+    if (totalDescontoEl) totalDescontoEl.textContent = formatCurrency(desconto);
+    if (totalFinalEl) totalFinalEl.textContent = formatCurrency(totalFinal);
+  };
+
+  // Event Listeners
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const clienteId = fields.cliente.value;
+    if (!clienteId) {
+      window.alert("Selecione um cliente.");
+      return;
+    }
+
+    const cliente = storage
+      .load()
+      .clientes.find((item) => item.id === clienteId);
+    if (!cliente) {
+      window.alert("Cliente não encontrado.");
+      return;
+    }
+
+    const data = {
+      clienteId,
+      clienteNome: cliente.nome,
+      data: fields.data.value || new Date().toISOString().split("T")[0],
+      validade: fields.validade.value,
+      descricao: fields.descricao.value.trim(),
+      observacoes: fields.observacoes.value.trim(),
+      condicaoPagamento: fields.condicaoPagamento?.value.trim() || "",
+      status: fields.status?.value || "pendente",
+      valor:
+        Number.parseFloat(
+          document
+            .querySelector("#totalFinal")
+            ?.textContent.replace(/[^\d,]/g, "")
+            .replace(",", ".")
+        ) || 0,
+    };
+
+    if (editingOrcamentoId) {
+      storage.update((draft) => {
+        const orcamento = draft.orcamentos.find(
+          (item) => item.id === editingOrcamentoId
+        );
+        if (orcamento) {
+          Object.assign(orcamento, data);
+        }
+      });
+      window.alert("Orçamento atualizado com sucesso!");
+    } else {
+      storage.update((draft) => {
+        const novo = { id: generateId("orc"), ...data };
+        draft.orcamentos.push(novo);
+      });
+      window.alert("Orçamento criado com sucesso!");
+    }
+
+    window.location.href = "orcamentos.html";
+  });
+
+  // Calcular totais ao mudar valores
+  fields.valorFrete?.addEventListener("input", calculateTotals);
+  fields.valorAcrescimo?.addEventListener("input", calculateTotals);
+  fields.valorDesconto?.addEventListener("input", calculateTotals);
+
+  // Inicialização
+  refreshSelects();
+  fields.data.value = new Date().toISOString().split("T")[0];
+
+  // Carregar dados se for edição
+  if (editingOrcamentoId) {
+    const orcamento = storage
+      .load()
+      .orcamentos.find((item) => item.id === editingOrcamentoId);
+    if (orcamento) {
+      formTitle.textContent = `🛒 Orçamento - Editando Nº ${orcamento.id.toUpperCase()}`;
+      fields.cliente.value = orcamento.clienteId || "";
+      fields.data.value = orcamento.data || fields.data.value;
+      fields.validade.value = orcamento.validade || "";
+      fields.descricao.value = orcamento.descricao || "";
+      fields.observacoes.value = orcamento.observacoes || "";
+      fields.condicaoPagamento.value = orcamento.condicaoPagamento || "";
+      fields.status.value = orcamento.status || "pendente";
+    }
+  }
+
+  calculateTotals();
+}
+
+/**
+ * Pedido Form Page - Página separada para criar/editar pedidos
+ */
+function initPedidoFormPage() {
+  const form = document.querySelector("#pedidoForm");
+  if (!form) return;
+
+  const formTitle = document.querySelector("#pedidoFormTitle");
+
+  const fields = {
+    id: document.querySelector("#pedidoId"),
+    cliente: document.querySelector("#pedidoCliente"),
+    comprador: document.querySelector("#pedidoComprador"),
+    transportadora: document.querySelector("#pedidoTransportadora"),
+    tipoFrete: document.querySelector("#pedidoTipoFrete"),
+    dataVenda: document.querySelector("#pedidoDataVenda"),
+    previsaoEntrega: document.querySelector("#pedidoPrevisaoEntrega"),
+    dataFatura: document.querySelector("#pedidoDataFatura"),
+    notaFiscal: document.querySelector("#pedidoNotaFiscal"),
+    tipo: document.querySelector("#pedidoTipo"),
+    cancelado: document.querySelector("#pedidoCancelado"),
+    ordemCompra: document.querySelector("#pedidoOrdemCompra"),
+    numeroERP: document.querySelector("#pedidoNumeroERP"),
+    status: document.querySelector("#pedidoStatus"),
+    vendedor: document.querySelector("#pedidoVendedor"),
+    observacoes: document.querySelector("#pedidoObservacoes"),
+    condicaoPagamento: document.querySelector("#pedidoCondicaoPagamento"),
+    observacaoPrivada: document.querySelector("#pedidoObservacaoPrivada"),
+    enderecoEntrega: document.querySelector("#pedidoEnderecoEntrega"),
+    fatorCubagem: document.querySelector("#pedidoFatorCubagem"),
+    valorFrete: document.querySelector("#valorFrete"),
+    valorAcrescimo: document.querySelector("#valorAcrescimo"),
+    valorDesconto: document.querySelector("#valorDesconto"),
+  };
+
+  let pedidoItens = [];
+  let editingPedidoId =
+    window.sessionStorage.getItem("oursales:editPedido") || null;
+
+  if (editingPedidoId) {
+    window.sessionStorage.removeItem("oursales:editPedido");
+  }
+
+  // Funções auxiliares
+  const refreshSelects = () => {
+    fillClientesSelect(fields.cliente);
+    fillTransportadorasSelect(fields.transportadora);
+  };
+
+  const calculateTotals = () => {
+    const frete = Number.parseFloat(fields.valorFrete.value) || 0;
+    const acrescimo = Number.parseFloat(fields.valorAcrescimo.value) || 0;
+    const desconto = Number.parseFloat(fields.valorDesconto.value) || 0;
+
+    let subtotal = 0;
+    pedidoItens.forEach((item) => {
+      subtotal += (item.precoFinal || 0) * (item.quantidade || 0);
+    });
+
+    const totalSemImpostos = subtotal;
+    const totalFinal = subtotal + frete + acrescimo - desconto;
+
+    // Atualizar visualização
+    const totalItensEl = document.querySelector("#totalItens");
+    const totalProdutosEl = document.querySelector("#totalProdutos");
+    const totalSemImpostosEl = document.querySelector("#totalSemImpostos");
+    const totalFreteEl = document.querySelector("#totalFrete");
+    const totalAcrescimoEl = document.querySelector("#totalAcrescimo");
+    const totalDescontoEl = document.querySelector("#totalDesconto");
+    const totalFinalEl = document.querySelector("#totalFinal");
+
+    if (totalItensEl) totalItensEl.textContent = pedidoItens.length.toFixed(2);
+    if (totalProdutosEl)
+      totalProdutosEl.textContent = pedidoItens
+        .reduce((sum, item) => sum + (item.quantidade || 0), 0)
+        .toFixed(2);
+    if (totalSemImpostosEl)
+      totalSemImpostosEl.textContent = formatCurrency(totalSemImpostos);
+    if (totalFreteEl) totalFreteEl.textContent = formatCurrency(frete);
+    if (totalAcrescimoEl)
+      totalAcrescimoEl.textContent = formatCurrency(acrescimo);
+    if (totalDescontoEl) totalDescontoEl.textContent = formatCurrency(desconto);
+    if (totalFinalEl) totalFinalEl.textContent = formatCurrency(totalFinal);
+  };
+
+  // Event Listeners
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const clienteId = fields.cliente.value;
+    if (!clienteId) {
+      window.alert("Selecione um cliente.");
+      return;
+    }
+
+    const cliente = storage
+      .load()
+      .clientes.find((item) => item.id === clienteId);
+    if (!cliente) {
+      window.alert("Cliente não encontrado.");
+      return;
+    }
+
+    const data = {
+      clienteId,
+      clienteNome: cliente.nome,
+      transportadoraId: fields.transportadora.value || "",
+      transportadoraNome: fields.transportadora.value
+        ? storage
+            .load()
+            .transportadoras.find((t) => t.id === fields.transportadora.value)
+            ?.nome || ""
+        : "",
+      dataVenda:
+        fields.dataVenda.value || new Date().toISOString().split("T")[0],
+      previsaoEntrega: fields.previsaoEntrega.value || "",
+      dataFatura: fields.dataFatura.value || "",
+      notaFiscal: fields.notaFiscal.value.trim(),
+      tipo: fields.tipo?.value || "pedido",
+      cancelado: fields.cancelado?.checked || false,
+      ordemCompra: fields.ordemCompra?.value.trim() || "",
+      numeroERP: fields.numeroERP?.value.trim() || "",
+      status: fields.status?.value || "pendente",
+      vendedor: fields.vendedor?.value || "",
+      observacoes: fields.observacoes.value.trim(),
+      condicaoPagamento: fields.condicaoPagamento?.value.trim() || "",
+      observacaoPrivada: fields.observacaoPrivada?.value.trim() || "",
+      enderecoEntrega: fields.enderecoEntrega?.value.trim() || "",
+      fatorCubagem: Number.parseFloat(fields.fatorCubagem?.value) || 0,
+      valor:
+        Number.parseFloat(
+          document
+            .querySelector("#totalFinal")
+            ?.textContent.replace(/[^\d,]/g, "")
+            .replace(",", ".")
+        ) || 0,
+    };
+
+    if (editingPedidoId) {
+      storage.update((draft) => {
+        const pedido = draft.pedidos.find(
+          (item) => item.id === editingPedidoId
+        );
+        if (pedido) {
+          Object.assign(pedido, data);
+        }
+      });
+      window.alert("Pedido atualizado com sucesso!");
+    } else {
+      storage.update((draft) => {
+        const novo = { id: generateId("ped"), ...data };
+        draft.pedidos.push(novo);
+      });
+      window.alert("Pedido criado com sucesso!");
+    }
+
+    window.location.href = "pedidos.html";
+  });
+
+  // Calcular totais ao mudar valores
+  fields.valorFrete?.addEventListener("input", calculateTotals);
+  fields.valorAcrescimo?.addEventListener("input", calculateTotals);
+  fields.valorDesconto?.addEventListener("input", calculateTotals);
+
+  // Inicialização
+  refreshSelects();
+  fields.dataVenda.value = new Date().toISOString().split("T")[0];
+
+  // Carregar dados se for edição
+  if (editingPedidoId) {
+    const pedido = storage
+      .load()
+      .pedidos.find((item) => item.id === editingPedidoId);
+    if (pedido) {
+      formTitle.textContent = `🛒 Pedido - Editando Nº ${pedido.id.toUpperCase()}`;
+      fields.cliente.value = pedido.clienteId || "";
+      fields.transportadora.value = pedido.transportadoraId || "";
+      fields.dataVenda.value = pedido.dataVenda || fields.dataVenda.value;
+      fields.previsaoEntrega.value = pedido.previsaoEntrega || "";
+      fields.dataFatura.value = pedido.dataFatura || "";
+      fields.notaFiscal.value = pedido.notaFiscal || "";
+      fields.tipo.value = pedido.tipo || "pedido";
+      fields.cancelado.checked = pedido.cancelado || false;
+      fields.ordemCompra.value = pedido.ordemCompra || "";
+      fields.numeroERP.value = pedido.numeroERP || "";
+      fields.status.value = pedido.status || "pendente";
+      fields.vendedor.value = pedido.vendedor || "";
+      fields.observacoes.value = pedido.observacoes || "";
+      fields.condicaoPagamento.value = pedido.condicaoPagamento || "";
+      fields.observacaoPrivada.value = pedido.observacaoPrivada || "";
+      fields.enderecoEntrega.value = pedido.enderecoEntrega || "";
+      fields.fatorCubagem.value = pedido.fatorCubagem || "";
+    }
+  }
+
+  calculateTotals();
 }
 
 /**
@@ -3724,7 +5013,7 @@ Navegação:
 
 Ações:
 • Ctrl/Cmd + N: Novo registro (na página atual)
-• Ctrl/Cmd + E: Editar selecionado
+• Ctrl/Cmd + E: Editar
 • Ctrl/Cmd + S: Salvar formulário
 • Ctrl/Cmd + F: Buscar/Filtrar
 
@@ -3751,9 +5040,14 @@ const pageInitializers = {
   "cliente-pj": initClientePJPage,
   "cliente-pf": initClientePFPage,
   transportadoras: initTransportadorasPage,
+  industrias: initIndustriasPage,
+  "industria-form": initIndustriaFormPage,
   produtos: initProdutosPage,
+  "produto-form": initProdutoFormPage,
   orcamentos: initOrcamentosPage,
+  "orcamento-form": initOrcamentoFormPage,
   pedidos: initPedidosPage,
+  "pedido-form": initPedidoFormPage,
   crm: initCrmPage,
   configuracoes: initConfiguracoesPage,
 };
@@ -3770,39 +5064,12 @@ function init() {
 
 document.addEventListener("DOMContentLoaded", init);
 function initPedidosPage() {
-  const form = document.querySelector("#pedidoForm");
-  if (!form) return;
-
-  const overlay = document.querySelector("#pedidoOverlay");
-  const drawer = document.querySelector("#pedidoDrawer");
-  const titleEl = document.querySelector("#pedidoDrawerTitulo");
-  const descEl = document.querySelector("#pedidoDrawerDescricao");
   const openBtn = document.querySelector("#pedidoCriar");
   const editBtn = document.querySelector("#pedidoEditar");
   const removeBtn = document.querySelector("#pedidoRemover");
-  const closeBtn = document.querySelector("#pedidoDrawerFechar");
-  const cancelBtn = document.querySelector("#pedidoCancelar");
-  const submitBtn = form.querySelector('button[type="submit"]');
   const listContainer = document.querySelector("#pedidosLista");
 
-  const fields = {
-    id: document.querySelector("#pedidoId"),
-    codigo: document.querySelector("#pedidoCodigo"),
-    cliente: document.querySelector("#pedidoCliente"),
-    transportadora: document.querySelector("#pedidoTransportadora"),
-    valor: document.querySelector("#pedidoValor"),
-    entrega: document.querySelector("#pedidoEntrega"),
-    observacoes: document.querySelector("#pedidoObservacoes"),
-  };
-
   let selectedId = "";
-
-  const refreshSelects = (clienteId = "", transportadoraId = "") => {
-    fillClientesSelect(fields.cliente, clienteId);
-    fillTransportadorasSelect(fields.transportadora, transportadoraId);
-    submitBtn.disabled =
-      fields.cliente.disabled || fields.transportadora.disabled;
-  };
 
   const updateActionsState = () => {
     const hasSelection = Boolean(selectedId);
@@ -3819,36 +5086,8 @@ function initPedidosPage() {
     }
   };
 
-  const clearForm = () => {
-    form.reset();
-    fields.id.value = "";
-  };
-
-  const closeForm = () => {
-    clearForm();
-    hideDrawer(drawer, overlay);
-  };
-
-  overlay?.addEventListener("click", closeForm);
-  closeBtn?.addEventListener("click", closeForm);
-  cancelBtn?.addEventListener("click", closeForm);
-
   openBtn?.addEventListener("click", () => {
-    const state = storage.load();
-    if (state.clientes.length === 0 || state.transportadoras.length === 0) {
-      window.alert(
-        "Cadastre ao menos um cliente e uma transportadora antes de registrar pedidos."
-      );
-      return;
-    }
-    clearForm();
-    refreshSelects();
-    titleEl.textContent = "Novo pedido";
-    descEl.textContent =
-      "Informe código, cliente, transportadora e detalhes financeiros do pedido.";
-    submitBtn.textContent = "Salvar pedido";
-    showDrawer(drawer, overlay);
-    focusFirstInput(fields.codigo);
+    window.location.href = "pedido-form.html";
   });
 
   editBtn?.addEventListener("click", () => {
@@ -3856,28 +5095,8 @@ function initPedidosPage() {
       window.alert("Selecione um pedido para editar.");
       return;
     }
-    const pedido = storage
-      .load()
-      .pedidos.find((item) => item.id === selectedId);
-    if (!pedido) {
-      window.alert("O pedido selecionado não está mais disponível.");
-      selectedId = "";
-      updateActionsState();
-      render();
-      return;
-    }
-    fields.id.value = pedido.id;
-    refreshSelects(pedido.clienteId, pedido.transportadoraId);
-    fields.codigo.value = pedido.codigo;
-    fields.valor.value = pedido.valor;
-    fields.entrega.value = pedido.entrega;
-    fields.observacoes.value = pedido.observacoes || "";
-    titleEl.textContent = "Editar pedido";
-    descEl.textContent =
-      "Atualize as informações financeiras e logísticas do pedido selecionado.";
-    submitBtn.textContent = "Atualizar pedido";
-    showDrawer(drawer, overlay);
-    focusFirstInput(fields.codigo);
+    window.sessionStorage.setItem("oursales:editPedido", selectedId);
+    window.location.href = "pedido-form.html";
   });
 
   removeBtn?.addEventListener("click", () => {
@@ -3892,73 +5111,6 @@ function initPedidosPage() {
       draft.pedidos = draft.pedidos.filter((item) => item.id !== selectedId);
     });
     selectedId = "";
-    render();
-  });
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    if (fields.cliente.disabled || fields.transportadora.disabled) {
-      window.alert(
-        "Cadastre um cliente e uma transportadora antes de registrar pedidos."
-      );
-      return;
-    }
-
-    const clienteId = fields.cliente.value;
-    const transportadoraId = fields.transportadora.value;
-    const cliente = storage
-      .load()
-      .clientes.find((item) => item.id === clienteId);
-    const transportadora = storage
-      .load()
-      .transportadoras.find((item) => item.id === transportadoraId);
-
-    if (!cliente || !transportadora) {
-      window.alert("Selecione cliente e transportadora válidos.");
-      return;
-    }
-
-    const valor = Number.parseFloat(fields.valor.value);
-    if (!Number.isFinite(valor) || valor < 0) {
-      window.alert("Informe um valor total válido.");
-      return;
-    }
-
-    const data = {
-      codigo: fields.codigo.value.trim(),
-      clienteId,
-      clienteNome: cliente.nome,
-      transportadoraId,
-      transportadoraNome: transportadora.nome,
-      valor,
-      entrega: fields.entrega.value,
-      observacoes: fields.observacoes.value.trim(),
-    };
-
-    if (!data.codigo || !data.entrega) {
-      window.alert("Informe o código do pedido e a data prevista de entrega.");
-      return;
-    }
-
-    const id = fields.id.value;
-    if (id) {
-      storage.update((draft) => {
-        const pedido = draft.pedidos.find((item) => item.id === id);
-        if (!pedido) return;
-        Object.assign(pedido, data);
-      });
-      selectedId = id;
-    } else {
-      let createdId = "";
-      storage.update((draft) => {
-        const novo = { id: generateId("ped"), ...data };
-        draft.pedidos.push(novo);
-        createdId = novo.id;
-      });
-      selectedId = createdId;
-    }
-
-    closeForm();
     render();
   });
 
@@ -4054,7 +5206,6 @@ function initPedidosPage() {
     updateActionsState();
   }
 
-  refreshSelects();
   render();
 }
 

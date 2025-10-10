@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OurSales • Orçamentos</title>
+    <title>OurSales • Transportadoras</title>
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
-  <body data-page="orcamentos">
+  <body data-page="transportadoras">
     <header>
-      <h1>Orçamentos</h1>
+      <h1>Transportadoras</h1>
       <p>
-        Registre propostas comerciais vinculando clientes, condições de
-        pagamento e tempo de validade.
+        Cadastre parceiros logísticos com prazo e custo estimados para agilizar
+        cálculos de frete durante negociações.
       </p>
     </header>
 
@@ -22,6 +22,7 @@
         <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
         <a href="pedidos.html" data-page="pedidos">Pedidos</a>
         <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
         <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
       </div>
@@ -31,99 +32,102 @@
       <section>
         <div class="section-header">
           <div>
-            <h2>Orçamentos registrados</h2>
-            <p>Acompanhe propostas em aberto e atualize conforme negociações.</p>
+            <h2>Transportadoras cadastradas</h2>
+            <p>Selecione uma transportadora para editar ou remover.</p>
           </div>
           <div class="toolbar">
-            <button type="button" id="orcamentoCriar">Novo orçamento</button>
+            <button type="button" id="transportadoraCriar">
+              Nova transportadora
+            </button>
             <button
               type="button"
-              id="orcamentoEditar"
+              id="transportadoraEditar"
               class="button-secondary"
               disabled
             >
-              Editar selecionado
+              Editar selecionada
             </button>
             <button
               type="button"
-              id="orcamentoRemover"
+              id="transportadoraRemover"
               class="button-danger"
               disabled
             >
-              Remover selecionado
+              Remover selecionada
             </button>
           </div>
         </div>
-        <div class="list" id="orcamentosLista"></div>
+        <div class="list" id="transportadorasLista"></div>
       </section>
     </main>
 
-    <div class="overlay" id="orcamentoOverlay" hidden></div>
+    <div class="overlay" id="transportadoraOverlay" hidden></div>
 
-    <section class="drawer" id="orcamentoDrawer" hidden>
+    <section class="drawer" id="transportadoraDrawer" hidden>
       <div class="drawer-header">
         <div>
-          <h2 id="orcamentoDrawerTitulo">Novo orçamento</h2>
-          <p id="orcamentoDrawerDescricao">
-            Selecione um cliente, defina a validade e informe o valor estimado da
-            proposta.
+          <h2 id="transportadoraDrawerTitulo">Nova transportadora</h2>
+          <p id="transportadoraDrawerDescricao">
+            Cadastre parceiros logísticos com prazo e custo estimados para
+            reutilizar nos pedidos.
           </p>
         </div>
         <button
           type="button"
           class="button-icon"
-          id="orcamentoDrawerFechar"
+          id="transportadoraDrawerFechar"
           aria-label="Fechar formulário"
         >
           <span aria-hidden="true">X</span>
         </button>
       </div>
-      <form id="orcamentoForm" autocomplete="off">
-        <input type="hidden" id="orcamentoId" />
-        <div class="grouped two">
+      <form id="transportadoraForm" autocomplete="off">
+        <input type="hidden" id="transportadoraId" />
+        <div class="grouped three">
           <label>
-            Cliente
-            <select id="orcamentoCliente" required></select>
-          </label>
-          <label>
-            Validade
-            <input type="date" id="orcamentoValidade" required />
-          </label>
-        </div>
-        <div class="grouped two">
-          <label>
-            Descrição do Orçamento
+            Nome
             <input
               type="text"
-              id="orcamentoDescricao"
+              id="transportadoraNome"
               required
-              placeholder="120 unidades linha Evolution"
+              placeholder="Rápido Sul"
             />
           </label>
           <label>
-            Valor Estimado (R$)
+            Prazo Médio (dias)
             <input
               type="number"
-              id="orcamentoValor"
+              id="transportadoraPrazo"
+              min="1"
+              required
+              placeholder="4"
+            />
+          </label>
+          <label>
+            Custo Médio (R$)
+            <input
+              type="number"
+              id="transportadoraCusto"
               min="0"
               step="0.01"
               required
-              placeholder="18450,00"
+              placeholder="120,00"
             />
           </label>
         </div>
         <label>
-          Observações
-          <textarea
-            id="orcamentoObservacoes"
-            placeholder="Condições de pagamento, descontos, itens adicionais..."
-          ></textarea>
+          Cobertura
+          <input
+            type="text"
+            id="transportadoraCobertura"
+            placeholder="Estados ou regiões atendidas"
+          />
         </label>
         <div class="hero-actions">
-          <button type="submit">Salvar orçamento</button>
+          <button type="submit">Salvar transportadora</button>
           <button
             type="button"
-            id="orcamentoCancelar"
+            id="transportadoraCancelar"
             class="button-secondary"
           >
             Cancelar
@@ -133,8 +137,8 @@
     </section>
 
     <footer>
-      Garanta que os clientes estejam cadastrados para vincular novos
-      orçamentos.
+      Revise periodicamente prazos e custos com os parceiros para manter os
+      dados atualizados.
     </footer>
 
     <script src="assets/js/app.js" defer></script>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Orçamentos</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body data-page="orcamentos">
+    <header>
+      <h1>Orçamentos</h1>
+      <p>
+        Registre propostas comerciais vinculando clientes, condições de
+        pagamento e tempo de validade.
+      </p>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <section>
+        <div class="section-header">
+          <div>
+            <h2>Orçamentos registrados</h2>
+            <p>
+              Acompanhe propostas em aberto e atualize conforme negociações.
+            </p>
+          </div>
+          <div class="toolbar">
+            <button type="button" id="orcamentoCriar">Novo orçamento</button>
+            <button
+              type="button"
+              id="orcamentoEditar"
+              class="button-secondary"
+              disabled
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              id="orcamentoRemover"
+              class="button-danger"
+              disabled
+            >
+              Remover
+            </button>
+          </div>
+        </div>
+        <div class="list" id="orcamentosLista"></div>
+      </section>
+    </main>
+
+    <footer>
+      Garanta que os clientes estejam cadastrados para vincular novos
+      orçamentos.
+    </footer>
+
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>

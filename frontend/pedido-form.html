@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Novo Pedido</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body data-page="pedido-form">
+    <header>
+      <h1 id="pedidoFormTitle">🛒 Pedido - Novo</h1>
+      <p>
+        Preencha as informações do pedido, adicione produtos e controle o
+        faturamento.
+      </p>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <form id="pedidoForm" autocomplete="off">
+        <input type="hidden" id="pedidoId" />
+
+        <!-- Ações do formulário -->
+        <section class="card">
+          <div class="hero-actions">
+            <button type="submit" id="pedidoSalvar">Salvar</button>
+            <button
+              type="button"
+              id="pedidoSalvarEnviar"
+              class="button-secondary"
+            >
+              Salvar e Enviar
+            </button>
+            <button
+              type="button"
+              id="pedidoVisualizar"
+              class="button-secondary"
+            >
+              Visualizar
+            </button>
+            <a href="pedidos.html" class="button button-danger">Cancelar</a>
+            <button
+              type="button"
+              id="personalizarCampos"
+              class="button-secondary"
+              style="margin-left: auto"
+            >
+              ⚙️ Personalizar Campos
+            </button>
+          </div>
+        </section>
+
+        <!-- Informações sobre o Pedido -->
+        <section class="card">
+          <h3>Informações sobre o Pedido</h3>
+          <div class="grouped three">
+            <label>
+              Cliente *
+              <div style="display: flex; gap: 0.5rem">
+                <input
+                  type="text"
+                  id="pedidoClienteSearch"
+                  placeholder="Razão Social, Nome Fantasia, Código ou CNPJ/CPF"
+                  style="flex: 1"
+                />
+                <button
+                  type="button"
+                  id="pedidoClienteProcurar"
+                  class="button-secondary"
+                >
+                  🔍 Procurar
+                </button>
+              </div>
+              <select id="pedidoCliente" required style="margin-top: 0.5rem">
+                <option value="">Selecione um cliente</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grouped three">
+            <label>
+              Comprador
+              <select id="pedidoComprador">
+                <option value="">Selecione</option>
+              </select>
+            </label>
+            <label>
+              Transportadora
+              <select id="pedidoTransportadora">
+                <option value="">Selecione uma transportadora</option>
+              </select>
+            </label>
+            <label>
+              Frete
+              <select id="pedidoTipoFrete">
+                <option value="">Selecione</option>
+                <option value="cif">CIF</option>
+                <option value="fob">FOB</option>
+                <option value="sem">Sem Frete</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grouped four">
+            <label>
+              Dt. Venda *
+              <input type="date" id="pedidoDataVenda" required />
+            </label>
+            <label>
+              Previsão Entrega
+              <div style="display: flex; gap: 0.5rem; align-items: center">
+                <input type="date" id="pedidoPrevisaoEntrega" style="flex: 1" />
+                <a
+                  href="#"
+                  id="adicionarAgendaSV"
+                  style="
+                    font-size: 0.875rem;
+                    color: #007bff;
+                    text-decoration: none;
+                    white-space: nowrap;
+                  "
+                >
+                  📅 Adicionar na Agenda SV
+                </a>
+              </div>
+            </label>
+            <label>
+              Dt. Fatura
+              <input type="date" id="pedidoDataFatura" />
+            </label>
+            <label>
+              Nota Fiscal
+              <input
+                type="text"
+                id="pedidoNotaFiscal"
+                placeholder="Número da NF"
+              />
+            </label>
+          </div>
+        </section>
+
+        <!-- Itens do Pedido -->
+        <section class="card">
+          <div class="section-header">
+            <div>
+              <h3>Itens do Pedido</h3>
+            </div>
+            <div class="toolbar">
+              <button
+                type="button"
+                id="buscarProdutos"
+                class="button-secondary"
+              >
+                🔍 Busca Avançada
+              </button>
+              <button type="button" id="modoCesta" class="button-secondary">
+                🛒 Modo Cesta de Compra
+              </button>
+              <button type="button" id="excluirItem" class="button-danger">
+                🗑️ Excluir item
+              </button>
+              <button type="button" id="maisAcoes" class="button-secondary">
+                ⋮ Mais Ações
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="alert alert-info"
+            style="
+              margin-bottom: 1rem;
+              padding: 0.75rem 1rem;
+              background: #fff3cd;
+              border: 1px solid #ffc107;
+              border-radius: 4px;
+              color: #856404;
+            "
+          >
+            ⚠️ Agora o campo de importação de produtos está dentro de Mais
+            Ações.
+          </div>
+
+          <div class="search-product-container">
+            <input
+              type="text"
+              id="produtoSearch"
+              placeholder="Nome do produto, código/código original ou EAN"
+              class="search-product-input"
+            />
+            <button
+              type="button"
+              id="adicionarProduto"
+              class="button-secondary"
+            >
+              ➕ Adicionar
+            </button>
+          </div>
+
+          <!-- Filtros de quantidade -->
+          <div
+            class="quantity-filters"
+            style="
+              display: flex;
+              gap: 0.5rem;
+              margin-top: 1rem;
+              align-items: center;
+            "
+          >
+            <input
+              type="number"
+              placeholder="0"
+              style="width: 60px"
+              id="filtro1"
+            />
+            <input
+              type="number"
+              placeholder="0"
+              style="width: 60px"
+              id="filtro2"
+            />
+            <input
+              type="number"
+              placeholder="0"
+              style="width: 60px"
+              id="filtro3"
+            />
+            <input
+              type="number"
+              placeholder="0"
+              style="width: 60px"
+              id="filtro4"
+            />
+            <input
+              type="number"
+              placeholder="0"
+              style="width: 60px"
+              id="filtro5"
+            />
+            <input
+              type="number"
+              placeholder="0"
+              style="width: 60px"
+              id="filtro6"
+            />
+            <input
+              type="number"
+              placeholder="0"
+              style="width: 60px"
+              id="filtro7"
+            />
+            <button type="button" id="aplicarFiltros" class="button-secondary">
+              Aplicar
+            </button>
+            <button type="button" id="limparFiltros" class="button-secondary">
+              Limpar %
+            </button>
+          </div>
+
+          <div class="table-wrapper" style="margin-top: 1rem">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 40px">
+                    <input type="checkbox" id="selecionarTodos" />
+                  </th>
+                  <th>Código</th>
+                  <th>Descrição</th>
+                  <th>Fornecedor/Marca</th>
+                  <th>Comissão 👁️</th>
+                  <th>R$ Tabela</th>
+                  <th>Preço Final</th>
+                  <th>Qtde</th>
+                  <th>Qtde. Faturada</th>
+                  <th>Total R$</th>
+                </tr>
+              </thead>
+              <tbody id="pedidoItensList">
+                <tr>
+                  <td colspan="10" class="empty-state">
+                    Nenhum produto adicionado neste pedido!
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="9" style="text-align: right; font-weight: bold">
+                    Total:
+                  </td>
+                  <td
+                    id="tabelaTotalPedido"
+                    style="font-weight: bold; text-align: right"
+                  >
+                    0,00
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+
+        <!-- Totais do Pedido -->
+        <section class="card">
+          <h3>Totais do Pedido</h3>
+
+          <div class="totals-grid">
+            <div class="totals-column">
+              <div class="total-item">
+                <span class="total-label">Qtde. Itens</span>
+                <span class="total-value" id="totalItens">0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Qtde Produtos</span>
+                <span class="total-value" id="totalProdutos">0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total Peso Líquido</span>
+                <span class="total-value" id="totalPesoLiquido">0,000 Kg</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total IPI</span>
+                <span class="total-value" id="totalIPI">R$ 0,00</span>
+              </div>
+            </div>
+
+            <div class="totals-column">
+              <div class="total-item">
+                <span class="total-label">Acréscimo</span>
+                <span class="total-value" id="totalAcrescimo">R$ 0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total Peso Bruto</span>
+                <span class="total-value" id="totalPesoBruto">0,000 Kg</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total S/ Impostos</span>
+                <span class="total-value" id="totalSemImpostos">R$ 0,00</span>
+              </div>
+            </div>
+
+            <div class="totals-column">
+              <div class="total-item">
+                <span class="total-label">Frete</span>
+                <span class="total-value" id="totalFrete">R$ 0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Desconto</span>
+                <span class="total-value" id="totalDesconto">R$ 0,00</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total ST</span>
+                <span class="total-value" id="totalST">R$ 0,00</span>
+              </div>
+              <div class="total-item highlight">
+                <span class="total-label"><strong>Total Final</strong></span>
+                <span class="total-value"
+                  ><strong id="totalFinal">R$ 0,00</strong></span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="frete-calculator">
+            <h4>Calcular % Frete</h4>
+            <div class="grouped three">
+              <label>
+                Valor do Frete (R$)
+                <input
+                  type="number"
+                  id="valorFrete"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                />
+              </label>
+              <label>
+                Acréscimo (R$)
+                <input
+                  type="number"
+                  id="valorAcrescimo"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                />
+              </label>
+              <label>
+                Desconto (R$)
+                <input
+                  type="number"
+                  id="valorDesconto"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                />
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Informações Complementares -->
+        <section class="card">
+          <h3>Informações Complementares</h3>
+
+          <div class="grouped two">
+            <label>
+              Condição de Pagamento
+              <div style="display: flex; gap: 0.5rem">
+                <textarea
+                  id="pedidoCondicaoPagamento"
+                  rows="2"
+                  placeholder="Inclua algum produto no Pedido"
+                  style="flex: 1"
+                ></textarea>
+                <button
+                  type="button"
+                  id="copiarCondicao"
+                  class="button-secondary"
+                  style="padding: 0.5rem"
+                  title="Copiar condição"
+                >
+                  📋
+                </button>
+              </div>
+            </label>
+            <label>
+              Tipo
+              <select id="pedidoTipo">
+                <option value="pedido">Pedido</option>
+                <option value="orcamento">Orçamento</option>
+                <option value="cotacao">Cotação</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grouped two">
+            <label class="checkbox-label">
+              <input type="checkbox" id="pedidoCancelado" />
+              Cancelado
+            </label>
+            <label>
+              Vendedor *
+              <select id="pedidoVendedor" required>
+                <option value="">Selecione</option>
+                <option value="guilherme">Guilherme</option>
+                <option value="vendedor1">Vendedor 1</option>
+                <option value="vendedor2">Vendedor 2</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grouped one">
+            <label>
+              Status
+              <select id="pedidoStatus">
+                <option value="">Selecione</option>
+                <option value="pendente">Pendente</option>
+                <option value="aprovado">Aprovado</option>
+                <option value="faturado">Faturado</option>
+                <option value="separacao">Em Separação</option>
+                <option value="transporte">Em Transporte</option>
+                <option value="entregue">Entregue</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Observações
+            <textarea
+              id="pedidoObservacoes"
+              rows="3"
+              placeholder="Informações sobre o pedido, condições especiais..."
+            ></textarea>
+          </label>
+
+          <label>
+            Observação Privada
+            <textarea
+              id="pedidoObservacaoPrivada"
+              rows="2"
+              placeholder="Anotações internas (não aparece no pedido)"
+            ></textarea>
+          </label>
+
+          <label>
+            Endereço de Entrega
+            <textarea
+              id="pedidoEnderecoEntrega"
+              rows="3"
+              placeholder="Endereço completo de entrega..."
+            ></textarea>
+          </label>
+
+          <div class="grouped three">
+            <label>
+              Fator Cubagem (Kg/m3)
+              <input
+                type="number"
+                id="pedidoFatorCubagem"
+                min="0"
+                step="0.01"
+                placeholder="Ex: 300"
+              />
+            </label>
+            <label>
+              Nº Ordem de Compra
+              <input
+                type="text"
+                id="pedidoOrdemCompra"
+                placeholder="Número da OC"
+              />
+            </label>
+            <label>
+              Nº Pedido ERP
+              <input
+                type="text"
+                id="pedidoNumeroERP"
+                placeholder="Número do pedido no ERP"
+              />
+            </label>
+          </div>
+        </section>
+
+        <!-- Ações finais -->
+        <section class="card">
+          <div class="hero-actions">
+            <button type="submit">Salvar Pedido</button>
+            <a href="pedidos.html" class="button button-secondary">Cancelar</a>
+          </div>
+        </section>
+      </form>
+    </main>
+
+    <footer>
+      Garanta que os clientes e produtos estejam cadastrados para criar pedidos
+      completos.
+    </footer>
+
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>

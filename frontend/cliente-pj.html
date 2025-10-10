@@ -23,6 +23,7 @@
         <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
         <a href="pedidos.html" data-page="pedidos">Pedidos</a>
         <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
         <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
       </div>
@@ -30,14 +31,19 @@
 
     <main>
       <form id="clientePJForm">
+        <input type="hidden" id="pjClienteId" />
         <section class="card">
           <div class="hero-actions">
-            <button type="submit">Salvar</button>
-            <button type="button" id="clientePJCancelar" class="button-secondary">
+            <button type="submit" id="pjSalvar">Salvar</button>
+            <button
+              type="button"
+              id="clientePJCancelar"
+              class="button-secondary"
+            >
               Cancelar
             </button>
           </div>
-          <h2>Informações do Cliente (Pessoa Jurídica)</h2>
+          <h2 id="pjFormTitle">Informações do Cliente (Pessoa Jurídica)</h2>
           <div class="grouped two">
             <label>
               Razão Social *
@@ -99,7 +105,11 @@
               Código
               <div class="input-action">
                 <input type="text" id="pjCodigo" placeholder="CLI-0001" />
-                <button type="button" id="pjGerarCodigo" class="button-secondary">
+                <button
+                  type="button"
+                  id="pjGerarCodigo"
+                  class="button-secondary"
+                >
                   Gerar Código
                 </button>
               </div>
@@ -129,7 +139,11 @@
               <h2>Contatos</h2>
               <p>Cadastre responsáveis diretos pelo relacionamento.</p>
             </div>
-            <button type="button" class="button-secondary" id="pjContatoAdicionar">
+            <button
+              type="button"
+              class="button-secondary"
+              id="pjContatoAdicionar"
+            >
               Adicionar contato
             </button>
           </div>
@@ -176,10 +190,7 @@
               CEP
               <div class="input-action">
                 <input type="text" id="pjCep" placeholder="00000-000" />
-                <a
-                  href="https://viacep.com.br/"
-                  target="_blank"
-                  rel="noopener"
+                <a href="https://viacep.com.br/" target="_blank" rel="noopener"
                   >Consultar CEP</a
                 >
               </div>
@@ -253,11 +264,19 @@
           <div class="grouped two">
             <label>
               Website
-              <input type="url" id="pjWebsite" placeholder="https://empresa.com" />
+              <input
+                type="url"
+                id="pjWebsite"
+                placeholder="https://empresa.com"
+              />
             </label>
             <label>
               E-mail
-              <input type="email" id="pjEmail" placeholder="contato@empresa.com" />
+              <input
+                type="email"
+                id="pjEmail"
+                placeholder="contato@empresa.com"
+              />
               <span class="label-note"
                 >Este e-mail poderá receber uma cópia do pedido.</span
               >
@@ -284,7 +303,11 @@
             </label>
             <label>
               E-mail NF-e
-              <input type="email" id="pjEmailNfe" placeholder="nf@empresa.com" />
+              <input
+                type="email"
+                id="pjEmailNfe"
+                placeholder="nf@empresa.com"
+              />
             </label>
             <label>
               Dt. Abertura
@@ -314,7 +337,11 @@
                 Cadastre as condições especiais negociadas com este cliente.
               </p>
             </div>
-            <button type="button" class="button-secondary" id="pjPagamentoAdicionar">
+            <button
+              type="button"
+              class="button-secondary"
+              id="pjPagamentoAdicionar"
+            >
               Adicionar condição
             </button>
           </div>
@@ -349,7 +376,11 @@
                   Associe representantes responsáveis pelo atendimento.
                 </p>
               </div>
-              <button type="button" class="button-secondary" id="pjVendedorAdicionar">
+              <button
+                type="button"
+                class="button-secondary"
+                id="pjVendedorAdicionar"
+              >
                 Adicionar vendedor
               </button>
             </div>
@@ -371,13 +402,19 @@
           <div>
             <div class="section-header">
               <div>
-                <h3 class="section-subheading">Indústrias (Portal do Cliente)</h3>
+                <h3 class="section-subheading">
+                  Indústrias (Portal do Cliente)
+                </h3>
                 <p class="table-hint">
-                  Defina quais indústrias e tabelas estarão visíveis no portal do
-                  cliente.
+                  Defina quais indústrias e tabelas estarão visíveis no portal
+                  do cliente.
                 </p>
               </div>
-              <button type="button" class="button-secondary" id="pjIndustriaAdicionar">
+              <button
+                type="button"
+                class="button-secondary"
+                id="pjIndustriaAdicionar"
+              >
                 Adicionar indústria
               </button>
             </div>
@@ -433,8 +470,8 @@
     </main>
 
     <footer>
-      Os dados preenchidos são integrados ao cadastro geral de clientes.
-      Revise antes de salvar.
+      Os dados preenchidos são integrados ao cadastro geral de clientes. Revise
+      antes de salvar.
     </footer>
 
     <script src="assets/js/app.js" defer></script>

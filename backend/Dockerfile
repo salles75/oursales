@@ -43,18 +43,26 @@ COPY . .
 # =====================================================
 FROM base AS production
 
+# Copiar package files primeiro
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Copiar dependências
+COPY --from=dependencies /app/node_modules ./node_modules
+
+# Gerar Prisma Client no stage de produção
+RUN npx prisma generate
+
+# Copiar código fonte
+COPY src ./src
+
 # Criar usuário não-root por segurança
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Copiar dependências e arquivos necessários
-COPY --from=dependencies --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=dependencies --chown=nodejs:nodejs /app/prisma ./prisma
-COPY --chown=nodejs:nodejs . .
-
-# Criar diretórios necessários
+# Criar diretórios necessários e ajustar permissões
 RUN mkdir -p /app/uploads /app/logs && \
-    chown -R nodejs:nodejs /app/uploads /app/logs
+    chown -R nodejs:nodejs /app
 
 # Expor porta
 EXPOSE 3000

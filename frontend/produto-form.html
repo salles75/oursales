@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Cadastrar Produto</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body data-page="produto-form">
+    <header>
+      <h1 id="produtoFormTitle">📦 Produto Cadastrando</h1>
+      <p>
+        Preencha as informações do produto, defina preços e controle o catálogo.
+      </p>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <form id="produtoForm" autocomplete="off">
+        <input type="hidden" id="produtoId" />
+
+        <!-- Ações do formulário -->
+        <section class="card">
+          <div class="hero-actions">
+            <button type="submit" id="produtoSalvar">Salvar</button>
+            <a href="produtos.html" class="button button-secondary">Cancelar</a>
+            <button
+              type="button"
+              id="personalizarCampos"
+              class="button-secondary"
+              style="margin-left: auto"
+            >
+              ⚙️ Personalizar Campos
+            </button>
+          </div>
+        </section>
+
+        <!-- Informações do Produto -->
+        <section class="card">
+          <h3>Informações do Produto</h3>
+          <div class="grouped three">
+            <label>
+              Indústria *
+              <select id="produtoIndustria" required>
+                <option value="">Selecione</option>
+                <option value="nacional">Nacional</option>
+                <option value="importado">Importado</option>
+              </select>
+            </label>
+            <label>
+              Código do Produto (SKU) *
+              <div style="display: flex; gap: 0.5rem">
+                <input
+                  type="text"
+                  id="produtoSKU"
+                  required
+                  placeholder="Ex: PROD-001"
+                  style="flex: 1"
+                />
+                <button
+                  type="button"
+                  id="gerarCodigo"
+                  class="button-secondary"
+                  title="Gerar código automaticamente"
+                >
+                  🔄 Gerar Código
+                </button>
+              </div>
+            </label>
+            <label>
+              Nome do Produto *
+              <input
+                type="text"
+                id="produtoNome"
+                required
+                placeholder="Ex: Produto Evolution 500ml"
+              />
+            </label>
+          </div>
+
+          <div class="grouped three">
+            <label>
+              Preço de Venda
+              <div style="display: flex; gap: 0.5rem">
+                <input
+                  type="number"
+                  id="produtoPrecoVenda"
+                  min="0"
+                  step="0.01"
+                  placeholder="0,00"
+                  style="flex: 1"
+                />
+                <button
+                  type="button"
+                  id="calcularPrecoVenda"
+                  class="button-secondary"
+                  title="Calcular preço de venda"
+                >
+                  🧮 Calcular Preço de Venda
+                </button>
+              </div>
+            </label>
+            <label>
+              NCM (Mercosul)
+              <input
+                type="text"
+                id="produtoNCM"
+                placeholder="Ex: 12345678"
+                maxlength="8"
+              />
+            </label>
+            <label>
+              Preço em Promoção
+              <input
+                type="number"
+                id="produtoPrecoPromocao"
+                min="0"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+          </div>
+
+          <div class="grouped two">
+            <label>
+              Cores Disponíveis
+              <textarea
+                id="produtoCores"
+                rows="3"
+                placeholder="Ex: Azul, Vermelho, Verde..."
+              ></textarea>
+            </label>
+            <label>
+              Marca do produto
+              <input
+                type="text"
+                id="produtoMarca"
+                placeholder="Ex: Evolution"
+              />
+            </label>
+          </div>
+        </section>
+
+        <!-- Custo e Precificação -->
+        <section class="card">
+          <h3>Custo e Precificação</h3>
+
+          <div class="grouped three">
+            <label>
+              Markup Multiplicador
+              <input
+                type="number"
+                id="produtoMarkup"
+                min="0"
+                step="0.01"
+                placeholder="Ex: 2.5"
+              />
+            </label>
+            <label>
+              Margem de Lucro (%)
+              <div style="display: flex; gap: 0.5rem">
+                <input
+                  type="number"
+                  id="produtoMargemLucro"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  placeholder="0,00"
+                  style="flex: 1"
+                />
+                <button
+                  type="button"
+                  id="calcularPrecoVendaMargem"
+                  class="button-secondary"
+                  title="Calcular preço de venda"
+                >
+                  🧮 Calcular Preço de Venda
+                </button>
+              </div>
+            </label>
+            <label>
+              Preço de Compra / Fabricação
+              <input
+                type="number"
+                id="produtoPrecoCompra"
+                min="0"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+          </div>
+
+          <div class="grouped three">
+            <label>
+              Cálculo do Custo Médio (Compra)
+              <select id="produtoCustoMedio">
+                <option value="ultimo">Último preço de compra</option>
+                <option value="media">Média dos últimos preços</option>
+                <option value="manual">Manual</option>
+              </select>
+            </label>
+            <label>
+              Margem de Lucro Mínima (%)
+              <input
+                type="number"
+                id="produtoMargemMinima"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+            <label>
+              Margem de Segurança (Lucro)
+              <input
+                type="number"
+                id="produtoMargemSeguranca"
+                min="0"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+          </div>
+        </section>
+
+        <!-- Informações Complementares -->
+        <section class="card">
+          <h3>Informações Complementares</h3>
+
+          <div class="grouped three">
+            <label>
+              IPI (%) *
+              <input
+                type="number"
+                id="produtoIPI"
+                min="0"
+                max="100"
+                step="0.01"
+                value="0"
+                required
+              />
+            </label>
+            <label>
+              Unidade Medida
+              <input
+                type="text"
+                id="produtoUnidadeMedida"
+                placeholder="Exemplo: UN, KG, PCT, CX, FARDO"
+              />
+            </label>
+            <label>
+              Embalagem
+              <input
+                type="text"
+                id="produtoEmbalagem"
+                placeholder="Quantidade de produto por embalagem: 1, 6, 12, 24 etc."
+              />
+            </label>
+          </div>
+
+          <label>
+            Observações
+            <textarea
+              id="produtoObservacoes"
+              rows="3"
+              placeholder="Informações adicionais sobre o produto..."
+            ></textarea>
+          </label>
+
+          <div class="grouped three">
+            <label>
+              Tabela de Preço
+              <select id="produtoTabelaPreco">
+                <option value="">Selecione</option>
+                <option value="tabela1">Tabela 1</option>
+                <option value="tabela2">Tabela 2</option>
+                <option value="tabela3">Tabela 3</option>
+              </select>
+            </label>
+            <label>
+              Categoria
+              <select id="produtoCategoria">
+                <option value="">Escolha...</option>
+                <option value="bebidas">Bebidas</option>
+                <option value="alimentos">Alimentos</option>
+                <option value="suplementos">Suplementos</option>
+                <option value="kits">Kits</option>
+              </select>
+            </label>
+            <label>
+              Status *
+              <select id="produtoStatus" required>
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grouped three">
+            <label>
+              Altura da Unidade (m)
+              <input
+                type="number"
+                id="produtoAltura"
+                min="0"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+            <label>
+              Largura da Unidade (m)
+              <input
+                type="number"
+                id="produtoLargura"
+                min="0"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+            <label>
+              Comprimento da Unidade (m)
+              <input
+                type="number"
+                id="produtoComprimento"
+                min="0"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+          </div>
+
+          <div class="grouped three">
+            <label>
+              Código Original
+              <input
+                type="text"
+                id="produtoCodigoOriginal"
+                placeholder="Código do fabricante"
+              />
+            </label>
+            <label>
+              Modelo
+              <input type="text" id="produtoModelo" placeholder="Modelo" />
+            </label>
+            <label>
+              Peso Líquido (Kg)
+              <input
+                type="number"
+                id="produtoPesoLiquido"
+                min="0"
+                step="0.001"
+                placeholder="0,000"
+              />
+            </label>
+          </div>
+
+          <div class="grouped one">
+            <label>
+              Fator Cubagem (Kg/m3)
+              <input
+                type="number"
+                id="produtoFatorCubagem"
+                min="0"
+                step="0.01"
+                placeholder="Ex: 300"
+              />
+            </label>
+          </div>
+        </section>
+
+        <!-- Foto do Produto -->
+        <section class="card">
+          <h3>Foto do Produto</h3>
+
+          <div class="grouped two">
+            <label>
+              Informe a URL da foto do produto
+              <input
+                type="url"
+                id="produtoFotoURL"
+                placeholder="https://exemplo.com/foto.jpg"
+              />
+            </label>
+            <div style="display: flex; align-items: flex-end">
+              <button
+                type="button"
+                id="uploadPorURL"
+                class="button-secondary"
+                style="width: 100%"
+              >
+                Upload por Url da Imagem
+              </button>
+            </div>
+          </div>
+
+          <div class="file-upload-area">
+            <div class="upload-zone" id="uploadZone">
+              <p style="margin: 0; color: var(--text-500)">
+                Arraste as imagens e solte aqui
+              </p>
+            </div>
+            <input
+              type="file"
+              id="produtoFotoInput"
+              accept="image/*"
+              multiple
+              style="display: none"
+            />
+          </div>
+
+          <div id="imagensPreview" style="margin-top: 1rem"></div>
+        </section>
+
+        <!-- Substituição Tributária por Estado -->
+        <section class="card">
+          <h3>Substituição Tributária por Estado</h3>
+
+          <div class="grouped three" style="align-items: flex-end">
+            <label>
+              Estado
+              <select id="stEstado">
+                <option value="AC">AC</option>
+                <option value="AL">AL</option>
+                <option value="AP">AP</option>
+                <option value="AM">AM</option>
+                <option value="BA">BA</option>
+                <option value="CE">CE</option>
+                <option value="DF">DF</option>
+                <option value="ES">ES</option>
+                <option value="GO">GO</option>
+                <option value="MA">MA</option>
+                <option value="MT">MT</option>
+                <option value="MS">MS</option>
+                <option value="MG">MG</option>
+                <option value="PA">PA</option>
+                <option value="PB">PB</option>
+                <option value="PR">PR</option>
+                <option value="PE">PE</option>
+                <option value="PI">PI</option>
+                <option value="RJ">RJ</option>
+                <option value="RN">RN</option>
+                <option value="RS">RS</option>
+                <option value="RO">RO</option>
+                <option value="RR">RR</option>
+                <option value="SC">SC</option>
+                <option value="SP">SP</option>
+                <option value="SE">SE</option>
+                <option value="TO">TO</option>
+              </select>
+            </label>
+            <label>
+              S. Tributária (%)
+              <input
+                type="number"
+                id="stAliquota"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </label>
+            <button
+              type="button"
+              id="adicionarST"
+              class="button-secondary"
+              style="height: fit-content"
+            >
+              ➕ Adicionar
+            </button>
+          </div>
+
+          <div class="table-wrapper" style="margin-top: 1rem">
+            <table>
+              <thead>
+                <tr>
+                  <th>Estado</th>
+                  <th>S. Tributária (%)</th>
+                  <th style="width: 80px">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="stListaEstados">
+                <tr>
+                  <td colspan="3" class="empty-state">
+                    Nenhuma substituição tributária cadastrada
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Ações finais -->
+        <section class="card">
+          <div class="hero-actions">
+            <button type="submit">Salvar Produto</button>
+            <a href="produtos.html" class="button button-secondary">Cancelar</a>
+          </div>
+        </section>
+      </form>
+    </main>
+
+    <footer>
+      Mantenha o catálogo sempre atualizado para garantir propostas
+      consistentes.
+    </footer>
+
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>

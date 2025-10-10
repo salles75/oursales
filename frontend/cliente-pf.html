@@ -23,6 +23,7 @@
         <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
         <a href="pedidos.html" data-page="pedidos">Pedidos</a>
         <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
         <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
       </div>
@@ -30,14 +31,19 @@
 
     <main>
       <form id="clientePFForm">
+        <input type="hidden" id="pfClienteId" />
         <section class="card">
           <div class="hero-actions">
-            <button type="submit">Salvar</button>
-            <button type="button" id="clientePFCancelar" class="button-secondary">
+            <button type="submit" id="pfSalvar">Salvar</button>
+            <button
+              type="button"
+              id="clientePFCancelar"
+              class="button-secondary"
+            >
               Cancelar
             </button>
           </div>
-          <h2>Informações sobre o Cliente (Pessoa Física)</h2>
+          <h2 id="pfFormTitle">Informações sobre o Cliente (Pessoa Física)</h2>
           <div class="grouped two">
             <label>
               Nome Completo *
@@ -47,7 +53,11 @@
               Código
               <div class="input-action">
                 <input type="text" id="pfCodigo" placeholder="CLI-0001" />
-                <button type="button" id="pfGerarCodigo" class="button-secondary">
+                <button
+                  type="button"
+                  id="pfGerarCodigo"
+                  class="button-secondary"
+                >
                   Gerar Código
                 </button>
               </div>
@@ -56,7 +66,12 @@
           <div class="grouped three">
             <label>
               CPF *
-              <input type="text" id="pfCpf" required placeholder="000.000.000-00" />
+              <input
+                type="text"
+                id="pfCpf"
+                required
+                placeholder="000.000.000-00"
+              />
             </label>
             <label>
               RG
@@ -90,7 +105,9 @@
                 <option value="Feminino">Feminino</option>
                 <option value="Masculino">Masculino</option>
                 <option value="Outro">Outro</option>
-                <option value="Prefiro não informar">Prefiro não informar</option>
+                <option value="Prefiro não informar">
+                  Prefiro não informar
+                </option>
               </select>
             </label>
             <label>
@@ -106,7 +123,11 @@
               <h2>Contatos</h2>
               <p>Registre contatos adicionais ligados ao cliente.</p>
             </div>
-            <button type="button" class="button-secondary" id="pfContatoAdicionar">
+            <button
+              type="button"
+              class="button-secondary"
+              id="pfContatoAdicionar"
+            >
               Adicionar contato
             </button>
           </div>
@@ -231,7 +252,11 @@
             </label>
             <label>
               E-mail
-              <input type="email" id="pfEmail" placeholder="cliente@email.com" />
+              <input
+                type="email"
+                id="pfEmail"
+                placeholder="cliente@email.com"
+              />
             </label>
           </div>
           <label>
@@ -255,7 +280,11 @@
             </label>
             <label>
               E-mail NF-e
-              <input type="email" id="pfEmailNfe" placeholder="nf@cliente.com" />
+              <input
+                type="email"
+                id="pfEmailNfe"
+                placeholder="nf@cliente.com"
+              />
             </label>
             <label>
               Dt. Cadastro
@@ -285,7 +314,11 @@
                 Configure condições personalizadas negociadas com o cliente.
               </p>
             </div>
-            <button type="button" class="button-secondary" id="pfPagamentoAdicionar">
+            <button
+              type="button"
+              class="button-secondary"
+              id="pfPagamentoAdicionar"
+            >
               Adicionar condição
             </button>
           </div>
@@ -320,7 +353,11 @@
                   Selecione representantes responsáveis pelo atendimento.
                 </p>
               </div>
-              <button type="button" class="button-secondary" id="pfVendedorAdicionar">
+              <button
+                type="button"
+                class="button-secondary"
+                id="pfVendedorAdicionar"
+              >
                 Adicionar vendedor
               </button>
             </div>
@@ -342,12 +379,18 @@
           <div>
             <div class="section-header">
               <div>
-                <h3 class="section-subheading">Indústrias (Portal do Cliente)</h3>
+                <h3 class="section-subheading">
+                  Indústrias (Portal do Cliente)
+                </h3>
                 <p class="table-hint">
                   Defina a tabela de preço e descontos aplicados ao cliente.
                 </p>
               </div>
-              <button type="button" class="button-secondary" id="pfIndustriaAdicionar">
+              <button
+                type="button"
+                class="button-secondary"
+                id="pfIndustriaAdicionar"
+              >
                 Adicionar indústria
               </button>
             </div>

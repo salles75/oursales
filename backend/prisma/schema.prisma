@@ -532,6 +532,9 @@ model ContaReceber {
   pedidoId          String?    @map("pedido_id") @db.Uuid
   pedido            Pedido?    @relation(fields: [pedidoId], references: [id])
   
+  usuarioId         String     @map("usuario_id") @db.Uuid
+  usuario           Usuario    @relation(fields: [usuarioId], references: [id])
+  
   numeroDocumento   String?    @map("numero_documento") @db.VarChar(50)
   numeroParcela     Int?       @map("numero_parcela")
   totalParcelas     Int?       @map("total_parcelas")
@@ -560,6 +563,7 @@ model ContaReceber {
 
   @@index([clienteId])
   @@index([pedidoId])
+  @@index([usuarioId])
   @@index([status])
   @@index([dataVencimento])
   @@map("financeiro_contas_receber")

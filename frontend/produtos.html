@@ -22,6 +22,7 @@
         <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
         <a href="pedidos.html" data-page="pedidos">Pedidos</a>
         <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
         <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
       </div>
@@ -32,7 +33,9 @@
         <div class="section-header">
           <div>
             <h2>Produtos cadastrados</h2>
-            <p>Selecione um item para atualizar dados ou remover do catálogo.</p>
+            <p>
+              Selecione um item para atualizar dados ou remover do catálogo.
+            </p>
           </div>
           <div class="toolbar">
             <button type="button" id="produtoCriar">Novo produto</button>
@@ -42,7 +45,7 @@
               class="button-secondary"
               disabled
             >
-              Editar selecionado
+              Editar
             </button>
             <button
               type="button"
@@ -50,7 +53,7 @@
               class="button-danger"
               disabled
             >
-              Remover selecionado
+              Remover
             </button>
           </div>
         </div>
@@ -92,7 +95,12 @@
           </label>
           <label>
             SKU / Código
-            <input type="text" id="produtoSKU" required placeholder="EV-500-01" />
+            <input
+              type="text"
+              id="produtoSKU"
+              required
+              placeholder="EV-500-01"
+            />
           </label>
         </div>
         <div class="grouped two">
@@ -144,7 +152,8 @@
     </section>
 
     <footer>
-      Mantenha o catálogo sempre atualizado para garantir propostas consistentes.
+      Mantenha o catálogo sempre atualizado para garantir propostas
+      consistentes.
     </footer>
 
     <script src="assets/js/app.js" defer></script>

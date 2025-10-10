@@ -12,16 +12,27 @@ const redisConfig = {
   password: process.env.REDIS_PASSWORD,
   db: parseInt(process.env.REDIS_DB || "0", 10),
   retryStrategy: (times) => {
+    if (times > 10) {
+      logger.error("Redis: Máximo de tentativas de reconexão atingido");
+      return null; // Para de tentar reconectar
+    }
     const delay = Math.min(times * 50, 2000);
     return delay;
   },
-  maxRetriesPerRequest: 3,
+  maxRetriesPerRequest: null, // Sem limite de retentativas por requisição
   enableReadyCheck: true,
-  lazyConnect: false,
+  lazyConnect: true, // Conectar sob demanda
+  connectTimeout: 10000,
+  enableOfflineQueue: true,
 };
 
 // Criar cliente Redis
 export const redis = new Redis(redisConfig);
+
+// Conectar ao Redis
+redis.connect().catch((err) => {
+  logger.error("Erro ao conectar ao Redis:", err);
+});
 
 // Prefixo para as chaves
 const REDIS_PREFIX = process.env.REDIS_PREFIX || "oursales:";

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criar Pedido de Teste</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .result {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 4px;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🛒 Criar Pedido de Teste</h1>
+
+    <div id="results"></div>
+
+    <button onclick="criarPedidoTeste()">🚀 Criar Pedido de Teste</button>
+    <button onclick="verificarPedidos()">📋 Ver Pedidos Existentes</button>
+    <button onclick="limparResultados()">🧹 Limpar</button>
+
+    <script>
+      function addResult(message, type = "info") {
+        const div = document.createElement("div");
+        div.className = `result ${type}`;
+        div.textContent = message;
+        document.getElementById("results").appendChild(div);
+      }
+
+      function limparResultados() {
+        document.getElementById("results").innerHTML = "";
+      }
+
+      function verificarPedidos() {
+        addResult("📋 Verificando pedidos existentes...", "info");
+
+        try {
+          const storage = JSON.parse(
+            localStorage.getItem("oursales:data") || "{}"
+          );
+          const pedidos = storage.pedidos || [];
+
+          if (pedidos.length === 0) {
+            addResult("❌ Nenhum pedido encontrado", "info");
+          } else {
+            addResult(`✅ Encontrados ${pedidos.length} pedido(s):`, "success");
+            pedidos.forEach((pedido, index) => {
+              addResult(
+                `${index + 1}. ${pedido.codigo || pedido.id} - ${
+                  pedido.clienteNome || "Sem cliente"
+                }`,
+                "success"
+              );
+            });
+          }
+        } catch (error) {
+          addResult(`❌ Erro ao verificar pedidos: ${error.message}`, "info");
+        }
+      }
+
+      function criarPedidoTeste() {
+        addResult("🚀 Criando pedido de teste...", "info");
+
+        try {
+          // Carregar dados existentes
+          const storage = JSON.parse(
+            localStorage.getItem("oursales:data") || "{}"
+          );
+
+          // Verificar se há clientes e transportadoras
+          const clientes = storage.clientes || [];
+          const transportadoras = storage.transportadoras || [];
+
+          if (clientes.length === 0) {
+            addResult(
+              "❌ Nenhum cliente cadastrado. Criando cliente de teste...",
+              "info"
+            );
+
+            // Criar cliente de teste
+            const clienteTeste = {
+              id: "cli-teste-pedido",
+              tipo: "PJ",
+              nome: "Empresa Teste LTDA",
+              documento: "12.345.678/0001-99",
+              email: "teste@empresa.com",
+              telefone: "(11) 99999-9999",
+              observacoes: "Cliente criado para teste de pedidos",
+            };
+
+            storage.clientes = storage.clientes || [];
+            storage.clientes.push(clienteTeste);
+            addResult("✅ Cliente de teste criado", "success");
+          }
+
+          if (transportadoras.length === 0) {
+            addResult(
+              "❌ Nenhuma transportadora cadastrada. Criando transportadora de teste...",
+              "info"
+            );
+
+            // Criar transportadora de teste
+            const transportadoraTeste = {
+              id: "tra-teste-pedido",
+              nome: "Transportadora Teste",
+              prazo: 5,
+              custo: 150,
+              cobertura: "São Paulo e região",
+            };
+
+            storage.transportadoras = storage.transportadoras || [];
+            storage.transportadoras.push(transportadoraTeste);
+            addResult("✅ Transportadora de teste criada", "success");
+          }
+
+          // Criar pedido de teste
+          const pedidoTeste = {
+            id: "ped-teste-" + Date.now(),
+            codigo: "PED-2024-TESTE-" + Math.floor(Math.random() * 1000),
+            clienteId: storage.clientes[0].id,
+            clienteNome: storage.clientes[0].nome,
+            transportadoraId: storage.transportadoras[0].id,
+            transportadoraNome: storage.transportadoras[0].nome,
+            dataVenda: new Date().toISOString().split("T")[0],
+            previsaoEntrega: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split("T")[0],
+            valor: 2500.0,
+            status: "pendente",
+            observacoes: "Pedido criado para teste da funcionalidade de edição",
+            tipo: "pedido",
+            vendedor: "Vendedor Teste",
+            condicaoPagamento: "À vista com 5% de desconto",
+            enderecoEntrega: "Rua Teste, 123 - Centro - São Paulo/SP",
+          };
+
+          // Adicionar pedido
+          storage.pedidos = storage.pedidos || [];
+          storage.pedidos.push(pedidoTeste);
+
+          // Salvar no localStorage
+          localStorage.setItem("oursales:data", JSON.stringify(storage));
+
+          addResult("🎉 Pedido de teste criado com sucesso!", "success");
+          addResult(`📦 Código: ${pedidoTeste.codigo}`, "success");
+          addResult(`👤 Cliente: ${pedidoTeste.clienteNome}`, "success");
+          addResult(
+            `🚚 Transportadora: ${pedidoTeste.transportadoraNome}`,
+            "success"
+          );
+          addResult(`💰 Valor: R$ ${pedidoTeste.valor.toFixed(2)}`, "success");
+          addResult(`📅 Data de Venda: ${pedidoTeste.dataVenda}`, "success");
+          addResult(
+            `📅 Previsão de Entrega: ${pedidoTeste.previsaoEntrega}`,
+            "success"
+          );
+          addResult(`📝 Status: ${pedidoTeste.status}`, "success");
+
+          addResult(
+            "✅ Agora você pode testar a edição deste pedido!",
+            "success"
+          );
+        } catch (error) {
+          addResult(`❌ Erro ao criar pedido: ${error.message}`, "info");
+        }
+      }
+
+      // Executar verificação automática
+      window.addEventListener("load", () => {
+        addResult(
+          '🎯 Página carregada. Clique em "Criar Pedido de Teste" para criar um pedido.',
+          "info"
+        );
+        verificarPedidos();
+      });
+    </script>
+  </body>
+</html>

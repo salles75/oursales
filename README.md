@@ -2,6 +2,22 @@
 
 Sistema completo e escalável para gestão de vendas, desenvolvido com arquitetura moderna e preparado para grandes volumes de dados.
 
+## 🎉 SISTEMA COMPLETO E INTEGRADO!
+
+✅ **Backend 100% implementado** com todos os controllers funcionais
+✅ **Frontend integrado** com suporte a localStorage e API
+✅ **Todas as integrações funcionando**: Produto → Orçamento → Pedido → Estoque → CRM
+✅ **Baixa automática de estoque** ao aprovar pedidos
+✅ **Conversão automática** de orçamentos em pedidos
+✅ **CRM integrado** com clientes, orçamentos e pedidos
+
+📚 **Documentação Completa:**
+
+- [`INICIO_RAPIDO.md`](INICIO_RAPIDO.md) - Comece em 3 passos
+- [`GUIA_INTEGRACAO.md`](GUIA_INTEGRACAO.md) - Guia completo de integração
+- [`RESUMO_IMPLEMENTACAO.md`](RESUMO_IMPLEMENTACAO.md) - O que foi implementado
+- [`TESTE_INTEGRACAO.js`](TESTE_INTEGRACAO.js) - Script de teste automático
+
 ## 📋 Índice
 
 - [Visão Geral](#visão-geral)
@@ -72,6 +88,38 @@ OurSales é um sistema profissional de gestão comercial que oferece:
 3. **Backend API**: Node.js + Express + Prisma
 4. **PostgreSQL**: Banco de dados relacional principal
 5. **Redis**: Cache de queries, sessões, rate limiting
+
+### Estrutura de Diretórios
+
+```
+OurSales/
+├── frontend/             # Interface do usuário (HTML, CSS, JS)
+│   ├── assets/           # Recursos estáticos
+│   │   ├── css/          # Folhas de estilo
+│   │   └── js/           # Scripts JavaScript
+│   ├── index.html        # Dashboard principal
+│   ├── clientes.html     # Gestão de clientes
+│   ├── produtos.html     # Catálogo de produtos
+│   └── ...               # Outras páginas
+│
+├── backend/              # API RESTful Node.js
+│   ├── src/
+│   │   ├── config/       # Configurações (DB, Redis, Logger)
+│   │   ├── controllers/  # Lógica de negócio
+│   │   ├── routes/       # Definição de rotas da API
+│   │   ├── middlewares/  # Auth, Error Handler, Rate Limiter
+│   │   └── server.js     # Ponto de entrada da API
+│   ├── prisma/           # ORM e Schema do banco
+│   └── uploads/          # Arquivos enviados pelos usuários
+│
+├── database/             # Scripts SQL e migrations
+├── nginx/                # Configuração do proxy reverso
+├── docs/                 # Documentação técnica completa
+├── docker-compose.yml    # Orquestração de containers
+└── README.md             # Este arquivo
+```
+
+> 📖 Para mais detalhes sobre a estrutura, veja [docs/ESTRUTURA_PASTAS.md](docs/ESTRUTURA_PASTAS.md)
 
 ## 🛠️ Tecnologias
 

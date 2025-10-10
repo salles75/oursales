@@ -4,48 +4,23 @@
 
 import express from "express";
 import { authenticate } from "../middlewares/auth.js";
+import {
+  getTransportadoras,
+  getTransportadora,
+  createTransportadora,
+  updateTransportadora,
+  deleteTransportadora,
+} from "../controllers/transportadoras.controller.js";
 
 const router = express.Router();
 
 router.use(authenticate);
 
-router.get("/", async (req, res) => {
-  res.json({
-    success: true,
-    data: [],
-    message: "Implementar listagem de transportadoras",
-  });
-});
-
-router.get("/:id", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar obtenção de transportadora",
-  });
-});
-
-router.post("/", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar criação de transportadora",
-  });
-});
-
-router.put("/:id", async (req, res) => {
-  res.json({
-    success: true,
-    data: {},
-    message: "Implementar atualização de transportadora",
-  });
-});
-
-router.delete("/:id", async (req, res) => {
-  res.json({
-    success: true,
-    message: "Implementar exclusão de transportadora",
-  });
-});
+// CRUD
+router.get("/", getTransportadoras);
+router.get("/:id", getTransportadora);
+router.post("/", createTransportadora);
+router.put("/:id", updateTransportadora);
+router.delete("/:id", deleteTransportadora);
 
 export default router;
