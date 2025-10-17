@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Simples</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .section {
+        display: none;
+        padding: 20px;
+        background: #f0f0f0;
+        margin: 10px 0;
+        border: 2px solid #007bff;
+      }
+      .section.active {
+        display: block !important;
+      }
+      .button {
+        padding: 10px 20px;
+        margin: 5px;
+        background: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Teste Simples de Seções</h1>
+
+    <div>
+      <button class="button" onclick="showSection('dashboard')">
+        Dashboard
+      </button>
+      <button class="button" onclick="showSection('estatisticas')">
+        Estatísticas
+      </button>
+      <button class="button" onclick="showSection('instancias')">
+        Instâncias
+      </button>
+    </div>
+
+    <div id="dashboard" class="section active">
+      <h2>📊 Dashboard</h2>
+      <p>Esta é a seção do dashboard</p>
+    </div>
+
+    <div id="estatisticas" class="section">
+      <h2>📈 Estatísticas</h2>
+      <p>Esta é a seção de estatísticas</p>
+    </div>
+
+    <div id="instancias" class="section">
+      <h2>🖥️ Instâncias</h2>
+      <p>Esta é a seção de instâncias</p>
+    </div>
+
+    <script>
+      function showSection(sectionName) {
+        console.log("Mostrando seção:", sectionName);
+
+        // Esconder todas
+        document.querySelectorAll(".section").forEach((section) => {
+          section.classList.remove("active");
+          section.style.display = "none";
+        });
+
+        // Mostrar selecionada
+        const target = document.getElementById(sectionName);
+        if (target) {
+          target.classList.add("active");
+          target.style.display = "block";
+          console.log("Seção ativada:", sectionName);
+        } else {
+          console.log("Seção não encontrada:", sectionName);
+        }
+      }
+
+      console.log("Teste simples carregado");
+    </script>
+  </body>
+</html>

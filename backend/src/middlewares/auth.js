@@ -4,7 +4,8 @@
  */
 
 import jwt from "jsonwebtoken";
-import { AppError, asyncHandler } from "./errorHandler.js";
+import { AppError } from "../utils/AppError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { prisma } from "../config/database.js";
 import { cache } from "../config/redis.js";
 
@@ -109,6 +110,51 @@ export const isAdmin = authorize("admin");
  * Verificar se o usuário é admin ou gerente
  */
 export const isAdminOrGerente = authorize("admin", "gerente");
+
+/**
+ * Middleware para verificar se o usuário é admin (compatibilidade com rotas)
+ */
+export const requireAdmin = asyncHandler(async (req, res, next) => {
+  if (!req.user) {
+    throw new AppError("Usuário não autenticado", 401);
+  }
+
+  if (req.user.perfil !== "admin") {
+    throw new AppError(
+      "Acesso negado. Apenas administradores podem acessar este recurso.",
+      403
+    );
+  }
+
+  next();
+});
+
+/**
+ * Middleware para verificar token JWT (compatibilidade com rotas)
+ */
+export const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: "Token de acesso requerido",
+    });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({
+        success: false,
+        message: "Token inválido ou expirado",
+      });
+    }
+
+    req.user = decoded;
+    next();
+  });
+};
 
 /**
  * Verificar se o usuário pode acessar o recurso (dono ou admin)

@@ -47,6 +47,9 @@
             >
               Editar
             </button>
+            <button type="button" id="produtoImportar" class="button-secondary">
+              📥 Importar
+            </button>
             <button
               type="button"
               id="produtoRemover"
@@ -145,6 +148,83 @@
         <div class="hero-actions">
           <button type="submit">Salvar produto</button>
           <button type="button" id="produtoCancelar" class="button-secondary">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Drawer para Importar Produtos -->
+    <div class="overlay" id="importProdutosOverlay" hidden></div>
+    <section class="drawer" id="importProdutosDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2>Importar Produtos</h2>
+          <p>
+            Selecione uma indústria e tabela de preços para importar produtos.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="importProdutosDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="importProdutosForm" autocomplete="off">
+        <div class="grouped two">
+          <label>
+            Indústria *
+            <select id="importIndustria" required>
+              <option value="">Selecione uma indústria</option>
+            </select>
+          </label>
+          <label>
+            Tabela de Preços *
+            <select id="importTabelaPreco" required disabled>
+              <option value="">Selecione uma tabela</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grouped two">
+          <label>
+            <input type="checkbox" id="importarTodosProdutos" />
+            Importar todos os produtos da tabela
+          </label>
+          <label>
+            Preço Padrão (% sobre preço de venda)
+            <input
+              type="number"
+              id="precoPadraoImportacao"
+              min="0"
+              max="1000"
+              step="0.01"
+              placeholder="100.00"
+              value="100"
+            />
+          </label>
+        </div>
+
+        <div
+          class="list"
+          id="produtosImportacaoLista"
+          style="max-height: 300px; overflow-y: auto; margin-top: 1rem"
+        >
+          <div class="empty-state">
+            <p>Selecione uma tabela para ver os produtos disponíveis.</p>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button type="submit">Importar Produtos Selecionados</button>
+          <button
+            type="button"
+            id="importProdutosCancelar"
+            class="button-secondary"
+          >
             Cancelar
           </button>
         </div>

@@ -31,6 +31,8 @@ model Usuario {
   ultimoAcesso  DateTime? @map("ultimo_acesso") @db.Timestamptz()
 
   // Relacionamentos
+  clienteId              String?               @db.Uuid // Para usuários de clientes específicos
+  cliente                ClienteOurSales?      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   clientes               Cliente[]             @relation("VendedorCliente")
   orcamentos             Orcamento[]           @relation("VendedorOrcamento")
   pedidos                Pedido[]              @relation("VendedorPedido")
@@ -48,6 +50,7 @@ model Usuario {
 
   @@index([email])
   @@index([perfil, ativo])
+  @@index([clienteId])
   @@map("usuarios")
 }
 
@@ -240,7 +243,9 @@ model Produto {
   destaque              Boolean           @default(false)
   tags                  String[]
   
-  // Fornecedor
+  // Fornecedor/Indústria
+  industriaId           String?           @map("industria_id") @db.Uuid
+  industria             Industria?        @relation(fields: [industriaId], references: [id])
   fornecedorNome        String?           @map("fornecedor_nome") @db.VarChar(255)
   fornecedorCodigo      String?           @map("fornecedor_codigo") @db.VarChar(100)
   
@@ -257,11 +262,13 @@ model Produto {
   orcamentosItens       OrcamentoItem[]
   pedidosItens          PedidoItem[]
   movimentosEstoque     MovimentoEstoque[]
+  tabelasPrecos         TabelaPrecoProduto[]
 
   @@index([codigo])
   @@index([sku])
   @@index([ean])
   @@index([categoriaId])
+  @@index([industriaId])
   @@index([ativo])
   @@index([precoVenda])
   @@map("produtos")
@@ -593,5 +600,205 @@ model Auditoria {
   @@index([criadoEm])
   @@index([acao])
   @@map("auditoria")
+}
+
+// =====================================================
+// INDÚSTRIAS E TABELAS DE PREÇOS
+// =====================================================
+
+model Industria {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  razaoSocial       String    @map("razao_social") @db.VarChar(255)
+  nomeFantasia      String    @map("nome_fantasia") @db.VarChar(255)
+  cnpj              String    @unique @db.VarChar(18)
+  inscricaoEstadual String?   @map("inscricao_estadual") @db.VarChar(20)
+  email             String?   @db.VarChar(255)
+  telefone          String?   @db.VarChar(20)
+  endereco          String?   @db.VarChar(255)
+  cidade            String?   @db.VarChar(100)
+  estado            String?   @db.VarChar(2)
+  cep               String?   @db.VarChar(10)
+  comissao          Decimal   @default(0) @db.Decimal(5, 2)
+  status            String    @default("ativo") @db.VarChar(20)
+  observacoes       String?   @db.Text
+  criadoEm          DateTime  @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm      DateTime  @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  // Relacionamentos
+  tabelasPrecos     TabelaPreco[]
+  produtos          Produto[]
+
+  @@index([cnpj])
+  @@index([status])
+  @@index([nomeFantasia])
+  @@map("industrias")
+}
+
+model TabelaPreco {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nome        String    @db.VarChar(255)
+  descricao   String?   @db.Text
+  ativa       Boolean   @default(true)
+  tipo        String    @default("venda") @db.VarChar(20) // venda, promocional, especial
+  industriaId String    @map("industria_id") @db.Uuid
+  industria   Industria @relation(fields: [industriaId], references: [id], onDelete: Cascade)
+  
+  // Configurações da tabela
+  margemMinima    Decimal? @map("margem_minima") @db.Decimal(5, 2)
+  descontoMaximo  Decimal? @map("desconto_maximo") @db.Decimal(5, 2)
+  validadeInicio  DateTime? @map("validade_inicio") @db.Date
+  validadeFim     DateTime? @map("validade_fim") @db.Date
+  
+  criadoEm        DateTime @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm    DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  // Relacionamentos
+  produtos        TabelaPrecoProduto[]
+
+  @@index([industriaId])
+  @@index([ativa])
+  @@index([tipo])
+  @@map("tabelas_precos")
+}
+
+model TabelaPrecoProduto {
+  id            String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tabelaPrecoId String      @map("tabela_preco_id") @db.Uuid
+  produtoId     String      @map("produto_id") @db.Uuid
+  preco         Decimal     @db.Decimal(15, 2)
+  margemLucro   Decimal?    @map("margem_lucro") @db.Decimal(5, 2)
+  desconto      Decimal?    @default(0) @db.Decimal(5, 2)
+  ativo         Boolean     @default(true)
+  observacoes   String?     @db.Text
+  
+  criadoEm      DateTime    @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm  DateTime    @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  // Relacionamentos
+  tabelaPreco   TabelaPreco @relation(fields: [tabelaPrecoId], references: [id], onDelete: Cascade)
+  produto       Produto     @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@unique([tabelaPrecoId, produtoId])
+  @@index([tabelaPrecoId])
+  @@index([produtoId])
+  @@index([ativo])
+  @@map("tabelas_precos_produtos")
+}
+
+// =====================================================
+// CONFIGURAÇÕES ADMINISTRATIVAS
+// =====================================================
+
+model Configuracao {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  categoria   String   @db.VarChar(100)
+  chave       String   @db.VarChar(100)
+  valor       String   @db.Text
+  ativo       Boolean  @default(true)
+  criadoEm    DateTime @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  @@unique([categoria, chave], name: "categoria_chave")
+  @@index([categoria])
+  @@index([ativo])
+  @@map("configuracoes")
+}
+
+model Arquivo {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nome        String   @db.VarChar(255)
+  nomeArquivo String   @map("nome_arquivo") @db.VarChar(255)
+  caminho     String   @db.VarChar(500)
+  tipo        String   @db.VarChar(50)
+  tamanho     BigInt
+  mimeType    String   @map("mime_type") @db.VarChar(100)
+  ativo       Boolean  @default(true)
+  criadoEm    DateTime @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  @@index([tipo])
+  @@index([ativo])
+  @@map("arquivos")
+}
+
+model PadraoTabela {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nome        String   @db.VarChar(255)
+  tipo        String   @db.VarChar(50)
+  colunas     String   @db.Text // JSON array
+  descricao   String?  @db.Text
+  ativo       Boolean  @default(true)
+  criadoEm    DateTime @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  @@index([tipo])
+  @@index([ativo])
+  @@map("padroes_tabelas")
+}
+
+// =====================================================
+// CONTROLE GLOBAL - MASTER ADMIN
+// =====================================================
+
+model ClienteOurSales {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nome        String   @db.VarChar(255)
+  email       String   @db.VarChar(255)
+  cnpj        String?  @db.VarChar(18)
+  plano       String   @db.VarChar(50) // basico, profissional, empresarial, enterprise
+  status      String   @default("ativo") @db.VarChar(20) // ativo, suspenso, cancelado, trial
+  subdomain   String   @unique @db.VarChar(50)
+  url         String   @db.VarChar(255)
+  criadoEm    DateTime @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  // Relacionamentos
+  instancia   InstanciaOurSales?
+  faturas     FaturaOurSales[]
+  usuarios    Usuario[]
+
+  @@index([status])
+  @@index([plano])
+  @@index([subdomain])
+  @@map("clientes_oursales")
+}
+
+model InstanciaOurSales {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  clienteId     String   @unique @db.Uuid
+  url           String   @db.VarChar(255)
+  status        String   @default("ativo") @db.VarChar(20) // ativo, parado, manutencao, reiniciando
+  recursos      String   @db.Text // JSON com CPU, memoria, armazenamento
+  ultimaAtividade DateTime? @map("ultima_atividade") @db.Timestamptz()
+  criadoEm      DateTime @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm  DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  // Relacionamentos
+  cliente       ClienteOurSales  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([clienteId])
+  @@map("instancias_oursales")
+}
+
+model FaturaOurSales {
+  id              String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  clienteId       String   @db.Uuid
+  valor           Decimal  @db.Decimal(10,2)
+  plano           String   @db.VarChar(50)
+  dataVencimento  DateTime @map("data_vencimento") @db.Date
+  dataPagamento   DateTime? @map("data_pagamento") @db.Date
+  status          String   @default("pendente") @db.VarChar(20) // pendente, pago, vencido, cancelado
+  metodoPagamento String?  @map("metodo_pagamento") @db.VarChar(50)
+  criadoEm        DateTime @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm    DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  // Relacionamentos
+  cliente         ClienteOurSales  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([clienteId])
+  @@index([status])
+  @@index([dataVencimento])
+  @@map("faturas_oursales")
 }
 

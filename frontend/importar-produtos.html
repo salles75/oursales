@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Importador Produtos</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <style>
+      .import-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .import-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .import-header h1 {
+        margin: 0;
+        color: #2c3e50;
+      }
+
+      .verify-imports-btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+
+      .verify-imports-btn:hover {
+        background: #2980b9;
+      }
+
+      .import-steps {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .step-card {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e1e8ed;
+      }
+
+      .step-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .step-number {
+        background: #3498db;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+
+      .step-description {
+        color: #7f8c8d;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+      }
+
+      .download-template-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        transition: background-color 0.2s;
+      }
+
+      .download-template-btn:hover {
+        background: #229954;
+      }
+
+      .download-options {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .download-options .download-template-btn {
+        flex: 1;
+        margin-bottom: 0;
+      }
+
+      .fields-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+      }
+
+      .fields-table th,
+      .fields-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e1e8ed;
+      }
+
+      .fields-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      .fields-table td {
+        color: #5a6c7d;
+      }
+
+      .field-checkbox {
+        margin-right: 0.5rem;
+      }
+
+      .field-name {
+        font-weight: 500;
+        color: #2c3e50;
+      }
+
+      .field-observation {
+        font-size: 0.875rem;
+        color: #7f8c8d;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-group select,
+      .form-group input[type="file"] {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        background: white;
+      }
+
+      .form-group select:focus,
+      .form-group input[type="file"]:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+
+      .file-input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .file-input {
+        flex: 1;
+      }
+
+      .browse-btn {
+        background: #95a5a6;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+
+      .browse-btn:hover {
+        background: #7f8c8d;
+      }
+
+      .import-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s;
+      }
+
+      .import-btn:hover {
+        background: #229954;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #3498db;
+        text-decoration: none;
+        margin-bottom: 2rem;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .back-link:hover {
+        color: #2980b9;
+      }
+
+      @media (max-width: 768px) {
+        .import-steps {
+          grid-template-columns: 1fr;
+        }
+
+        .import-container {
+          padding: 1rem;
+        }
+
+        .file-input-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .download-options {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body data-page="importar-produtos">
+    <div class="import-container">
+      <a href="produtos.html" class="back-link"> ← Voltar para Produtos </a>
+
+      <div class="import-header">
+        <h1>Importador Produtos</h1>
+        <button
+          type="button"
+          class="verify-imports-btn"
+          id="verificarImportacoes"
+        >
+          Verificar Importações
+        </button>
+      </div>
+
+      <div class="import-steps">
+        <!-- 1º Passo -->
+        <div class="step-card">
+          <h2 class="step-title">
+            <span class="step-number">1</span>
+            1º Passo - Crie sua planilha em Excel, TXT ou CSV
+          </h2>
+          <p class="step-description">
+            A importação é personalizada e você poderá usar vários campos ou
+            apenas alguns que julgar necessário:
+          </p>
+
+          <div class="download-options">
+            <button
+              type="button"
+              class="download-template-btn"
+              id="downloadTemplateCSV"
+            >
+              📥 Download CSV
+            </button>
+            <button
+              type="button"
+              class="download-template-btn"
+              id="downloadTemplateExcel"
+            >
+              📊 Download Excel
+            </button>
+          </div>
+
+          <table class="fields-table">
+            <thead>
+              <tr>
+                <th>Coluna no Excel</th>
+                <th>Observação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">Código</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  É obrigatório e pode ser letras e números
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">Nome do produto</span>
+                  </label>
+                </td>
+                <td class="field-observation">Obrigatório para inclusões.</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Preço</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Se não existir esta coluna será cadastrado 0,00
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Unidade</span>
+                  </label>
+                </td>
+                <td class="field-observation">Ex: UNID, PCT, CX, FARDO</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Embalagem</span>
+                  </label>
+                </td>
+                <td class="field-observation">Embalagem do produto</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">Fator de Embalagem</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Fator de conversão da embalagem, para calcular o preço
+                  unitário do produto.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">Data de Lançamento</span>
+                  </label>
+                </td>
+                <td class="field-observation">Data de lançamento do produto</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">IPI</span>
+                  </label>
+                </td>
+                <td class="field-observation">Se não existir será 0%</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">ICMS %</span>
+                  </label>
+                </td>
+                <td class="field-observation">Alíquota de ICMS em %</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">CEST</span>
+                  </label>
+                </td>
+                <td class="field-observation">Código CEST do Produto</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">CFOP</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Código numérico do CFOP 'padrão' para emissão da NF-e.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Observações</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Informações adicionais sobre o produto.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Comissão por produto</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Se você trabalha por comissão por pedido não precisa utilizar
+                  este campo.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">Código de barras</span>
+                  </label>
+                </td>
+                <td class="field-observation">Dado padrão GTIN</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="download-options">
+            <button
+              type="button"
+              class="download-template-btn"
+              id="downloadTemplateCSVBottom"
+            >
+              📥 Download CSV
+            </button>
+            <button
+              type="button"
+              class="download-template-btn"
+              id="downloadTemplateExcelBottom"
+            >
+              📊 Download Excel
+            </button>
+          </div>
+        </div>
+
+        <!-- 2º Passo -->
+        <div class="step-card">
+          <h2 class="step-title">
+            <span class="step-number">2</span>
+            2º Passo - Envie o arquivo de produtos
+          </h2>
+          <p class="step-description">
+            Já preencheu a planilha de acordo com o modelo? Então agora é hora
+            de enviá-la para o seu sistema..
+          </p>
+
+          <form id="importForm">
+            <div class="form-group">
+              <label for="industriaSelect"
+                >Escolha Indústria ou Fornecedor do Produto/Serviço...</label
+              >
+              <select id="industriaSelect" required>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="tabelaPrecoSelect"
+                >Escolha a Tabela de Preço...</label
+              >
+              <select id="tabelaPrecoSelect" required disabled>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="arquivoInput"
+                >Localize a tabela de preços em seu computador:</label
+              >
+              <div class="file-input-container">
+                <input
+                  type="file"
+                  id="arquivoInput"
+                  class="file-input"
+                  accept=".xlsx,.xls,.csv,.txt"
+                  required
+                />
+                <button
+                  type="button"
+                  class="browse-btn"
+                  onclick="document.getElementById('arquivoInput').click()"
+                >
+                  Browse
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="import-btn">
+              ➕ Importar Produtos
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/app.js" defer></script>
+    <script>
+      // Script específico para a página de importação
+      document.addEventListener("DOMContentLoaded", function () {
+        const industriaSelect = document.getElementById("industriaSelect");
+        const tabelaPrecoSelect = document.getElementById("tabelaPrecoSelect");
+        const arquivoInput = document.getElementById("arquivoInput");
+        const importForm = document.getElementById("importForm");
+        const downloadTemplateCSVBtn = document.getElementById(
+          "downloadTemplateCSV"
+        );
+        const downloadTemplateExcelBtn = document.getElementById(
+          "downloadTemplateExcel"
+        );
+        const downloadTemplateCSVBottomBtn = document.getElementById(
+          "downloadTemplateCSVBottom"
+        );
+        const downloadTemplateExcelBottomBtn = document.getElementById(
+          "downloadTemplateExcelBottom"
+        );
+        const verificarImportacoesBtn = document.getElementById(
+          "verificarImportacoes"
+        );
+
+        // API base URL
+        const API_BASE = "http://localhost:3000/api";
+
+        // Carregar indústrias
+        function carregarIndustrias() {
+          // Carregar dados do localStorage
+          const data = JSON.parse(
+            localStorage.getItem("oursales:data") || "{}"
+          );
+          const industrias = data.industrias || [];
+
+          industriaSelect.innerHTML = '<option value="">Selecione...</option>';
+
+          if (industrias.length === 0) {
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = "Nenhuma indústria cadastrada";
+            option.disabled = true;
+            industriaSelect.appendChild(option);
+            return;
+          }
+
+          industrias.forEach((industria) => {
+            const option = document.createElement("option");
+            option.value = industria.id;
+            option.textContent =
+              industria.nomeFantasia || industria.nome || industria.razaoSocial;
+            industriaSelect.appendChild(option);
+          });
+        }
+
+        // Carregar tabelas de preços quando indústria for selecionada
+        industriaSelect.addEventListener("change", function () {
+          const industriaId = this.value;
+          tabelaPrecoSelect.innerHTML =
+            '<option value="">Selecione...</option>';
+
+          if (industriaId) {
+            tabelaPrecoSelect.disabled = false;
+
+            // Carregar dados do localStorage
+            const data = JSON.parse(
+              localStorage.getItem("oursales:data") || "{}"
+            );
+            const industrias = data.industrias || [];
+
+            // Encontrar a indústria selecionada
+            const industriaSelecionada = industrias.find(
+              (ind) => ind.id === industriaId
+            );
+
+            if (industriaSelecionada && industriaSelecionada.tabelasPrecos) {
+              const tabelas = industriaSelecionada.tabelasPrecos;
+
+              if (tabelas.length === 0) {
+                const option = document.createElement("option");
+                option.value = "";
+                option.textContent = "Nenhuma tabela cadastrada";
+                option.disabled = true;
+                tabelaPrecoSelect.appendChild(option);
+              } else {
+                tabelas.forEach((tabela) => {
+                  const option = document.createElement("option");
+                  option.value = tabela.id;
+                  option.textContent = tabela.nome;
+                  tabelaPrecoSelect.appendChild(option);
+                });
+              }
+            } else {
+              const option = document.createElement("option");
+              option.value = "";
+              option.textContent = "Nenhuma tabela cadastrada";
+              option.disabled = true;
+              tabelaPrecoSelect.appendChild(option);
+            }
+          } else {
+            tabelaPrecoSelect.disabled = true;
+          }
+        });
+
+        // Dados do template
+        const templateData = {
+          headers: [
+            "Código",
+            "Nome do produto",
+            "Preço",
+            "Unidade",
+            "Embalagem",
+            "Fator de Embalagem",
+            "Data de Lançamento",
+            "IPI",
+            "ICMS %",
+            "CEST",
+            "CFOP",
+            "Observações",
+            "Comissão por produto",
+            "Código de barras",
+          ],
+          exemplo: [
+            "PROD001",
+            "Produto Exemplo 1",
+            "25.50",
+            "UNID",
+            "Caixa",
+            "12",
+            "2024-01-15",
+            "5",
+            "18",
+            "1234567",
+            "5102",
+            "Produto de exemplo",
+            "5",
+            "1234567890123",
+          ],
+        };
+
+        // Download do template CSV
+        function downloadTemplateCSV() {
+          const csvContent = `${templateData.headers.join(
+            ","
+          )}\n${templateData.exemplo.join(",")}`;
+
+          const blob = new Blob([csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
+          const link = document.createElement("a");
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", "modelo_importacao_produtos.csv");
+          link.style.visibility = "hidden";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+
+        // Download do template Excel (simulado como CSV com extensão .xlsx)
+        function downloadTemplateExcel() {
+          const csvContent = `${templateData.headers.join(
+            ","
+          )}\n${templateData.exemplo.join(",")}`;
+
+          const blob = new Blob([csvContent], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          const link = document.createElement("a");
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", "modelo_importacao_produtos.xlsx");
+          link.style.visibility = "hidden";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+
+        // Processar arquivo CSV
+        function processarArquivoCSV(arquivo) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+              try {
+                const csv = e.target.result;
+                const linhas = csv.split("\n");
+                const headers = linhas[0]
+                  .split(",")
+                  .map((h) => h.trim().toLowerCase());
+
+                const dados = [];
+                for (let i = 1; i < linhas.length; i++) {
+                  if (linhas[i].trim()) {
+                    const valores = linhas[i].split(",");
+                    const linha = {};
+
+                    headers.forEach((header, index) => {
+                      linha[header] = valores[index]
+                        ? valores[index].trim()
+                        : "";
+                    });
+
+                    dados.push(linha);
+                  }
+                }
+
+                resolve(dados);
+              } catch (error) {
+                reject(error);
+              }
+            };
+
+            reader.onerror = function () {
+              reject(new Error("Erro ao ler arquivo"));
+            };
+
+            reader.readAsText(arquivo);
+          });
+        }
+
+        // Event listeners
+        downloadTemplateCSVBtn.addEventListener("click", downloadTemplateCSV);
+        downloadTemplateExcelBtn.addEventListener(
+          "click",
+          downloadTemplateExcel
+        );
+        downloadTemplateCSVBottomBtn.addEventListener(
+          "click",
+          downloadTemplateCSV
+        );
+        downloadTemplateExcelBottomBtn.addEventListener(
+          "click",
+          downloadTemplateExcel
+        );
+
+        verificarImportacoesBtn.addEventListener("click", function () {
+          alert(
+            "Funcionalidade de verificação de importações será implementada em breve!"
+          );
+        });
+
+        // Submissão do formulário
+        importForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const industriaId = industriaSelect.value;
+          const tabelaPrecoId = tabelaPrecoSelect.value;
+          const arquivo = arquivoInput.files[0];
+
+          if (!industriaId || !tabelaPrecoId || !arquivo) {
+            alert("Por favor, preencha todos os campos obrigatórios.");
+            return;
+          }
+
+          try {
+            // Processar arquivo
+            const dados = await processarArquivoCSV(arquivo);
+
+            if (dados.length === 0) {
+              alert("Arquivo não contém dados válidos.");
+              return;
+            }
+
+            // Mostrar loading
+            const submitBtn = importForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "Processando...";
+            submitBtn.disabled = true;
+
+            // Processar importação localmente
+            const data = JSON.parse(
+              localStorage.getItem("oursales:data") || "{}"
+            );
+            const produtos = data.produtos || [];
+
+            let produtosImportados = 0;
+            let erros = [];
+
+            // Processar cada linha de dados
+            dados.forEach((linha, index) => {
+              try {
+                // Validações obrigatórias
+                if (!linha.codigo || !linha.nome) {
+                  erros.push({
+                    linha: index + 1,
+                    erro: "Código e nome são obrigatórios",
+                    dados: linha,
+                  });
+                  return;
+                }
+
+                // Verificar se produto já existe
+                const produtoExistente = produtos.find(
+                  (p) => p.codigo === linha.codigo
+                );
+                if (produtoExistente) {
+                  erros.push({
+                    linha: index + 1,
+                    erro: "Produto com este código já existe",
+                    dados: linha,
+                  });
+                  return;
+                }
+
+                // Criar novo produto
+                const novoProduto = {
+                  id: `pro-${Date.now()}-${index}`,
+                  codigo: linha.codigo,
+                  nome: linha.nome,
+                  precoVenda: parseFloat(linha.preco || 0),
+                  unidade: linha.unidade || "UNID",
+                  embalagem: linha.embalagem || "",
+                  fatorEmbalagem: linha.fatorEmbalagem
+                    ? parseFloat(linha.fatorEmbalagem)
+                    : null,
+                  dataLancamento: linha.dataLancamento || null,
+                  ipi: linha.ipi ? parseFloat(linha.ipi) : 0,
+                  icms: linha.icms ? parseFloat(linha.icms) : null,
+                  cest: linha.cest || null,
+                  cfop: linha.cfop || null,
+                  observacoes: linha.observacoes || "",
+                  comissaoProduto: linha.comissaoProduto
+                    ? parseFloat(linha.comissaoProduto)
+                    : null,
+                  codigoBarras: linha.codigoBarras || null,
+                  industriaId: industriaId,
+                  tabelaPrecoId: tabelaPrecoId,
+                  ativo: true,
+                  estoqueAtual: 0,
+                  estoqueMinimo: 0,
+                  criadoEm: new Date().toISOString(),
+                };
+
+                produtos.push(novoProduto);
+                produtosImportados++;
+              } catch (error) {
+                erros.push({
+                  linha: index + 1,
+                  erro: error.message,
+                  dados: linha,
+                });
+              }
+            });
+
+            // Salvar dados atualizados
+            data.produtos = produtos;
+            localStorage.setItem("oursales:data", JSON.stringify(data));
+
+            // Mostrar resultado
+            let mensagem = `Importação concluída!\n\n`;
+            mensagem += `✅ Produtos importados: ${produtosImportados}\n`;
+            mensagem += `❌ Erros: ${erros.length}\n`;
+
+            if (erros.length > 0) {
+              mensagem += `\nErros encontrados:\n`;
+              erros.slice(0, 5).forEach((erro) => {
+                mensagem += `• Linha ${erro.linha}: ${erro.erro}\n`;
+              });
+              if (erros.length > 5) {
+                mensagem += `... e mais ${erros.length - 5} erros`;
+              }
+            }
+
+            alert(mensagem);
+
+            // Limpar formulário
+            importForm.reset();
+            tabelaPrecoSelect.disabled = true;
+          } catch (error) {
+            console.error("Erro na importação:", error);
+            alert(
+              "Erro ao processar arquivo. Verifique o formato e tente novamente."
+            );
+          } finally {
+            // Restaurar botão
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+          }
+        });
+
+        // Inicializar
+        carregarIndustrias();
+      });
+    </script>
+  </body>
+</html>

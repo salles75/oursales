@@ -436,6 +436,102 @@ tbody tr:nth-child(odd) td {
   box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.2);
 }
 
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+  transition: all var(--transition-base);
+  cursor: pointer;
+  user-select: none;
+}
+
+.list-item:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.list-item.is-selected {
+  background: rgba(37, 99, 235, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.2);
+  border-color: rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px);
+}
+
+.list-item.is-selected:hover {
+  background: rgba(37, 99, 235, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.3), 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.list-item-content {
+  flex: 1;
+}
+
+.list-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.list-item-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-900);
+}
+
+.list-item-details {
+  font-size: 0.9rem;
+  color: var(--text-500);
+}
+
+.list-item-details p {
+  margin: 0.25rem 0;
+}
+
+.list-item-actions {
+  margin-left: 1rem;
+}
+
+.list-item-actions input[type="radio"] {
+  opacity: 0.6;
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+.list-item-actions input[type="radio"]:checked {
+  opacity: 1;
+}
+
+.status {
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status.active {
+  background: rgba(34, 197, 94, 0.1);
+  color: #059669;
+}
+
+.status.inactive {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.price {
+  font-weight: 600;
+  color: var(--accent-500);
+}
+
 .table-hint {
   margin-bottom: 0.85rem;
   color: var(--text-500);
@@ -680,6 +776,48 @@ td.actions {
 .drawer .hero-actions {
   justify-content: flex-start;
   margin-top: 0.5rem;
+}
+
+.drawer-content {
+  padding: 1.5rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  color: var(--text-400);
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-base);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.tab-button:hover {
+  color: var(--text-600);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.tab-button.active {
+  color: var(--primary-600);
+  border-bottom-color: var(--primary-600);
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
 }
 
 footer {

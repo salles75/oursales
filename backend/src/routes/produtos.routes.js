@@ -13,6 +13,8 @@ import {
   deleteProduto,
   ajustarEstoque,
   getMovimentosEstoque,
+  importarProdutos,
+  getTemplateImportacao,
 } from "../controllers/produtos.controller.js";
 
 const router = express.Router();
@@ -21,6 +23,12 @@ router.use(authenticate);
 
 // Estatísticas (deve vir antes de /:id)
 router.get("/stats", getProdutosStats);
+
+// Template de importação (deve vir antes de /:id)
+router.get("/template", getTemplateImportacao);
+
+// Importação (deve vir antes de /:id)
+router.post("/importar", importarProdutos);
 
 // CRUD
 router.get("/", getProdutos);

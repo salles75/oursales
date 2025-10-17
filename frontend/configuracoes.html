@@ -101,7 +101,7 @@
               <span class="sector-count" id="countProdutos">0</span>
               <span class="sector-label">no catálogo</span>
             </div>
-            <div class="sector-actions" onclick="event.stopPropagation();">
+            <div class="sector-actions">
               <button
                 type="button"
                 data-action="import"
@@ -133,13 +133,14 @@
           <div
             class="sector-card"
             data-sector="industrias"
-            style="cursor: not-allowed; opacity: 0.7"
-            title="Módulo em desenvolvimento"
+            onclick="window.location.href='industrias.html'"
+            style="cursor: pointer"
           >
             <div class="sector-icon">🏭</div>
             <h3>Indústrias</h3>
             <p class="sector-description">
-              Módulo em desenvolvimento. Em breve você poderá importar dados.
+              Gerencie fornecedores e parceiros industriais, importe ou exporte
+              dados.
             </p>
             <div class="sector-stats">
               <span class="sector-count" id="countIndustrias">0</span>

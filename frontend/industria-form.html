@@ -158,51 +158,6 @@
           </p>
         </section>
 
-        <!-- Tabelas de Preço -->
-        <section class="card">
-          <h3>Tabelas de Preço</h3>
-          <p style="color: #666; margin-bottom: 1rem">
-            Cadastre as Tabelas de Preço para esta Indústria.
-          </p>
-
-          <div class="grouped two" style="align-items: flex-end">
-            <label>
-              Nome da Tabela
-              <input
-                type="text"
-                id="tabelaPrecoNome"
-                placeholder="Ex: Tabela Padrão"
-              />
-            </label>
-            <button
-              type="button"
-              id="adicionarTabelaPreco"
-              class="button-secondary"
-              style="height: fit-content"
-            >
-              ➕ Adicionar
-            </button>
-          </div>
-
-          <div class="table-wrapper" style="margin-top: 1rem">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nome da Tabela</th>
-                  <th style="width: 80px">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="tabelasPrecosLista">
-                <tr>
-                  <td colspan="2" class="empty-state">
-                    Nenhuma tabela de preço cadastrada
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
         <!-- Condições de Pagamento -->
         <section class="card">
           <h3>Condições de Pagamento</h3>
@@ -282,6 +237,48 @@
                 <tr>
                   <td colspan="6" class="empty-state">
                     Nenhuma condição de pagamento cadastrada
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Tabelas de Preços -->
+        <section class="card">
+          <h3>Tabelas de Preço</h3>
+          <p>Cadastre as Tabelas de Preço para esta Indústria.</p>
+
+          <!-- Adicionar Nova Tabela -->
+          <div class="grouped two" style="margin-bottom: 1rem">
+            <label>
+              Nome da Tabela
+              <input
+                type="text"
+                id="novaTabelaNome"
+                placeholder="Ex: Tabela Padrão"
+              />
+            </label>
+            <div style="display: flex; align-items: end">
+              <button type="button" id="tabelaAdicionar" class="button">
+                ➕ Adicionar
+              </button>
+            </div>
+          </div>
+
+          <!-- Lista de Tabelas Cadastradas -->
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome da Tabela</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelasLista">
+                <tr>
+                  <td colspan="2" class="empty-state">
+                    Nenhuma tabela de preço cadastrada
                   </td>
                 </tr>
               </tbody>
@@ -470,6 +467,512 @@
       Mantenha o cadastro de fornecedores atualizado para otimizar a gestão
       comercial.
     </footer>
+
+    <!-- Drawer para Tabela de Preços -->
+    <div class="overlay" id="tabelaOverlay" hidden></div>
+    <section class="drawer" id="tabelaDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2 id="tabelaDrawerTitulo">Nova Tabela de Preços</h2>
+          <p id="tabelaDrawerDescricao">
+            Cadastre uma nova tabela de preços para esta indústria.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="tabelaDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="tabelaForm" autocomplete="off">
+        <input type="hidden" id="tabelaId" />
+        <div class="grouped two">
+          <label>
+            Nome da Tabela *
+            <input
+              type="text"
+              id="tabelaNome"
+              required
+              placeholder="Ex: Tabela Padrão"
+            />
+          </label>
+          <label>
+            Tipo
+            <select id="tabelaTipo">
+              <option value="venda">Venda</option>
+              <option value="promocional">Promocional</option>
+              <option value="especial">Especial</option>
+            </select>
+          </label>
+        </div>
+        <div class="grouped two">
+          <label>
+            Status
+            <select id="tabelaStatus">
+              <option value="true">Ativa</option>
+              <option value="false">Inativa</option>
+            </select>
+          </label>
+          <label>
+            Margem Mínima (%)
+            <input
+              type="number"
+              id="tabelaMargemMinima"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </label>
+        </div>
+        <div class="grouped two">
+          <label>
+            Desconto Máximo (%)
+            <input
+              type="number"
+              id="tabelaDescontoMaximo"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </label>
+          <label>
+            Válido de
+            <input type="date" id="tabelaValidadeInicio" />
+          </label>
+        </div>
+        <div class="grouped two">
+          <label>
+            Válido até
+            <input type="date" id="tabelaValidadeFim" />
+          </label>
+        </div>
+        <label>
+          Descrição
+          <textarea
+            id="tabelaDescricao"
+            placeholder="Descrição da tabela de preços..."
+          ></textarea>
+        </label>
+        <div class="hero-actions">
+          <button type="submit">Salvar Tabela</button>
+          <button type="button" id="tabelaCancelar" class="button-secondary">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Drawer para Produtos da Tabela -->
+    <div class="overlay" id="produtoOverlay" hidden></div>
+    <section class="drawer" id="produtoDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2 id="produtoDrawerTitulo">Produtos da Tabela</h2>
+          <p id="produtoDrawerDescricao">
+            Gerencie produtos e preços nesta tabela de preços.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="produtoDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <div class="drawer-content">
+        <div class="section-header">
+          <div>
+            <h3>Produtos na Tabela</h3>
+            <p>
+              Adicione produtos e defina preços específicos para esta tabela.
+            </p>
+          </div>
+          <div class="toolbar">
+            <button
+              type="button"
+              id="produtoAdicionar"
+              class="button-secondary"
+            >
+              Adicionar Produto
+            </button>
+            <button type="button" id="produtoImportar" class="button-secondary">
+              Importar Produtos
+            </button>
+            <button
+              type="button"
+              id="produtoEditar"
+              class="button-secondary"
+              disabled
+            >
+              Editar Preço
+            </button>
+            <button
+              type="button"
+              id="produtoRemover"
+              class="button-danger"
+              disabled
+            >
+              Remover
+            </button>
+          </div>
+        </div>
+        <div class="list" id="produtosTabelaLista"></div>
+      </div>
+    </section>
+
+    <!-- Drawer para Adicionar/Editar Produto -->
+    <div class="overlay" id="produtoFormOverlay" hidden></div>
+    <section class="drawer" id="produtoFormDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2 id="produtoFormDrawerTitulo">Adicionar Produto</h2>
+          <p id="produtoFormDrawerDescricao">
+            Adicione um produto à tabela de preços com preço específico.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="produtoFormDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="produtoTabelaForm" autocomplete="off">
+        <input type="hidden" id="produtoTabelaId" />
+        <div class="grouped two">
+          <label>
+            Produto *
+            <select id="produtoSelecionado" required>
+              <option value="">Selecione</option>
+            </select>
+          </label>
+          <label>
+            Preço na Tabela *
+            <input
+              type="number"
+              id="produtoPrecoTabela"
+              required
+              min="0"
+              step="0.01"
+              placeholder="0,00"
+            />
+          </label>
+        </div>
+        <div class="grouped two">
+          <label>
+            Margem de Lucro (%)
+            <input
+              type="number"
+              id="produtoMargemLucro"
+              min="0"
+              max="1000"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </label>
+          <label>
+            Desconto (%)
+            <input
+              type="number"
+              id="produtoDesconto"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </label>
+        </div>
+        <label>
+          Observações
+          <textarea
+            id="produtoObservacoes"
+            placeholder="Observações sobre este produto na tabela..."
+          ></textarea>
+        </label>
+        <div class="hero-actions">
+          <button type="submit">Salvar Produto</button>
+          <button
+            type="button"
+            id="produtoFormCancelar"
+            class="button-secondary"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Drawer para Importar Produtos -->
+    <div class="overlay" id="importOverlay" hidden></div>
+    <section class="drawer" id="importDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2>Importar Produtos</h2>
+          <p>Importe múltiplos produtos para esta tabela de preços.</p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="importDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="importForm" autocomplete="off">
+        <div class="grouped two">
+          <label>
+            <input type="checkbox" id="importarTodos" />
+            Importar todos os produtos da indústria
+          </label>
+          <label>
+            Preço Padrão (% sobre preço de venda)
+            <input
+              type="number"
+              id="precoPadraoPercentual"
+              min="0"
+              max="1000"
+              step="0.01"
+              placeholder="100.00"
+              value="100"
+            />
+          </label>
+        </div>
+        <label>
+          Produtos para Importar
+          <div
+            style="
+              max-height: 300px;
+              overflow-y: auto;
+              border: 1px solid #ddd;
+              padding: 1rem;
+              border-radius: 4px;
+            "
+          >
+            <div id="produtosDisponiveis"></div>
+          </div>
+        </label>
+        <div class="hero-actions">
+          <button type="submit">Importar Produtos</button>
+          <button type="button" id="importCancelar" class="button-secondary">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Drawer para Importar Produtos da Indústria -->
+    <div class="overlay" id="importProdutosOverlay" hidden></div>
+    <section class="drawer" id="importProdutosDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2>Importar Produtos</h2>
+          <p>
+            Selecione uma indústria e tabela de preços para importar produtos.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="importProdutosDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="importProdutosForm" autocomplete="off">
+        <div class="grouped two">
+          <label>
+            Indústria *
+            <select id="importIndustria" required>
+              <option value="">Selecione uma indústria</option>
+            </select>
+          </label>
+          <label>
+            Tabela de Preços *
+            <select id="importTabelaPreco" required disabled>
+              <option value="">Selecione uma tabela</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grouped two">
+          <label>
+            <input type="checkbox" id="importarTodosProdutos" />
+            Importar todos os produtos da tabela
+          </label>
+          <label>
+            Preço Padrão (% sobre preço de venda)
+            <input
+              type="number"
+              id="precoPadraoImportacao"
+              min="0"
+              max="1000"
+              step="0.01"
+              placeholder="100.00"
+              value="100"
+            />
+          </label>
+        </div>
+
+        <div
+          class="list"
+          id="produtosImportacaoLista"
+          style="max-height: 300px; overflow-y: auto; margin-top: 1rem"
+        >
+          <div class="empty-state">
+            <p>Selecione uma tabela para ver os produtos disponíveis.</p>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button type="submit">Importar Produtos Selecionados</button>
+          <button
+            type="button"
+            id="importProdutosCancelar"
+            class="button-secondary"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Drawer para Novo Produto da Indústria -->
+    <div class="overlay" id="novoProdutoOverlay" hidden></div>
+    <section class="drawer" id="novoProdutoDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2>Novo Produto</h2>
+          <p>Cadastre um novo produto para esta indústria.</p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="novoProdutoDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="novoProdutoForm" autocomplete="off">
+        <div class="grouped two">
+          <label>
+            Código do Produto (SKU) *
+            <div style="display: flex; gap: 0.5rem">
+              <input
+                type="text"
+                id="novoProdutoSKU"
+                required
+                placeholder="Ex: PROD-001"
+                style="flex: 1"
+              />
+              <button
+                type="button"
+                id="gerarCodigoProduto"
+                class="button-secondary"
+                title="Gerar código automaticamente"
+              >
+                🔄 Gerar
+              </button>
+            </div>
+          </label>
+          <label>
+            Nome do Produto *
+            <input
+              type="text"
+              id="novoProdutoNome"
+              required
+              placeholder="Nome do produto"
+            />
+          </label>
+        </div>
+
+        <div class="grouped three">
+          <label>
+            Preço de Venda *
+            <input
+              type="number"
+              id="novoProdutoPrecoVenda"
+              required
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </label>
+          <label>
+            Preço de Compra
+            <input
+              type="number"
+              id="novoProdutoPrecoCompra"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </label>
+          <label>
+            Margem de Lucro (%)
+            <input
+              type="number"
+              id="novoProdutoMargemLucro"
+              min="0"
+              max="1000"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </label>
+        </div>
+
+        <div class="grouped two">
+          <label>
+            NCM
+            <input type="text" id="novoProdutoNCM" placeholder="Código NCM" />
+          </label>
+          <label>
+            Unidade de Medida
+            <select id="novoProdutoUnidade">
+              <option value="UN">UN - Unidade</option>
+              <option value="KG">KG - Quilograma</option>
+              <option value="M">M - Metro</option>
+              <option value="M2">M² - Metro Quadrado</option>
+              <option value="M3">M³ - Metro Cúbico</option>
+              <option value="L">L - Litro</option>
+              <option value="CX">CX - Caixa</option>
+              <option value="PC">PC - Peça</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          Observações
+          <textarea
+            id="novoProdutoObservacoes"
+            placeholder="Observações sobre o produto..."
+            rows="3"
+          ></textarea>
+        </label>
+
+        <div class="hero-actions">
+          <button type="submit">Salvar Produto</button>
+          <button
+            type="button"
+            id="novoProdutoCancelar"
+            class="button-secondary"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
 
     <script src="assets/js/app.js" defer></script>
   </body>

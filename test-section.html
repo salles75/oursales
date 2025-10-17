@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Seção</title>
+    <style>
+        .admin-section {
+            display: none !important;
+        }
+        .admin-section.active {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="showSection('teste')">Mostrar Seção</button>
+    <div id="teste" class="admin-section">
+        <h2>Seção de Teste</h2>
+        <p>Este conteúdo deve aparecer quando clicar no botão.</p>
+    </div>
+    
+    <script>
+        function showSection(sectionName) {
+            console.log("Mostrando seção:", sectionName);
+            
+            // Esconder todas as seções
+            const allSections = document.querySelectorAll(".admin-section");
+            allSections.forEach(section => {
+                section.classList.remove("active");
+                section.style.display = "none";
+            });
+            
+            // Mostrar seção selecionada
+            const targetSection = document.getElementById(sectionName);
+            if (targetSection) {
+                targetSection.classList.add("active");
+                targetSection.style.display = "block";
+                targetSection.style.visibility = "visible";
+                targetSection.style.opacity = "1";
+                console.log("Seção ativada:", sectionName);
+            } else {
+                console.log("Seção não encontrada:", sectionName);
+            }
+        }
+    </script>
+</body>
+</html>

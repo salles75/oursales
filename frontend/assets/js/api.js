@@ -398,6 +398,112 @@ export const crm = {
 };
 
 // =====================================================
+// API de Indústrias
+// =====================================================
+
+export const industrias = {
+  async listar(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return await request(
+      `/industrias${queryString ? `?${queryString}` : ""}`
+    );
+  },
+
+  async buscar(id) {
+    return await request(`/industrias/${id}`);
+  },
+
+  async criar(industriaData) {
+    return await request("/industrias", {
+      method: "POST",
+      body: JSON.stringify(industriaData),
+    });
+  },
+
+  async atualizar(id, industriaData) {
+    return await request(`/industrias/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(industriaData),
+    });
+  },
+
+  async deletar(id) {
+    return await request(`/industrias/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async obterEstatisticas() {
+    return await request("/industrias/stats");
+  },
+};
+
+// =====================================================
+// API de Tabelas de Preços
+// =====================================================
+
+export const tabelasPrecos = {
+  async listar(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return await request(
+      `/tabelas-precos${queryString ? `?${queryString}` : ""}`
+    );
+  },
+
+  async buscar(id) {
+    return await request(`/tabelas-precos/${id}`);
+  },
+
+  async criar(tabelaData) {
+    return await request("/tabelas-precos", {
+      method: "POST",
+      body: JSON.stringify(tabelaData),
+    });
+  },
+
+  async atualizar(id, tabelaData) {
+    return await request(`/tabelas-precos/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(tabelaData),
+    });
+  },
+
+  async deletar(id) {
+    return await request(`/tabelas-precos/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  // Gerenciar produtos na tabela
+  async adicionarProduto(tabelaId, produtoData) {
+    return await request(`/tabelas-precos/${tabelaId}/produtos`, {
+      method: "POST",
+      body: JSON.stringify(produtoData),
+    });
+  },
+
+  async removerProduto(tabelaId, produtoId) {
+    return await request(`/tabelas-precos/${tabelaId}/produtos/${produtoId}`, {
+      method: "DELETE",
+    });
+  },
+
+  async atualizarPrecoProduto(tabelaId, produtoId, precoData) {
+    return await request(`/tabelas-precos/${tabelaId}/produtos/${produtoId}`, {
+      method: "PUT",
+      body: JSON.stringify(precoData),
+    });
+  },
+
+  async importarProdutos(tabelaId, produtos) {
+    return await request(`/tabelas-precos/${tabelaId}/produtos/import`, {
+      method: "POST",
+      body: JSON.stringify({ produtos }),
+    });
+  },
+};
+
+// =====================================================
 // API de Dashboard
 // =====================================================
 
@@ -427,3 +533,6 @@ export default {
   setAuthToken,
   getAuthToken,
 };
+
+
+

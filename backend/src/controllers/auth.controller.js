@@ -5,7 +5,8 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../config/database.js";
 import { cache } from "../config/redis.js";
-import { AppError, asyncHandler } from "../middlewares/errorHandler.js";
+import { AppError } from "../utils/AppError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { generateToken, invalidateToken } from "../middlewares/auth.js";
 import { logger } from "../config/logger.js";
 
@@ -22,26 +23,104 @@ export const register = asyncHandler(async (req, res) => {
     throw new AppError("Por favor, forneça nome, email e senha", 400);
   }
 
+  // Verificar se já existe um admin no sistema
+  const adminCount = await prisma.usuario.count({
+    where: { perfil: "admin" },
+  });
+
+  // Permitir registro apenas se não houver admin OU se for o primeiro registro após limpeza
+  if (adminCount > 0) {
+    // Verificar se é um email específico do Master Admin
+    const masterEmails = [
+      "proprietario@oursales.com",
+      "admin@oursales.com",
+      "master@oursales.com",
+      "owner@oursales.com",
+    ];
+
+    if (!masterEmails.includes(email.toLowerCase())) {
+      throw new AppError(
+        "Sistema já possui um administrador. Registros adicionais não são permitidos.",
+        403
+      );
+    }
+
+    // Se for um email master, permitir o registro (substituindo o admin existente)
+    logger.info(`Registro Master Admin autorizado para: ${email}`);
+  }
+
   // Verificar se o email já existe
   const emailExists = await prisma.usuario.findUnique({
     where: { email },
   });
 
   if (emailExists) {
-    throw new AppError("Email já cadastrado", 409);
+    // Se for um email master e já existir, atualizar em vez de criar
+    const masterEmails = [
+      "proprietario@oursales.com",
+      "admin@oursales.com",
+      "master@oursales.com",
+      "owner@oursales.com",
+    ];
+
+    if (masterEmails.includes(email.toLowerCase())) {
+      // Atualizar o usuário existente
+      const senhaHash = await bcrypt.hash(
+        senha,
+        parseInt(process.env.BCRYPT_ROUNDS || "10", 10)
+      );
+
+      const usuario = await prisma.usuario.update({
+        where: { email },
+        data: {
+          nome,
+          senhaHash,
+          perfil: "admin",
+          telefone: telefone || null,
+        },
+        select: {
+          id: true,
+          nome: true,
+          email: true,
+          perfil: true,
+          telefone: true,
+          criadoEm: true,
+        },
+      });
+
+      // Gerar token
+      const token = generateToken(usuario.id);
+
+      // Cache do usuário
+      await cache.setex(`user:${usuario.id}`, 3600, JSON.stringify(usuario));
+
+      logger.info(`Master Admin atualizado: ${usuario.email}`);
+
+      res.status(200).json({
+        success: true,
+        message: "Master Admin atualizado com sucesso",
+        data: {
+          user: usuario,
+          token,
+        },
+      });
+      return;
+    } else {
+      throw new AppError("Email já cadastrado", 409);
+    }
   }
 
   // Hash da senha
   const rounds = parseInt(process.env.BCRYPT_ROUNDS || "10", 10);
   const senhaHash = await bcrypt.hash(senha, rounds);
 
-  // Criar usuário
+  // Criar usuário (primeiro registro sempre será admin)
   const usuario = await prisma.usuario.create({
     data: {
       nome,
       email,
       senhaHash,
-      perfil: perfil || "vendedor",
+      perfil: "admin", // Primeiro registro sempre é admin
       telefone,
     },
     select: {
@@ -229,6 +308,64 @@ export const updatePassword = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Atualizar perfil do usuário
+ * @route   PUT /api/auth/update-profile
+ * @access  Private
+ */
+export const updateProfile = asyncHandler(async (req, res) => {
+  const { nome, email, telefone } = req.body;
+
+  // Validações
+  if (!nome && !email && !telefone) {
+    throw new AppError("Por favor, forneça pelo menos um campo para atualizar", 400);
+  }
+
+  // Verificar se o email já existe (se estiver sendo alterado)
+  if (email && email !== req.user.email) {
+    const emailExists = await prisma.usuario.findUnique({
+      where: { email },
+    });
+
+    if (emailExists) {
+      throw new AppError("Email já cadastrado", 409);
+    }
+  }
+
+  // Preparar dados para atualização
+  const updateData = {};
+  if (nome) updateData.nome = nome;
+  if (email) updateData.email = email;
+  if (telefone !== undefined) updateData.telefone = telefone;
+
+  // Atualizar usuário
+  const usuario = await prisma.usuario.update({
+    where: { id: req.user.id },
+    data: updateData,
+    select: {
+      id: true,
+      nome: true,
+      email: true,
+      perfil: true,
+      telefone: true,
+      criadoEm: true,
+    },
+  });
+
+  // Atualizar cache
+  await cache.setex(`user:${usuario.id}`, 3600, JSON.stringify(usuario));
+
+  logger.info(`Perfil atualizado para usuário: ${usuario.email}`);
+
+  res.json({
+    success: true,
+    message: "Perfil atualizado com sucesso",
+    data: {
+      user: usuario,
+    },
+  });
+});
+
+/**
  * @desc    Renovar token JWT
  * @route   POST /api/auth/refresh
  * @access  Private
@@ -245,11 +382,47 @@ export const refreshToken = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Verificar token
+ * @route   GET /api/auth/verify
+ * @access  Private
+ */
+export const verifyToken = asyncHandler(async (req, res) => {
+  // Se chegou até aqui, o token é válido (middleware já verificou)
+  res.json({
+    success: true,
+    message: "Token válido",
+    data: {
+      user: req.user,
+    },
+  });
+});
+
+/**
+ * @desc    Verificar se já existe um admin no sistema
+ * @route   GET /api/auth/check-admin
+ * @access  Public
+ */
+export const checkAdminExists = asyncHandler(async (req, res) => {
+  const adminCount = await prisma.usuario.count({
+    where: { perfil: "admin" },
+  });
+
+  res.json({
+    success: true,
+    exists: adminCount > 0,
+    count: adminCount,
+  });
+});
+
 export default {
   register,
   login,
   logout,
   getMe,
   updatePassword,
+  updateProfile,
   refreshToken,
+  verifyToken,
+  checkAdminExists,
 };

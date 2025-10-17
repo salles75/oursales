@@ -1,0 +1,2871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel Administrativo • OurSales</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --admin-primary: #6366f1;
+        --admin-secondary: #8b5cf6;
+        --admin-success: #10b981;
+        --admin-warning: #f59e0b;
+        --admin-danger: #ef4444;
+        --admin-dark: #1f2937;
+        --admin-light: #f8fafc;
+        --admin-border: #e2e8f0;
+        --admin-text: #374151;
+        --admin-text-light: #6b7280;
+        --admin-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --admin-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .admin-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar */
+      .admin-sidebar {
+        width: 280px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-right: 1px solid var(--admin-border);
+        padding: 2rem 0;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 1000;
+      }
+
+      .admin-logo {
+        padding: 0 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .admin-logo h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--admin-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .admin-nav {
+        padding: 0 1rem;
+      }
+
+      .nav-section {
+        margin-bottom: 2rem;
+      }
+
+      .nav-section-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--admin-text-light);
+        margin-bottom: 0.5rem;
+        padding: 0 1rem;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        margin: 0.25rem 0;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: var(--admin-text);
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .nav-item:hover {
+        background: var(--admin-light);
+        color: var(--admin-primary);
+        transform: translateX(4px);
+      }
+
+      .nav-item.active {
+        background: linear-gradient(
+          135deg,
+          var(--admin-primary),
+          var(--admin-secondary)
+        );
+        color: white;
+        box-shadow: var(--admin-shadow);
+      }
+
+      .nav-item i {
+        width: 20px;
+        text-align: center;
+      }
+
+      /* Main Content */
+      .admin-main {
+        flex: 1;
+        margin-left: 280px;
+        padding: 2rem;
+        background: var(--admin-light);
+      }
+
+      .admin-header {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--admin-shadow);
+        border: 1px solid var(--admin-border);
+      }
+
+      .admin-header h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: var(--admin-dark);
+      }
+
+      .admin-header p {
+        margin: 0;
+        color: var(--admin-text-light);
+        font-size: 1rem;
+      }
+
+      .admin-section {
+        display: none;
+      }
+
+      .admin-section.active {
+        display: block;
+      }
+
+      /* Cards */
+      .admin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .admin-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--admin-shadow);
+        border: 1px solid var(--admin-border);
+        transition: all 0.2s ease;
+      }
+
+      .admin-card:hover {
+        box-shadow: var(--admin-shadow-lg);
+        transform: translateY(-2px);
+      }
+
+      .admin-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--admin-border);
+      }
+
+      .admin-card-header h3 {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--admin-dark);
+      }
+
+      .admin-card-header i {
+        color: var(--admin-primary);
+        font-size: 1.25rem;
+      }
+
+      /* Forms */
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--admin-text);
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--admin-border);
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background: white;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--admin-primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .form-control[type="color"] {
+        height: 50px;
+        padding: 0.25rem;
+        cursor: pointer;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--admin-primary),
+          var(--admin-secondary)
+        );
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--admin-shadow-lg);
+      }
+
+      .btn-secondary {
+        background: var(--admin-light);
+        color: var(--admin-text);
+        border: 1px solid var(--admin-border);
+      }
+
+      .btn-secondary:hover {
+        background: white;
+        border-color: var(--admin-primary);
+        color: var(--admin-primary);
+      }
+
+      .btn-success {
+        background: var(--admin-success);
+        color: white;
+      }
+
+      .btn-warning {
+        background: var(--admin-warning);
+        color: white;
+      }
+
+      .btn-danger {
+        background: var(--admin-danger);
+        color: white;
+      }
+
+      .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+      }
+
+      /* File Upload */
+      .file-upload {
+        border: 2px dashed var(--admin-border);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: var(--admin-light);
+      }
+
+      .file-upload:hover {
+        border-color: var(--admin-primary);
+        background: rgba(99, 102, 241, 0.05);
+      }
+
+      .file-upload.dragover {
+        border-color: var(--admin-primary);
+        background: rgba(99, 102, 241, 0.1);
+        transform: scale(1.02);
+      }
+
+      .file-upload i {
+        font-size: 2rem;
+        color: var(--admin-text-light);
+        margin-bottom: 1rem;
+      }
+
+      .file-upload p {
+        margin: 0.5rem 0;
+        color: var(--admin-text);
+        font-weight: 500;
+      }
+
+      .file-upload small {
+        color: var(--admin-text-light);
+        font-size: 0.75rem;
+      }
+
+      /* Preview Images */
+      .preview-image {
+        max-width: 200px;
+        max-height: 100px;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+        box-shadow: var(--admin-shadow);
+      }
+
+      /* Status Badges */
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .status-active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--admin-success);
+      }
+
+      .status-inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--admin-danger);
+      }
+
+      /* Tables */
+      .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: var(--admin-shadow);
+      }
+
+      .admin-table th,
+      .admin-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--admin-border);
+      }
+
+      .admin-table th {
+        background: var(--admin-light);
+        font-weight: 600;
+        color: var(--admin-text);
+      }
+
+      .admin-table tr:hover {
+        background: rgba(99, 102, 241, 0.05);
+      }
+
+      /* Stats Cards */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--admin-shadow);
+        border: 1px solid var(--admin-border);
+      }
+
+      .stat-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .stat-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: white;
+      }
+
+      .stat-card-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--admin-dark);
+        margin: 0;
+      }
+
+      .stat-card-label {
+        color: var(--admin-text-light);
+        font-size: 0.875rem;
+        margin: 0;
+      }
+
+      /* Danger Zone */
+      .danger-zone {
+        background: rgba(239, 68, 68, 0.05);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-top: 2rem;
+      }
+
+      .danger-zone h3 {
+        color: var(--admin-danger);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .danger-zone p {
+        color: var(--admin-danger);
+        margin: 0 0 1rem 0;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .admin-sidebar {
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+        }
+
+        .admin-sidebar.open {
+          transform: translateX(0);
+        }
+
+        .admin-main {
+          margin-left: 0;
+          padding: 1rem;
+        }
+
+        .admin-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .admin-section.active {
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* Custom Scrollbar */
+      .admin-sidebar::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .admin-sidebar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .admin-sidebar::-webkit-scrollbar-thumb {
+        background: var(--admin-border);
+        border-radius: 3px;
+      }
+
+      .admin-sidebar::-webkit-scrollbar-thumb:hover {
+        background: var(--admin-text-light);
+      }
+    </style>
+  </head>
+  <body data-page="admin">
+    <script></script>
+
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <div class="admin-sidebar">
+        <div class="admin-logo">
+          <h1><i class="fas fa-crown"></i> OurSales Master</h1>
+          <p
+            style="
+              font-size: 0.75rem;
+              color: var(--admin-text-light);
+              margin: 0.5rem 0 0 0;
+            "
+          >
+            Painel do Proprietário
+          </p>
+          <div
+            id="userInfo"
+            style="
+              margin-top: 1rem;
+              padding: 0.75rem;
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 0.5rem;
+              font-size: 0.75rem;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-bottom: 0.5rem;
+              "
+            >
+              <i
+                class="fas fa-user-circle"
+                style="color: var(--admin-primary)"
+              ></i>
+              <span id="userName" style="font-weight: 500"></span>
+            </div>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-bottom: 0.5rem;
+              "
+            >
+              <i
+                class="fas fa-envelope"
+                style="color: var(--admin-primary)"
+              ></i>
+              <span id="userEmail" style="font-size: 0.7rem"></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem">
+              <i
+                class="fas fa-shield-alt"
+                style="color: var(--admin-success)"
+              ></i>
+              <span style="color: var(--admin-success); font-weight: 500"
+                >Master Admin</span
+              >
+            </div>
+          </div>
+          <button
+            onclick="logout()"
+            style="
+              margin-top: 1rem;
+              width: 100%;
+              padding: 0.5rem;
+              background: rgba(239, 68, 68, 0.1);
+              border: 1px solid rgba(239, 68, 68, 0.3);
+              border-radius: 0.5rem;
+              color: var(--admin-danger);
+              font-size: 0.75rem;
+              cursor: pointer;
+              transition: all 0.3s ease;
+            "
+            onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'"
+            onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'"
+          >
+            <i class="fas fa-sign-out-alt"></i> Sair
+          </button>
+        </div>
+
+        <nav class="admin-nav">
+          <div class="nav-section">
+            <div class="nav-section-title">Visão Geral</div>
+            <div class="nav-item active" onclick="showSection('dashboard')">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="showSection('estatisticas')">
+              <i class="fas fa-chart-line"></i>
+              <span>Estatísticas</span>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Controle Global</div>
+            <div class="nav-item" onclick="showSection('clientes')">
+              <i class="fas fa-users-cog"></i>
+              <span>Gerenciar Clientes</span>
+            </div>
+            <div class="nav-item" onclick="showSection('instancias')">
+              <i class="fas fa-server"></i>
+              <span>Instâncias Ativas</span>
+            </div>
+            <div class="nav-item" onclick="showSection('faturamento')">
+              <i class="fas fa-credit-card"></i>
+              <span>Faturamento</span>
+            </div>
+            <div class="nav-item" onclick="showSection('suporte')">
+              <i class="fas fa-headset"></i>
+              <span>Suporte & Tickets</span>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Configurações Globais</div>
+            <div class="nav-item" onclick="showSection('site')">
+              <i class="fas fa-globe"></i>
+              <span>Template Padrão</span>
+            </div>
+            <div class="nav-item" onclick="showSection('notificacoes')">
+              <i class="fas fa-bell"></i>
+              <span>Notificações</span>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Dados & Estrutura</div>
+            <div class="nav-item" onclick="showSection('padroes')">
+              <i class="fas fa-table"></i>
+              <span>Padrões de Tabelas</span>
+            </div>
+            <div class="nav-item" onclick="showSection('importacao')">
+              <i class="fas fa-upload"></i>
+              <span>Importação de Dados</span>
+            </div>
+            <div class="nav-item" onclick="showSection('backup')">
+              <i class="fas fa-database"></i>
+              <span>Backup & Restauração</span>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Sistema</div>
+            <div class="nav-item" onclick="showSection('usuarios')">
+              <i class="fas fa-users"></i>
+              <span>Usuários & Permissões</span>
+            </div>
+            <div class="nav-item" onclick="showSection('logs')">
+              <i class="fas fa-file-alt"></i>
+              <span>Logs do Sistema</span>
+            </div>
+            <div class="nav-item" onclick="showSection('seguranca')">
+              <i class="fas fa-shield-alt"></i>
+              <span>Segurança</span>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Ações</div>
+            <div class="nav-item" onclick="window.location.href='index.html'">
+              <i class="fas fa-home"></i>
+              <span>Voltar ao Sistema</span>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+      <!-- Main Content -->
+      <div class="admin-main">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="admin-section active">
+          <div class="admin-header">
+            <h2><i class="fas fa-tachometer-alt"></i> Dashboard Master</h2>
+            <p>
+              Visão geral de todas as instâncias e controle total do sistema
+            </p>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div
+                  class="stat-card-icon"
+                  style="background: linear-gradient(135deg, #10b981, #059669)"
+                >
+                  <i class="fas fa-building"></i>
+                </div>
+              </div>
+              <h3 class="stat-card-value" id="totalClientes">0</h3>
+              <p class="stat-card-label">Clientes Ativos</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div
+                  class="stat-card-icon"
+                  style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)"
+                >
+                  <i class="fas fa-server"></i>
+                </div>
+              </div>
+              <h3 class="stat-card-value" id="totalInstancias">0</h3>
+              <p class="stat-card-label">Instâncias Online</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div
+                  class="stat-card-icon"
+                  style="background: linear-gradient(135deg, #f59e0b, #d97706)"
+                >
+                  <i class="fas fa-dollar-sign"></i>
+                </div>
+              </div>
+              <h3 class="stat-card-value" id="receitaMensal">R$ 0</h3>
+              <p class="stat-card-label">Receita Mensal</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div
+                  class="stat-card-icon"
+                  style="background: linear-gradient(135deg, #8b5cf6, #7c3aed)"
+                >
+                  <i class="fas fa-users"></i>
+                </div>
+              </div>
+              <h3 class="stat-card-value" id="totalUsuariosSistema">0</h3>
+              <p class="stat-card-label">Usuários Totais</p>
+            </div>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-chart-pie"></i>
+                <h3>Status do Sistema</h3>
+              </div>
+              <div id="systemStatus">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                  "
+                >
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      background: #10b981;
+                      border-radius: 50%;
+                    "
+                  ></div>
+                  <span>Servidor Online</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                  "
+                >
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      background: #10b981;
+                      border-radius: 50%;
+                    "
+                  ></div>
+                  <span>Banco de Dados Conectado</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                  "
+                >
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      background: #10b981;
+                      border-radius: 50%;
+                    "
+                  ></div>
+                  <span>Cache Funcionando</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-clock"></i>
+                <h3>Atividades Recentes</h3>
+              </div>
+              <div id="recentActivities">
+                <div
+                  style="
+                    padding: 0.75rem 0;
+                    border-bottom: 1px solid var(--admin-border);
+                  "
+                >
+                  <div style="font-weight: 500; margin-bottom: 0.25rem">
+                    Novo usuário cadastrado
+                  </div>
+                  <div
+                    style="font-size: 0.75rem; color: var(--admin-text-light)"
+                  >
+                    há 2 minutos
+                  </div>
+                </div>
+                <div
+                  style="
+                    padding: 0.75rem 0;
+                    border-bottom: 1px solid var(--admin-border);
+                  "
+                >
+                  <div style="font-weight: 500; margin-bottom: 0.25rem">
+                    Pedido #1234 criado
+                  </div>
+                  <div
+                    style="font-size: 0.75rem; color: var(--admin-text-light)"
+                  >
+                    há 15 minutos
+                  </div>
+                </div>
+                <div style="padding: 0.75rem 0">
+                  <div style="font-weight: 500; margin-bottom: 0.25rem">
+                    Backup automático executado
+                  </div>
+                  <div
+                    style="font-size: 0.75rem; color: var(--admin-text-light)"
+                  >
+                    há 1 hora
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gerenciar Clientes Section -->
+        <div id="clientes" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-users-cog"></i> Gerenciar Clientes</h2>
+            <p>Controle total sobre todos os clientes do sistema OurSales</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-search"></i>
+                <h3>Buscar Cliente</h3>
+              </div>
+              <div class="form-group">
+                <label for="searchClient">Buscar por nome, email ou CNPJ</label>
+                <input
+                  type="text"
+                  id="searchClient"
+                  name="searchClient"
+                  class="form-control"
+                  placeholder="Digite para buscar..."
+                />
+              </div>
+              <button onclick="searchClients()" class="btn btn-primary">
+                <i class="fas fa-search"></i> Buscar
+              </button>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-plus"></i>
+                <h3>Criar Novo Cliente</h3>
+              </div>
+              <form id="newClientForm">
+                <div class="form-group">
+                  <label for="clientName">Nome da Empresa</label>
+                  <input
+                    type="text"
+                    id="clientName"
+                    name="clientName"
+                    class="form-control"
+                    placeholder="Empresa do Cliente Ltda"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="clientEmail">Email Principal</label>
+                  <input
+                    type="email"
+                    id="clientEmail"
+                    name="clientEmail"
+                    class="form-control"
+                    placeholder="contato@cliente.com"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="clientPlan">Plano</label>
+                  <select
+                    id="clientPlan"
+                    name="clientPlan"
+                    class="form-control"
+                  >
+                    <option value="basico">Básico - R$ 97/mês</option>
+                    <option value="profissional">
+                      Profissional - R$ 197/mês
+                    </option>
+                    <option value="empresarial">
+                      Empresarial - R$ 397/mês
+                    </option>
+                    <option value="enterprise">Enterprise - R$ 797/mês</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="clientStatus">Status</label>
+                  <select
+                    id="clientStatus"
+                    name="clientStatus"
+                    class="form-control"
+                  >
+                    <option value="ativo">Ativo</option>
+                    <option value="suspenso">Suspenso</option>
+                    <option value="cancelado">Cancelado</option>
+                    <option value="trial">Período de Teste</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-user-plus"></i> Criar Cliente
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <i class="fas fa-list"></i>
+              <h3>Todos os Clientes</h3>
+            </div>
+            <div id="clientsList">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Empresa</th>
+                    <th>Email</th>
+                    <th>Plano</th>
+                    <th>Status</th>
+                    <th>Instância</th>
+                    <th>Último Acesso</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="clientsTableBody">
+                  <tr>
+                    <td>Empresa Exemplo</td>
+                    <td>contato@exemplo.com</td>
+                    <td>
+                      <span class="status-badge status-active"
+                        >Profissional</span
+                      >
+                    </td>
+                    <td>
+                      <span class="status-badge status-active">Ativo</span>
+                    </td>
+                    <td>exemplo.oursales.com</td>
+                    <td>2 horas atrás</td>
+                    <td>
+                      <button
+                        class="btn btn-sm btn-secondary"
+                        onclick="editClient('1')"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-primary"
+                        onclick="accessClient('1')"
+                      >
+                        <i class="fas fa-external-link-alt"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-warning"
+                        onclick="suspendClient('1')"
+                      >
+                        <i class="fas fa-pause"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Instâncias Ativas Section -->
+        <div id="instancias" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-server"></i> Instâncias Ativas</h2>
+            <p>Monitore e gerencie todas as instâncias do sistema</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-chart-line"></i>
+                <h3>Status das Instâncias</h3>
+              </div>
+              <div id="instancesStatus">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                  "
+                >
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      background: #10b981;
+                      border-radius: 50%;
+                    "
+                  ></div>
+                  <span>Online: 45 instâncias</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                  "
+                >
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      background: #f59e0b;
+                      border-radius: 50%;
+                    "
+                  ></div>
+                  <span>Manutenção: 2 instâncias</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                  "
+                >
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      background: #ef4444;
+                      border-radius: 50%;
+                    "
+                  ></div>
+                  <span>Offline: 1 instância</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-tools"></i>
+                <h3>Ações em Massa</h3>
+              </div>
+              <div class="form-group">
+                <label for="bulkAction">Ação</label>
+                <select id="bulkAction" name="bulkAction" class="form-control">
+                  <option value="">Selecione uma ação</option>
+                  <option value="restart">Reiniciar Instâncias</option>
+                  <option value="backup">Fazer Backup</option>
+                  <option value="update">Atualizar Sistema</option>
+                  <option value="maintenance">Modo Manutenção</option>
+                </select>
+              </div>
+              <button onclick="executeBulkAction()" class="btn btn-warning">
+                <i class="fas fa-play"></i> Executar Ação
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <i class="fas fa-list"></i>
+              <h3>Lista de Instâncias</h3>
+            </div>
+            <div id="instancesList">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>URL</th>
+                    <th>Status</th>
+                    <th>CPU</th>
+                    <th>Memória</th>
+                    <th>Última Atividade</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="instancesTableBody">
+                  <tr>
+                    <td>Empresa Exemplo</td>
+                    <td>exemplo.oursales.com</td>
+                    <td>
+                      <span class="status-badge status-active">Online</span>
+                    </td>
+                    <td>45%</td>
+                    <td>2.1GB / 4GB</td>
+                    <td>2 min atrás</td>
+                    <td>
+                      <button
+                        class="btn btn-sm btn-secondary"
+                        onclick="restartInstance('1')"
+                      >
+                        <i class="fas fa-redo"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-primary"
+                        onclick="accessInstance('1')"
+                      >
+                        <i class="fas fa-external-link-alt"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-warning"
+                        onclick="maintenanceInstance('1')"
+                      >
+                        <i class="fas fa-tools"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Faturamento Section -->
+        <div id="faturamento" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-credit-card"></i> Faturamento</h2>
+            <p>Gerencie planos, cobranças e receita do sistema</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Receita do Mês</h3>
+              </div>
+              <div class="stats-grid">
+                <div>
+                  <h3
+                    style="
+                      font-size: 2rem;
+                      margin: 0;
+                      color: var(--admin-success);
+                    "
+                  >
+                    R$ 45.230
+                  </h3>
+                  <p style="margin: 0; color: var(--admin-text-light)">
+                    Receita Bruta
+                  </p>
+                </div>
+                <div>
+                  <h3
+                    style="
+                      font-size: 2rem;
+                      margin: 0;
+                      color: var(--admin-primary);
+                    "
+                  >
+                    R$ 42.890
+                  </h3>
+                  <p style="margin: 0; color: var(--admin-text-light)">
+                    Receita Líquida
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-cog"></i>
+                <h3>Configurar Planos</h3>
+              </div>
+              <form id="plansForm">
+                <div class="form-group">
+                  <label for="basicPlanPrice">Plano Básico (R$)</label>
+                  <input
+                    type="number"
+                    id="basicPlanPrice"
+                    name="basicPlanPrice"
+                    class="form-control"
+                    value="97"
+                    step="0.01"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="professionalPlanPrice"
+                    >Plano Profissional (R$)</label
+                  >
+                  <input
+                    type="number"
+                    id="professionalPlanPrice"
+                    name="professionalPlanPrice"
+                    class="form-control"
+                    value="197"
+                    step="0.01"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="businessPlanPrice">Plano Empresarial (R$)</label>
+                  <input
+                    type="number"
+                    id="businessPlanPrice"
+                    name="businessPlanPrice"
+                    class="form-control"
+                    value="397"
+                    step="0.01"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="enterprisePlanPrice">Plano Enterprise (R$)</label>
+                  <input
+                    type="number"
+                    id="enterprisePlanPrice"
+                    name="enterprisePlanPrice"
+                    class="form-control"
+                    value="797"
+                    step="0.01"
+                  />
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Preços
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <i class="fas fa-file-invoice"></i>
+              <h3>Faturas Pendentes</h3>
+            </div>
+            <div id="pendingInvoices">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Plano</th>
+                    <th>Valor</th>
+                    <th>Vencimento</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="invoicesTableBody">
+                  <tr>
+                    <td>Empresa Exemplo</td>
+                    <td>Profissional</td>
+                    <td>R$ 197,00</td>
+                    <td>15/01/2024</td>
+                    <td>
+                      <span class="status-badge status-active">Pendente</span>
+                    </td>
+                    <td>
+                      <button
+                        class="btn btn-sm btn-success"
+                        onclick="markPaid('1')"
+                      >
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-warning"
+                        onclick="sendReminder('1')"
+                      >
+                        <i class="fas fa-envelope"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suporte & Tickets Section -->
+        <div id="suporte" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-headset"></i> Suporte & Tickets</h2>
+            <p>Gerencie solicitações de suporte de todos os clientes</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-ticket-alt"></i>
+                <h3>Tickets Abertos</h3>
+              </div>
+              <div id="openTickets">
+                <div
+                  style="
+                    padding: 1rem;
+                    text-align: center;
+                    color: var(--admin-text-light);
+                  "
+                >
+                  <i
+                    class="fas fa-inbox"
+                    style="font-size: 2rem; margin-bottom: 1rem"
+                  ></i>
+                  <p>Nenhum ticket aberto no momento</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-chart-pie"></i>
+                <h3>Estatísticas de Suporte</h3>
+              </div>
+              <div class="stats-grid">
+                <div>
+                  <h3
+                    style="
+                      font-size: 1.5rem;
+                      margin: 0;
+                      color: var(--admin-primary);
+                    "
+                  >
+                    12
+                  </h3>
+                  <p style="margin: 0; color: var(--admin-text-light)">
+                    Tickets Hoje
+                  </p>
+                </div>
+                <div>
+                  <h3
+                    style="
+                      font-size: 1.5rem;
+                      margin: 0;
+                      color: var(--admin-success);
+                    "
+                  >
+                    2.3h
+                  </h3>
+                  <p style="margin: 0; color: var(--admin-text-light)">
+                    Tempo Médio
+                  </p>
+                </div>
+                <div>
+                  <h3
+                    style="
+                      font-size: 1.5rem;
+                      margin: 0;
+                      color: var(--admin-warning);
+                    "
+                  >
+                    98%
+                  </h3>
+                  <p style="margin: 0; color: var(--admin-text-light)">
+                    Satisfação
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Site & Aparência Section -->
+        <div id="site" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-globe"></i> Site & Aparência</h2>
+            <p>Personalize a aparência e identidade visual do seu sistema</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-palette"></i>
+                <h3>Identidade Visual</h3>
+              </div>
+              <form id="appearanceForm">
+                <div class="form-group">
+                  <label for="siteTitle">Título do Site</label>
+                  <input
+                    type="text"
+                    id="siteTitle"
+                    name="siteTitle"
+                    class="form-control"
+                    value="OurSales • Painel Comercial"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="siteDescription">Descrição</label>
+                  <textarea
+                    id="siteDescription"
+                    name="siteDescription"
+                    class="form-control"
+                    rows="3"
+                  >
+Painel de vendas para representantes gerenciarem clientes, transportadoras, orçamentos e pedidos.</textarea
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="siteKeywords">Palavras-chave (SEO)</label>
+                  <input
+                    type="text"
+                    id="siteKeywords"
+                    name="siteKeywords"
+                    class="form-control"
+                    placeholder="vendas, CRM, gestão comercial"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="primaryColor">Cor Primária</label>
+                  <input
+                    type="color"
+                    id="primaryColor"
+                    name="primaryColor"
+                    class="form-control"
+                    value="#667eea"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="secondaryColor">Cor Secundária</label>
+                  <input
+                    type="color"
+                    id="secondaryColor"
+                    name="secondaryColor"
+                    class="form-control"
+                    value="#764ba2"
+                  />
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Aparência
+                </button>
+              </form>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-images"></i>
+                <h3>Logo e Favicon</h3>
+              </div>
+              <form id="logoForm">
+                <div class="form-group">
+                  <label>Logo Principal</label>
+                  <div
+                    class="file-upload"
+                    onclick="document.getElementById('logoInput').click()"
+                  >
+                    <input
+                      type="file"
+                      id="logoInput"
+                      accept="image/*"
+                      style="display: none"
+                    />
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Clique para selecionar ou arraste uma imagem</p>
+                    <small>PNG, JPG, SVG até 2MB</small>
+                  </div>
+                  <div id="logoPreview"></div>
+                </div>
+
+                <div class="form-group">
+                  <label>Favicon</label>
+                  <div
+                    class="file-upload"
+                    onclick="document.getElementById('faviconInput').click()"
+                  >
+                    <input
+                      type="file"
+                      id="faviconInput"
+                      accept="image/*"
+                      style="display: none"
+                    />
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Clique para selecionar ou arraste um favicon</p>
+                    <small>ICO, PNG até 1MB</small>
+                  </div>
+                  <div id="faviconPreview"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Imagens
+                </button>
+              </form>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-code"></i>
+                <h3>Personalização CSS</h3>
+              </div>
+              <form id="cssForm">
+                <div class="form-group">
+                  <label for="customCSS">CSS Personalizado</label>
+                  <textarea
+                    id="customCSS"
+                    name="customCSS"
+                    class="form-control"
+                    rows="10"
+                    placeholder="/* Adicione seu CSS personalizado aqui */"
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="customJS">JavaScript Personalizado</label>
+                  <textarea
+                    id="customJS"
+                    name="customJS"
+                    class="form-control"
+                    rows="10"
+                    placeholder="// Adicione seu JavaScript personalizado aqui"
+                  ></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Código
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configurações de Negócio Section -->
+        <div id="negocio" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-store"></i> Configurações de Negócio</h2>
+            <p>Configure as informações da sua empresa e operação comercial</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-building"></i>
+                <h3>Informações da Empresa</h3>
+              </div>
+              <form id="companyForm">
+                <div class="form-group">
+                  <label for="companyName">Nome da Empresa</label>
+                  <input
+                    type="text"
+                    id="companyName"
+                    name="companyName"
+                    class="form-control"
+                    placeholder="Sua Empresa Ltda"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="companyCNPJ">CNPJ</label>
+                  <input
+                    type="text"
+                    id="companyCNPJ"
+                    name="companyCNPJ"
+                    class="form-control"
+                    placeholder="00.000.000/0000-00"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="companyEmail">Email Principal</label>
+                  <input
+                    type="email"
+                    id="companyEmail"
+                    name="companyEmail"
+                    class="form-control"
+                    placeholder="contato@empresa.com"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="companyPhone">Telefone</label>
+                  <input
+                    type="text"
+                    id="companyPhone"
+                    name="companyPhone"
+                    class="form-control"
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="companyAddress">Endereço Completo</label>
+                  <textarea
+                    id="companyAddress"
+                    name="companyAddress"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Rua, número, bairro, cidade, estado, CEP"
+                  ></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Informações
+                </button>
+              </form>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-cogs"></i>
+                <h3>Configurações Operacionais</h3>
+              </div>
+              <form id="operationalForm">
+                <div class="form-group">
+                  <label for="businessHours">Horário de Funcionamento</label>
+                  <input
+                    type="text"
+                    id="businessHours"
+                    name="businessHours"
+                    class="form-control"
+                    placeholder="Segunda a Sexta: 8h às 18h"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="timezone">Fuso Horário</label>
+                  <select id="timezone" name="timezone" class="form-control">
+                    <option value="America/Sao_Paulo">Brasília (GMT-3)</option>
+                    <option value="America/Manaus">Manaus (GMT-4)</option>
+                    <option value="America/Rio_Branco">
+                      Rio Branco (GMT-5)
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="currency">Moeda Principal</label>
+                  <select id="currency" name="currency" class="form-control">
+                    <option value="BRL">Real Brasileiro (R$)</option>
+                    <option value="USD">Dólar Americano ($)</option>
+                    <option value="EUR">Euro (€)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="language">Idioma do Sistema</label>
+                  <select id="language" name="language" class="form-control">
+                    <option value="pt-BR">Português (Brasil)</option>
+                    <option value="en-US">English (US)</option>
+                    <option value="es-ES">Español</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configurações de Vendas Section -->
+        <div id="vendas" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-handshake"></i> Configurações de Vendas</h2>
+            <p>Configure processos de vendas, comissões e fluxos comerciais</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-percentage"></i>
+                <h3>Comissões e Incentivos</h3>
+              </div>
+              <form id="commissionForm">
+                <div class="form-group">
+                  <label for="defaultCommission">Comissão Padrão (%)</label>
+                  <input
+                    type="number"
+                    id="defaultCommission"
+                    name="defaultCommission"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="5.00"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="minOrderValue">Valor Mínimo do Pedido</label>
+                  <input
+                    type="number"
+                    id="minOrderValue"
+                    name="minOrderValue"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    placeholder="100.00"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="bonusTarget">Meta de Vendas (Mensal)</label>
+                  <input
+                    type="number"
+                    id="bonusTarget"
+                    name="bonusTarget"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    placeholder="10000.00"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="bonusPercentage">Bônus por Meta (%)</label>
+                  <input
+                    type="number"
+                    id="bonusPercentage"
+                    name="bonusPercentage"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="2.00"
+                  />
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+              </form>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-route"></i>
+                <h3>Fluxo de Vendas</h3>
+              </div>
+              <form id="salesFlowForm">
+                <div class="form-group">
+                  <label for="quoteValidity"
+                    >Validade do Orçamento (dias)</label
+                  >
+                  <input
+                    type="number"
+                    id="quoteValidity"
+                    name="quoteValidity"
+                    class="form-control"
+                    min="1"
+                    max="365"
+                    value="30"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="autoApprovalLimit"
+                    >Limite Aprovação Automática</label
+                  >
+                  <input
+                    type="number"
+                    id="autoApprovalLimit"
+                    name="autoApprovalLimit"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    placeholder="1000.00"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="paymentTerms"
+                    >Condições de Pagamento Padrão</label
+                  >
+                  <textarea
+                    id="paymentTerms"
+                    name="paymentTerms"
+                    class="form-control"
+                    rows="3"
+                    placeholder="30 dias, 60 dias, à vista"
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="deliveryTime"
+                    >Prazo de Entrega Padrão (dias)</label
+                  >
+                  <input
+                    type="number"
+                    id="deliveryTime"
+                    name="deliveryTime"
+                    class="form-control"
+                    min="1"
+                    max="365"
+                    value="15"
+                  />
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configurações Financeiras Section -->
+        <div id="financeiro" class="admin-section">
+          <div class="admin-header">
+            <h2>
+              <i class="fas fa-dollar-sign"></i> Configurações Financeiras
+            </h2>
+            <p>Configure impostos, formas de pagamento e controle financeiro</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-receipt"></i>
+                <h3>Impostos e Tributos</h3>
+              </div>
+              <form id="taxForm">
+                <div class="form-group">
+                  <label for="icmsRate">ICMS Padrão (%)</label>
+                  <input
+                    type="number"
+                    id="icmsRate"
+                    name="icmsRate"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="18.00"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="ipiRate">IPI Padrão (%)</label>
+                  <input
+                    type="number"
+                    id="ipiRate"
+                    name="ipiRate"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="5.00"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="pisRate">PIS (%)</label>
+                  <input
+                    type="number"
+                    id="pisRate"
+                    name="pisRate"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="1.65"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="cofinsRate">COFINS (%)</label>
+                  <input
+                    type="number"
+                    id="cofinsRate"
+                    name="cofinsRate"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="7.60"
+                  />
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Impostos
+                </button>
+              </form>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-credit-card"></i>
+                <h3>Formas de Pagamento</h3>
+              </div>
+              <form id="paymentForm">
+                <div class="form-group">
+                  <label for="paymentMethods"
+                    >Formas de Pagamento Aceitas</label
+                  >
+                  <textarea
+                    id="paymentMethods"
+                    name="paymentMethods"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Dinheiro, PIX, Cartão de Crédito, Cartão de Débito, Boleto, Transferência"
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="creditCardFee">Taxa Cartão de Crédito (%)</label>
+                  <input
+                    type="number"
+                    id="creditCardFee"
+                    name="creditCardFee"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="3.50"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="debitCardFee">Taxa Cartão de Débito (%)</label>
+                  <input
+                    type="number"
+                    id="debitCardFee"
+                    name="debitCardFee"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="1.50"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="pixDiscount">Desconto PIX (%)</label>
+                  <input
+                    type="number"
+                    id="pixDiscount"
+                    name="pixDiscount"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="2.00"
+                  />
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Padrões de Tabelas Section -->
+        <div id="padroes" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-table"></i> Padrões de Tabelas</h2>
+            <p>Gerencie estruturas de dados e padrões para importação</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-list"></i>
+                <h3>Padrões Ativos</h3>
+              </div>
+              <div id="activePatterns">
+                <p
+                  style="
+                    text-align: center;
+                    color: var(--admin-text-light);
+                    padding: 2rem;
+                  "
+                >
+                  Nenhum padrão cadastrado ainda.
+                </p>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-plus"></i>
+                <h3>Criar Novo Padrão</h3>
+              </div>
+              <form id="patternForm">
+                <div class="form-group">
+                  <label for="patternName">Nome do Padrão</label>
+                  <input
+                    type="text"
+                    id="patternName"
+                    name="patternName"
+                    class="form-control"
+                    placeholder="Ex: Produtos Básicos"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="patternType">Tipo de Tabela</label>
+                  <select
+                    id="patternType"
+                    name="patternType"
+                    class="form-control"
+                  >
+                    <option value="produtos">Produtos</option>
+                    <option value="clientes">Clientes</option>
+                    <option value="transportadoras">Transportadoras</option>
+                    <option value="industrias">Indústrias</option>
+                    <option value="orcamentos">Orçamentos</option>
+                    <option value="pedidos">Pedidos</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="patternColumns">Colunas (uma por linha)</label>
+                  <textarea
+                    id="patternColumns"
+                    name="patternColumns"
+                    class="form-control"
+                    rows="8"
+                    placeholder="nome&#10;descricao&#10;preco&#10;categoria&#10;estoque&#10;ativo"
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="patternDescription">Descrição</label>
+                  <textarea
+                    id="patternDescription"
+                    name="patternDescription"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Descrição do padrão e suas características..."
+                  ></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-plus"></i> Criar Padrão
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Importação de Dados Section -->
+        <div id="importacao" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-upload"></i> Importação de Dados</h2>
+            <p>Importe e exporte dados do sistema em diferentes formatos</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-file-import"></i>
+                <h3>Importar Padrões de Tabelas</h3>
+              </div>
+              <div class="form-group">
+                <label>Selecionar Arquivo JSON</label>
+                <div
+                  class="file-upload"
+                  onclick="document.getElementById('patternFileInput').click()"
+                >
+                  <input
+                    type="file"
+                    id="patternFileInput"
+                    accept=".json"
+                    style="display: none"
+                  />
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Clique para selecionar um arquivo JSON</p>
+                  <small>Arquivo JSON com padrões de tabelas</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Ou cole o JSON diretamente:</label>
+                <textarea
+                  id="patternJsonInput"
+                  class="form-control"
+                  rows="10"
+                  placeholder='{
+  "padroes": [
+    {
+      "nome": "Produtos Básicos",
+      "tipo": "produtos",
+      "colunas": ["nome", "descricao", "preco", "categoria"],
+      "descricao": "Padrão básico para produtos"
+    }
+  ]
+}'
+                ></textarea>
+              </div>
+
+              <button onclick="importPatterns()" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Importar Padrões
+              </button>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-file-export"></i>
+                <h3>Exportar Dados</h3>
+              </div>
+              <div class="form-group">
+                <label>Exportar Padrões Atuais</label>
+                <p style="color: var(--admin-text-light); margin-bottom: 1rem">
+                  Exporte todos os padrões atuais para backup ou
+                  compartilhamento.
+                </p>
+                <button onclick="exportPatterns()" class="btn btn-secondary">
+                  <i class="fas fa-download"></i> Exportar Padrões
+                </button>
+              </div>
+
+              <div class="form-group">
+                <label>Exportar Dados Completos</label>
+                <p style="color: var(--admin-text-light); margin-bottom: 1rem">
+                  Exporte todos os dados do sistema (clientes, produtos,
+                  pedidos, etc.)
+                </p>
+                <button onclick="exportAllData()" class="btn btn-secondary">
+                  <i class="fas fa-database"></i> Exportar Tudo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backup & Restauração Section -->
+        <div id="backup" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-database"></i> Backup & Restauração</h2>
+            <p>Gerencie backups e restaurações do sistema</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-save"></i>
+                <h3>Criar Backup</h3>
+              </div>
+              <p style="color: var(--admin-text-light); margin-bottom: 1.5rem">
+                Faça backup completo de todos os dados do sistema.
+              </p>
+              <button onclick="createBackup()" class="btn btn-primary">
+                <i class="fas fa-download"></i> Criar Backup
+              </button>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-undo"></i>
+                <h3>Restaurar Backup</h3>
+              </div>
+              <div class="form-group">
+                <label>Selecionar Arquivo de Backup</label>
+                <div
+                  class="file-upload"
+                  onclick="document.getElementById('backupFileInput').click()"
+                >
+                  <input
+                    type="file"
+                    id="backupFileInput"
+                    accept=".json"
+                    style="display: none"
+                  />
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Selecionar arquivo de backup</p>
+                  <small>Arquivo JSON de backup</small>
+                </div>
+              </div>
+              <button onclick="restoreBackup()" class="btn btn-warning">
+                <i class="fas fa-upload"></i> Restaurar Backup
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <i class="fas fa-history"></i>
+              <h3>Histórico de Backups</h3>
+            </div>
+            <div id="backupHistory">
+              <p
+                style="
+                  text-align: center;
+                  color: var(--admin-text-light);
+                  padding: 2rem;
+                "
+              >
+                Nenhum backup encontrado.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usuários & Permissões Section -->
+        <div id="usuarios" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-users"></i> Usuários & Permissões</h2>
+            <p>Gerencie usuários, perfis e permissões do sistema</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-user-plus"></i>
+                <h3>Criar Novo Usuário</h3>
+              </div>
+              <form id="userForm">
+                <div class="form-group">
+                  <label for="userName">Nome Completo</label>
+                  <input
+                    type="text"
+                    id="userName"
+                    name="userName"
+                    class="form-control"
+                    placeholder="João Silva"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="userEmail">Email</label>
+                  <input
+                    type="email"
+                    id="userEmail"
+                    name="userEmail"
+                    class="form-control"
+                    placeholder="joao@empresa.com"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="userPassword">Senha</label>
+                  <input
+                    type="password"
+                    id="userPassword"
+                    name="userPassword"
+                    class="form-control"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="userProfile">Perfil</label>
+                  <select
+                    id="userProfile"
+                    name="userProfile"
+                    class="form-control"
+                  >
+                    <option value="admin">Administrador</option>
+                    <option value="gerente">Gerente</option>
+                    <option value="vendedor">Vendedor</option>
+                    <option value="operador">Operador</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="userPhone">Telefone</label>
+                  <input
+                    type="text"
+                    id="userPhone"
+                    name="userPhone"
+                    class="form-control"
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-user-plus"></i> Criar Usuário
+                </button>
+              </form>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-list"></i>
+                <h3>Usuários do Sistema</h3>
+              </div>
+              <div id="usersList">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Email</th>
+                      <th>Perfil</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTableBody">
+                    <tr>
+                      <td>Admin Sistema</td>
+                      <td>admin@oursales.com</td>
+                      <td>
+                        <span class="status-badge status-active"
+                          >Administrador</span
+                        >
+                      </td>
+                      <td>
+                        <span class="status-badge status-active">Ativo</span>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-secondary">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logs do Sistema Section -->
+        <div id="logs" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-file-alt"></i> Logs do Sistema</h2>
+            <p>Monitore atividades e eventos do sistema em tempo real</p>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <i class="fas fa-search"></i>
+              <h3>Visualizar Logs</h3>
+            </div>
+            <div class="form-group">
+              <label for="logLevel">Nível de Log</label>
+              <select id="logLevel" class="form-control">
+                <option value="all">Todos</option>
+                <option value="error">Erros</option>
+                <option value="warn">Avisos</option>
+                <option value="info">Informações</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="logDate">Data</label>
+              <input type="date" id="logDate" class="form-control" />
+            </div>
+
+            <button onclick="loadLogs()" class="btn btn-primary">
+              <i class="fas fa-search"></i> Carregar Logs
+            </button>
+
+            <div
+              id="logContent"
+              style="
+                margin-top: 1.5rem;
+                background: var(--admin-light);
+                padding: 1rem;
+                border-radius: 0.5rem;
+                font-family: monospace;
+                font-size: 0.875rem;
+                max-height: 400px;
+                overflow-y: auto;
+                border: 1px solid var(--admin-border);
+              "
+            >
+              <!-- Logs serão carregados aqui -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Segurança Section -->
+        <div id="seguranca" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-shield-alt"></i> Segurança</h2>
+            <p>Configure políticas de segurança e controle de acesso</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-lock"></i>
+                <h3>Configurações de Segurança</h3>
+              </div>
+              <form id="securityForm">
+                <div class="form-group">
+                  <label for="sessionTimeout"
+                    >Timeout de Sessão (minutos)</label
+                  >
+                  <input
+                    type="number"
+                    id="sessionTimeout"
+                    name="sessionTimeout"
+                    class="form-control"
+                    value="60"
+                    min="5"
+                    max="480"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="maxLoginAttempts">Tentativas de Login</label>
+                  <input
+                    type="number"
+                    id="maxLoginAttempts"
+                    name="maxLoginAttempts"
+                    class="form-control"
+                    value="5"
+                    min="3"
+                    max="10"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="requireHttps"
+                      name="requireHttps"
+                    />
+                    Exigir HTTPS em produção
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="enableAuditLog"
+                      name="enableAuditLog"
+                      checked
+                    />
+                    Habilitar log de auditoria
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="twoFactorAuth"
+                      name="twoFactorAuth"
+                    />
+                    Habilitar autenticação de dois fatores
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+              </form>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-key"></i>
+                <h3>Políticas de Senha</h3>
+              </div>
+              <form id="passwordPolicyForm">
+                <div class="form-group">
+                  <label for="minPasswordLength">Tamanho Mínimo da Senha</label>
+                  <input
+                    type="number"
+                    id="minPasswordLength"
+                    name="minPasswordLength"
+                    class="form-control"
+                    value="8"
+                    min="6"
+                    max="20"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="requireUppercase"
+                      name="requireUppercase"
+                      checked
+                    />
+                    Exigir letra maiúscula
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="requireLowercase"
+                      name="requireLowercase"
+                      checked
+                    />
+                    Exigir letra minúscula
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="requireNumbers"
+                      name="requireNumbers"
+                      checked
+                    />
+                    Exigir números
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="requireSpecialChars"
+                      name="requireSpecialChars"
+                    />
+                    Exigir caracteres especiais
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Políticas
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notificações Section -->
+        <div id="notificacoes" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-bell"></i> Notificações</h2>
+            <p>Configure sistema de notificações e alertas</p>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-envelope"></i>
+                <h3>Configurações de Email</h3>
+              </div>
+              <form id="notificationForm">
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="emailNotifications"
+                      name="emailNotifications"
+                      checked
+                    />
+                    Notificações por email
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label for="smtpHost">Servidor SMTP</label>
+                  <input
+                    type="text"
+                    id="smtpHost"
+                    name="smtpHost"
+                    class="form-control"
+                    placeholder="smtp.gmail.com"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="smtpPort">Porta SMTP</label>
+                  <input
+                    type="number"
+                    id="smtpPort"
+                    name="smtpPort"
+                    class="form-control"
+                    value="587"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="smtpUser">Usuário SMTP</label>
+                  <input
+                    type="email"
+                    id="smtpUser"
+                    name="smtpUser"
+                    class="form-control"
+                    placeholder="seu-email@gmail.com"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="smtpPassword">Senha SMTP</label>
+                  <input
+                    type="password"
+                    id="smtpPassword"
+                    name="smtpPassword"
+                    class="form-control"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+              </form>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <i class="fas fa-bell"></i>
+                <h3>Tipos de Notificação</h3>
+              </div>
+              <form id="notificationTypesForm">
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="newOrderNotification"
+                      name="newOrderNotification"
+                      checked
+                    />
+                    Novo pedido criado
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="paymentNotification"
+                      name="paymentNotification"
+                      checked
+                    />
+                    Pagamento recebido
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="lowStockNotification"
+                      name="lowStockNotification"
+                      checked
+                    />
+                    Estoque baixo
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="systemAlertNotification"
+                      name="systemAlertNotification"
+                      checked
+                    />
+                    Alertas do sistema
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      id="backupNotification"
+                      name="backupNotification"
+                    />
+                    Backup concluído
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estatísticas Section -->
+        <div id="estatisticas" class="admin-section">
+          <div class="admin-header">
+            <h2><i class="fas fa-chart-line"></i> Estatísticas</h2>
+            <p>Visualize métricas e relatórios do sistema</p>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div
+                  class="stat-card-icon"
+                  style="background: linear-gradient(135deg, #10b981, #059669)"
+                >
+                  <i class="fas fa-chart-bar"></i>
+                </div>
+              </div>
+              <h3 class="stat-card-value">R$ 45.230</h3>
+              <p class="stat-card-label">Faturamento Mensal</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div
+                  class="stat-card-icon"
+                  style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)"
+                >
+                  <i class="fas fa-users"></i>
+                </div>
+              </div>
+              <h3 class="stat-card-value">127</h3>
+              <p class="stat-card-label">Clientes Ativos</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div
+                  class="stat-card-icon"
+                  style="background: linear-gradient(135deg, #f59e0b, #d97706)"
+                >
+                  <i class="fas fa-shopping-cart"></i>
+                </div>
+              </div>
+              <h3 class="stat-card-value">89</h3>
+              <p class="stat-card-label">Pedidos do Mês</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div
+                  class="stat-card-icon"
+                  style="background: linear-gradient(135deg, #8b5cf6, #7c3aed)"
+                >
+                  <i class="fas fa-percentage"></i>
+                </div>
+              </div>
+              <h3 class="stat-card-value">23.5%</h3>
+              <p class="stat-card-label">Taxa de Conversão</p>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <i class="fas fa-chart-pie"></i>
+              <h3>Relatórios Disponíveis</h3>
+            </div>
+            <div class="admin-grid">
+              <div>
+                <h4>Relatórios de Vendas</h4>
+                <ul style="list-style: none; padding: 0">
+                  <li style="padding: 0.5rem 0">
+                    <i
+                      class="fas fa-file-alt"
+                      style="color: var(--admin-primary); margin-right: 0.5rem"
+                    ></i
+                    >Vendas por Período
+                  </li>
+                  <li style="padding: 0.5rem 0">
+                    <i
+                      class="fas fa-file-alt"
+                      style="color: var(--admin-primary); margin-right: 0.5rem"
+                    ></i
+                    >Top Produtos
+                  </li>
+                  <li style="padding: 0.5rem 0">
+                    <i
+                      class="fas fa-file-alt"
+                      style="color: var(--admin-primary); margin-right: 0.5rem"
+                    ></i
+                    >Performance de Vendedores
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4>Relatórios Financeiros</h4>
+                <ul style="list-style: none; padding: 0">
+                  <li style="padding: 0.5rem 0">
+                    <i
+                      class="fas fa-file-alt"
+                      style="color: var(--admin-primary); margin-right: 0.5rem"
+                    ></i
+                    >Fluxo de Caixa
+                  </li>
+                  <li style="padding: 0.5rem 0">
+                    <i
+                      class="fas fa-file-alt"
+                      style="color: var(--admin-primary); margin-right: 0.5rem"
+                    ></i
+                    >Contas a Receber
+                  </li>
+                  <li style="padding: 0.5rem 0">
+                    <i
+                      class="fas fa-file-alt"
+                      style="color: var(--admin-primary); margin-right: 0.5rem"
+                    ></i
+                    >Comissões
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zona de Perigo -->
+        <div class="danger-zone">
+          <h3><i class="fas fa-exclamation-triangle"></i> Zona de Perigo</h3>
+          <p>Estas ações são irreversíveis e podem afetar todo o sistema.</p>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="confirmDanger" />
+              Confirmo que entendo os riscos
+            </label>
+          </div>
+
+          <button
+            onclick="resetSystem()"
+            class="btn btn-danger"
+            disabled
+            id="resetButton"
+          >
+            <i class="fas fa-trash"></i> Resetar Sistema Completo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/admin.js" type="module"></script>
+  </body>
+</html>

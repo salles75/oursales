@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Admin Panel</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .test-button {
+        padding: 10px 20px;
+        margin: 5px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .test-button:hover {
+        background: #0056b3;
+      }
+      .result {
+        margin-top: 10px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Teste do Painel Admin</h1>
+
+    <div class="test-section">
+      <h2>Teste das Funções</h2>
+      <button class="test-button" onclick="testShowSection()">
+        Testar showSection
+      </button>
+      <button class="test-button" onclick="testLoadInstances()">
+        Testar loadInstancesData
+      </button>
+      <button class="test-button" onclick="testLoadFaturamento()">
+        Testar loadFaturamentoData
+      </button>
+      <button class="test-button" onclick="testLoadSuporte()">
+        Testar loadSuporteData
+      </button>
+      <button class="test-button" onclick="testLoadEstatisticas()">
+        Testar loadEstatisticasData
+      </button>
+      <div id="test-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>Simulação de Seções</h2>
+      <div
+        id="instancias"
+        style="
+          display: none;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 5px;
+        "
+      >
+        <h3>Instâncias Ativas</h3>
+        <div id="instancesStatus">Carregando...</div>
+      </div>
+
+      <div
+        id="faturamento"
+        style="
+          display: none;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 5px;
+        "
+      >
+        <h3>Faturamento</h3>
+        <div id="faturasPendentes">Carregando...</div>
+      </div>
+
+      <div
+        id="suporte"
+        style="
+          display: none;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 5px;
+        "
+      >
+        <h3>Suporte & Tickets</h3>
+        <div id="openTickets">Carregando...</div>
+      </div>
+
+      <div
+        id="estatisticas"
+        style="
+          display: none;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 5px;
+        "
+      >
+        <h3>Estatísticas</h3>
+        <div id="estatisticasContainer">Carregando...</div>
+      </div>
+    </div>
+
+    <script>
+      // Simular as funções do admin.js
+      function showSection(sectionName) {
+        console.log("🔄 Mostrando seção:", sectionName);
+
+        // Esconder todas as seções
+        document
+          .querySelectorAll(
+            "[id$='instancias'], [id$='faturamento'], [id$='suporte'], [id$='estatisticas']"
+          )
+          .forEach((section) => {
+            section.style.display = "none";
+          });
+
+        // Mostrar seção selecionada
+        const targetSection = document.getElementById(sectionName);
+        console.log("📦 Seção encontrada:", targetSection);
+        if (targetSection) {
+          targetSection.style.display = "block";
+          targetSection.style.visibility = "visible";
+          targetSection.style.opacity = "1";
+          console.log("✅ Seção ativada:", sectionName);
+          return true;
+        } else {
+          console.log("❌ Seção não encontrada:", sectionName);
+          return false;
+        }
+      }
+
+      // Funções de teste
+      function testShowSection() {
+        const result = showSection("instancias");
+        document.getElementById("test-result").innerHTML = result
+          ? "✅ showSection funcionando!"
+          : "❌ showSection com erro";
+      }
+
+      function testLoadInstances() {
+        showSection("instancias");
+        loadInstancesData();
+        document.getElementById("test-result").innerHTML =
+          "✅ loadInstancesData executado!";
+      }
+
+      function testLoadFaturamento() {
+        showSection("faturamento");
+        loadFaturamentoData();
+        document.getElementById("test-result").innerHTML =
+          "✅ loadFaturamentoData executado!";
+      }
+
+      function testLoadSuporte() {
+        showSection("suporte");
+        loadSuporteData();
+        document.getElementById("test-result").innerHTML =
+          "✅ loadSuporteData executado!";
+      }
+
+      function testLoadEstatisticas() {
+        showSection("estatisticas");
+        loadEstatisticasData();
+        document.getElementById("test-result").innerHTML =
+          "✅ loadEstatisticasData executado!";
+      }
+
+      // Incluir as funções do admin.js
+      // (Copiando as funções principais)
+
+      // Carregar dados das instâncias
+      async function loadInstancesData() {
+        try {
+          console.log("🔄 Carregando dados das instâncias...");
+          const instancesContainer = document.getElementById("instancesStatus");
+          console.log("📦 Container encontrado:", instancesContainer);
+
+          if (!instancesContainer) {
+            console.log("❌ Container instancesStatus não encontrado");
+            return;
+          }
+
+          // Simular dados de instâncias para demonstração
+          const mockInstances = [
+            {
+              id: "1",
+              cliente: "João Silva",
+              url: "joao.oursales.com",
+              status: "ativo",
+              recursos: "2GB RAM, 1 CPU",
+            },
+            {
+              id: "2",
+              cliente: "Maria Santos",
+              url: "maria.oursales.com",
+              status: "ativo",
+              recursos: "4GB RAM, 2 CPU",
+            },
+            {
+              id: "3",
+              cliente: "Pedro Costa",
+              url: "pedro.oursales.com",
+              status: "manutencao",
+              recursos: "1GB RAM, 1 CPU",
+            },
+          ];
+
+          instancesContainer.innerHTML = mockInstances
+            .map(
+              (instance) => `
+                        <div class="instance-item" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 0.5rem; border: 1px solid #e9ecef;">
+                          <div class="status-indicator" style="width: 12px; height: 12px; border-radius: 50%; background: ${
+                            instance.status === "ativo" ? "#28a745" : "#ffc107"
+                          };"></div>
+                          <div style="flex: 1;">
+                            <div style="font-weight: 500; color: #333;">${
+                              instance.cliente
+                            }</div>
+                            <div style="font-size: 0.875rem; color: #666;">${
+                              instance.url
+                            }</div>
+                          </div>
+                          <div style="font-size: 0.875rem; color: #666;">${
+                            instance.recursos
+                          }</div>
+                          <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="restartInstance('${
+                              instance.id
+                            }')" class="btn btn-sm btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Reiniciar</button>
+                            <button onclick="accessInstance('${
+                              instance.id
+                            }')" class="btn btn-sm btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Acessar</button>
+                            <button onclick="maintenanceInstance('${
+                              instance.id
+                            }')" class="btn btn-sm btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Manutenção</button>
+                          </div>
+                        </div>
+                      `
+            )
+            .join("");
+
+          console.log("✅ Dados das instâncias carregados");
+        } catch (error) {
+          console.error("Erro ao carregar instâncias:", error);
+          const instancesContainer = document.getElementById("instancesStatus");
+          if (instancesContainer) {
+            instancesContainer.innerHTML =
+              '<div style="text-align: center; color: #666; padding: 2rem;">Erro ao carregar instâncias</div>';
+          }
+        }
+      }
+
+      // Carregar dados de faturamento
+      async function loadFaturamentoData() {
+        try {
+          console.log("🔄 Carregando dados de faturamento...");
+          const faturasContainer = document.getElementById("faturasPendentes");
+          console.log("📦 Container faturas encontrado:", faturasContainer);
+
+          if (faturasContainer) {
+            // Simular dados de faturas
+            const mockFaturas = [
+              {
+                id: "1",
+                cliente: "João Silva",
+                plano: "Plano Profissional",
+                valor: "R$ 199,00",
+                vencimento: "Vence em 5 dias",
+                status: "warning",
+              },
+              {
+                id: "2",
+                cliente: "Maria Santos",
+                plano: "Plano Básico",
+                valor: "R$ 99,00",
+                vencimento: "Vence em 2 dias",
+                status: "danger",
+              },
+              {
+                id: "3",
+                cliente: "Pedro Costa",
+                plano: "Plano Empresarial",
+                valor: "R$ 299,00",
+                vencimento: "Vence em 10 dias",
+                status: "info",
+              },
+            ];
+
+            faturasContainer.innerHTML = mockFaturas
+              .map(
+                (fatura) => `
+                            <div class="fatura-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #e9ecef;">
+                              <div>
+                                <div style="font-weight: 500; color: #333;">${
+                                  fatura.cliente
+                                }</div>
+                                <div style="font-size: 0.875rem; color: #666;">${
+                                  fatura.plano
+                                }</div>
+                              </div>
+                              <div style="text-align: right;">
+                                <div style="font-weight: 500; color: #333;">${
+                                  fatura.valor
+                                }</div>
+                                <div style="font-size: 0.875rem; color: ${
+                                  fatura.status === "danger"
+                                    ? "#dc3545"
+                                    : fatura.status === "warning"
+                                    ? "#ffc107"
+                                    : "#17a2b8"
+                                };">${fatura.vencimento}</div>
+                              </div>
+                              <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="markPaid('${
+                                  fatura.id
+                                }')" class="btn btn-sm btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Marcar Pago</button>
+                                <button onclick="sendReminder('${
+                                  fatura.id
+                                }')" class="btn btn-sm btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Lembrar</button>
+                              </div>
+                            </div>
+                          `
+              )
+              .join("");
+
+            console.log("✅ Dados de faturamento carregados");
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados de faturamento:", error);
+        }
+      }
+
+      // Carregar dados de suporte
+      async function loadSuporteData() {
+        try {
+          console.log("🔄 Carregando dados de suporte...");
+          const ticketsContainer = document.getElementById("openTickets");
+          console.log("📦 Container tickets encontrado:", ticketsContainer);
+
+          if (ticketsContainer) {
+            // Simular dados de tickets
+            const mockTickets = [
+              {
+                id: "1234",
+                titulo: "Problema com login",
+                cliente: "João Silva",
+                tempo: "2 horas atrás",
+                prioridade: "Médio",
+                cor: "#ffc107",
+              },
+              {
+                id: "1235",
+                titulo: "Dúvida sobre relatórios",
+                cliente: "Maria Santos",
+                tempo: "1 dia atrás",
+                prioridade: "Baixo",
+                cor: "#17a2b8",
+              },
+              {
+                id: "1236",
+                titulo: "Erro no sistema de vendas",
+                cliente: "Pedro Costa",
+                tempo: "30 minutos atrás",
+                prioridade: "Alto",
+                cor: "#dc3545",
+              },
+            ];
+
+            ticketsContainer.innerHTML = mockTickets
+              .map(
+                (ticket) => `
+                            <div class="ticket-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #e9ecef;">
+                              <div>
+                                <div style="font-weight: 500; color: #333;">#${ticket.id} - ${ticket.titulo}</div>
+                                <div style="font-size: 0.875rem; color: #666;">${ticket.cliente} - ${ticket.tempo}</div>
+                              </div>
+                              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span style="background: ${ticket.cor}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">${ticket.prioridade}</span>
+                                <button class="btn btn-sm btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Responder</button>
+                              </div>
+                            </div>
+                          `
+              )
+              .join("");
+
+            console.log("✅ Dados de suporte carregados");
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados de suporte:", error);
+        }
+      }
+
+      // Carregar dados de estatísticas
+      async function loadEstatisticasData() {
+        try {
+          console.log("🔄 Carregando dados de estatísticas...");
+          const statsContainer = document.getElementById(
+            "estatisticasContainer"
+          );
+          console.log("📦 Container estatísticas encontrado:", statsContainer);
+
+          if (statsContainer) {
+            // Simular dados de estatísticas
+            const mockStats = {
+              totalClientes: 127,
+              instanciasAtivas: 8,
+              receitaTotal: "45.230",
+              totalUsuarios: 156,
+            };
+
+            statsContainer.innerHTML = `
+                        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                          <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 0.5rem; text-align: center;">
+                            <div class="stat-icon" style="font-size: 2rem; margin-bottom: 1rem;">
+                              <i class="fas fa-users">👥</i>
+                            </div>
+                            <div class="stat-content">
+                              <h3 style="font-size: 2.5rem; margin: 0; font-weight: bold;">${mockStats.totalClientes}</h3>
+                              <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Total de Clientes</p>
+                            </div>
+                          </div>
+                          <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 0.5rem; text-align: center;">
+                            <div class="stat-icon" style="font-size: 2rem; margin-bottom: 1rem;">
+                              <i class="fas fa-server">🖥️</i>
+                            </div>
+                            <div class="stat-content">
+                              <h3 style="font-size: 2.5rem; margin: 0; font-weight: bold;">${mockStats.instanciasAtivas}</h3>
+                              <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Instâncias Ativas</p>
+                            </div>
+                          </div>
+                          <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1.5rem; border-radius: 0.5rem; text-align: center;">
+                            <div class="stat-icon" style="font-size: 2rem; margin-bottom: 1rem;">
+                              <i class="fas fa-dollar-sign">💰</i>
+                            </div>
+                            <div class="stat-content">
+                              <h3 style="font-size: 2.5rem; margin: 0; font-weight: bold;">R$ ${mockStats.receitaTotal}</h3>
+                              <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Receita Total</p>
+                            </div>
+                          </div>
+                          <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 1.5rem; border-radius: 0.5rem; text-align: center;">
+                            <div class="stat-icon" style="font-size: 2rem; margin-bottom: 1rem;">
+                              <i class="fas fa-user-check">✅</i>
+                            </div>
+                            <div class="stat-content">
+                              <h3 style="font-size: 2.5rem; margin: 0; font-weight: bold;">${mockStats.totalUsuarios}</h3>
+                              <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Usuários Ativos</p>
+                            </div>
+                          </div>
+                        </div>
+                      `;
+
+            console.log("✅ Dados de estatísticas carregados");
+          }
+        } catch (error) {
+          console.error("Erro ao carregar estatísticas:", error);
+        }
+      }
+
+      // Funções placeholder
+      function restartInstance(id) {
+        alert(`Reiniciando instância ${id}`);
+      }
+      function accessInstance(id) {
+        alert(`Acessando instância ${id}`);
+      }
+      function maintenanceInstance(id) {
+        alert(`Manutenção instância ${id}`);
+      }
+      function markPaid(id) {
+        alert(`Marcando como pago: ${id}`);
+      }
+      function sendReminder(id) {
+        alert(`Enviando lembrete: ${id}`);
+      }
+    </script>
+  </body>
+</html>

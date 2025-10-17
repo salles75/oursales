@@ -345,3 +345,6 @@ console.log("Executando em 2 segundos...");
 console.log("════════════════════════════════════════════════════════");
 
 setTimeout(testarIntegracaoCompleta, 2000);
+
+
+

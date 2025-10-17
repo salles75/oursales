@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug Admin Panel</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .debug-section {
+        margin: 20px 0;
+        padding: 20px;
+        border: 2px solid #007bff;
+        border-radius: 5px;
+      }
+      .debug-button {
+        padding: 10px 20px;
+        margin: 5px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .debug-button:hover {
+        background: #0056b3;
+      }
+      .result {
+        margin-top: 10px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 3px;
+        min-height: 50px;
+      }
+      .section {
+        display: none;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+      .section.active {
+        display: block !important;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 Debug do Painel Admin</h1>
+
+    <div class="debug-section">
+      <h2>Teste de Navegação</h2>
+      <button class="debug-button" onclick="showSection('dashboard')">
+        Dashboard
+      </button>
+      <button class="debug-button" onclick="showSection('estatisticas')">
+        Estatísticas
+      </button>
+      <button class="debug-button" onclick="showSection('instancias')">
+        Instâncias
+      </button>
+      <button class="debug-button" onclick="showSection('faturamento')">
+        Faturamento
+      </button>
+      <button class="debug-button" onclick="showSection('suporte')">
+        Suporte
+      </button>
+      <div id="debug-result" class="result">
+        Clique em uma seção para testar
+      </div>
+    </div>
+
+    <div class="debug-section">
+      <h2>Seções de Teste</h2>
+
+      <div id="dashboard" class="section active">
+        <h3>📊 Dashboard</h3>
+        <p>Esta é a seção do dashboard</p>
+      </div>
+
+      <div id="estatisticas" class="section">
+        <h3>📈 Estatísticas</h3>
+        <div id="estatisticasContainer">
+          <p>Carregando estatísticas...</p>
+        </div>
+      </div>
+
+      <div id="instancias" class="section">
+        <h3>🖥️ Instâncias Ativas</h3>
+        <div id="instancesStatus">
+          <p>Carregando instâncias...</p>
+        </div>
+      </div>
+
+      <div id="faturamento" class="section">
+        <h3>💰 Faturamento</h3>
+        <div id="faturasPendentes">
+          <p>Carregando faturas...</p>
+        </div>
+      </div>
+
+      <div id="suporte" class="section">
+        <h3>🎫 Suporte & Tickets</h3>
+        <div id="openTickets">
+          <p>Carregando tickets...</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      console.log("🔧 Debug Admin Panel carregado");
+
+      function showSection(sectionName) {
+        console.log("🔄 Mostrando seção:", sectionName);
+
+        // Esconder todas as seções
+        document.querySelectorAll(".section").forEach((section) => {
+          section.classList.remove("active");
+          section.style.display = "none";
+        });
+
+        // Mostrar seção selecionada
+        const targetSection = document.getElementById(sectionName);
+        console.log("📦 Seção encontrada:", targetSection);
+
+        if (targetSection) {
+          targetSection.classList.add("active");
+          targetSection.style.display = "block";
+          targetSection.style.visibility = "visible";
+          targetSection.style.opacity = "1";
+          console.log("✅ Seção ativada:", sectionName);
+
+          // Carregar dados da seção
+          loadSectionData(sectionName);
+
+          document.getElementById(
+            "debug-result"
+          ).innerHTML = `✅ Seção "${sectionName}" ativada com sucesso!`;
+          return true;
+        } else {
+          console.log("❌ Seção não encontrada:", sectionName);
+          document.getElementById(
+            "debug-result"
+          ).innerHTML = `❌ Seção "${sectionName}" não encontrada!`;
+          return false;
+        }
+      }
+
+      function loadSectionData(sectionName) {
+        console.log("📊 Carregando dados para:", sectionName);
+
+        switch (sectionName) {
+          case "estatisticas":
+            loadEstatisticasData();
+            break;
+          case "instancias":
+            loadInstancesData();
+            break;
+          case "faturamento":
+            loadFaturamentoData();
+            break;
+          case "suporte":
+            loadSuporteData();
+            break;
+        }
+      }
+
+      // Funções de carregamento de dados
+      function loadEstatisticasData() {
+        const container = document.getElementById("estatisticasContainer");
+        if (container) {
+          container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                            <h4>127</h4>
+                            <p>Total de Clientes</p>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                            <h4>8</h4>
+                            <p>Instâncias Ativas</p>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                            <h4>R$ 45.230</h4>
+                            <p>Receita Total</p>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                            <h4>156</h4>
+                            <p>Usuários Ativos</p>
+                        </div>
+                    </div>
+                `;
+          console.log("✅ Estatísticas carregadas");
+        }
+      }
+
+      function loadInstancesData() {
+        const container = document.getElementById("instancesStatus");
+        if (container) {
+          container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #ddd;">
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background: #28a745;"></div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold;">João Silva</div>
+                                <div style="font-size: 0.875rem; color: #666;">joao.oursales.com</div>
+                            </div>
+                            <div style="font-size: 0.875rem; color: #666;">2GB RAM, 1 CPU</div>
+                            <button style="padding: 0.25rem 0.5rem; background: #ffc107; color: white; border: none; border-radius: 3px;">Reiniciar</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #ddd;">
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background: #28a745;"></div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold;">Maria Santos</div>
+                                <div style="font-size: 0.875rem; color: #666;">maria.oursales.com</div>
+                            </div>
+                            <div style="font-size: 0.875rem; color: #666;">4GB RAM, 2 CPU</div>
+                            <button style="padding: 0.25rem 0.5rem; background: #ffc107; color: white; border: none; border-radius: 3px;">Reiniciar</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #ddd;">
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffc107;"></div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold;">Pedro Costa</div>
+                                <div style="font-size: 0.875rem; color: #666;">pedro.oursales.com</div>
+                            </div>
+                            <div style="font-size: 0.875rem; color: #666;">1GB RAM, 1 CPU</div>
+                            <button style="padding: 0.25rem 0.5rem; background: #ffc107; color: white; border: none; border-radius: 3px;">Reiniciar</button>
+                        </div>
+                    </div>
+                `;
+          console.log("✅ Instâncias carregadas");
+        }
+      }
+
+      function loadFaturamentoData() {
+        const container = document.getElementById("faturasPendentes");
+        if (container) {
+          container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #ddd;">
+                            <div>
+                                <div style="font-weight: bold;">João Silva</div>
+                                <div style="font-size: 0.875rem; color: #666;">Plano Profissional</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold;">R$ 199,00</div>
+                                <div style="font-size: 0.875rem; color: #ffc107;">Vence em 5 dias</div>
+                            </div>
+                            <button style="padding: 0.25rem 0.5rem; background: #28a745; color: white; border: none; border-radius: 3px;">Marcar Pago</button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #ddd;">
+                            <div>
+                                <div style="font-weight: bold;">Maria Santos</div>
+                                <div style="font-size: 0.875rem; color: #666;">Plano Básico</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold;">R$ 99,00</div>
+                                <div style="font-size: 0.875rem; color: #dc3545;">Vence em 2 dias</div>
+                            </div>
+                            <button style="padding: 0.25rem 0.5rem; background: #28a745; color: white; border: none; border-radius: 3px;">Marcar Pago</button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #ddd;">
+                            <div>
+                                <div style="font-weight: bold;">Pedro Costa</div>
+                                <div style="font-size: 0.875rem; color: #666;">Plano Empresarial</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold;">R$ 299,00</div>
+                                <div style="font-size: 0.875rem; color: #17a2b8;">Vence em 10 dias</div>
+                            </div>
+                            <button style="padding: 0.25rem 0.5rem; background: #28a745; color: white; border: none; border-radius: 3px;">Marcar Pago</button>
+                        </div>
+                    </div>
+                `;
+          console.log("✅ Faturas carregadas");
+        }
+      }
+
+      function loadSuporteData() {
+        const container = document.getElementById("openTickets");
+        if (container) {
+          container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #ddd;">
+                            <div>
+                                <div style="font-weight: bold;">#1234 - Problema com login</div>
+                                <div style="font-size: 0.875rem; color: #666;">João Silva - 2 horas atrás</div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span style="background: #ffc107; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">Médio</span>
+                                <button style="padding: 0.25rem 0.5rem; background: #007bff; color: white; border: none; border-radius: 3px;">Responder</button>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #ddd;">
+                            <div>
+                                <div style="font-weight: bold;">#1235 - Dúvida sobre relatórios</div>
+                                <div style="font-size: 0.875rem; color: #666;">Maria Santos - 1 dia atrás</div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span style="background: #17a2b8; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">Baixo</span>
+                                <button style="padding: 0.25rem 0.5rem; background: #007bff; color: white; border: none; border-radius: 3px;">Responder</button>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #ddd;">
+                            <div>
+                                <div style="font-weight: bold;">#1236 - Erro no sistema de vendas</div>
+                                <div style="font-size: 0.875rem; color: #666;">Pedro Costa - 30 minutos atrás</div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span style="background: #dc3545; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">Alto</span>
+                                <button style="padding: 0.25rem 0.5rem; background: #007bff; color: white; border: none; border-radius: 3px;">Responder</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+          console.log("✅ Tickets carregados");
+        }
+      }
+
+      // Inicializar
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("✅ Debug Admin Panel inicializado");
+        loadEstatisticasData(); // Carregar dados iniciais
+      });
+    </script>
+  </body>
+</html>

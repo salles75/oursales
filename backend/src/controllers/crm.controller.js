@@ -4,7 +4,8 @@
 
 import { prisma } from "../config/database.js";
 import { cache } from "../config/redis.js";
-import { AppError, asyncHandler } from "../middlewares/errorHandler.js";
+import { AppError } from "../utils/AppError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { logger } from "../config/logger.js";
 
 /**

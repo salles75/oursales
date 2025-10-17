@@ -24,6 +24,7 @@ npm run dev
 Antes de começar, você precisa ter instalado:
 
 #### ✅ **Node.js** (v18 ou superior)
+
 ```bash
 # Verificar se está instalado
 node --version
@@ -35,6 +36,7 @@ node --version
 ```
 
 #### ✅ **PostgreSQL** (v14 ou superior)
+
 ```bash
 # Verificar se está instalado
 psql --version
@@ -47,11 +49,12 @@ brew services start postgresql@15
 sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
 
-# Windows: 
+# Windows:
 # Download: https://www.postgresql.org/download/windows/
 ```
 
 #### ✅ **Redis** (opcional, mas recomendado)
+
 ```bash
 # Verificar se está instalado
 redis-cli --version
@@ -159,6 +162,7 @@ curl http://localhost:3000/health
 ```
 
 Deve retornar:
+
 ```json
 {
   "status": "healthy",
@@ -308,17 +312,20 @@ npx prisma migrate reset
 ## 🎯 Próximos Passos Após Backend Rodando
 
 1. ✅ **Abrir frontend**
+
    ```bash
    cd frontend
    python3 -m http.server 8080
    ```
 
 2. ✅ **Configurar modo API**
+
    - Abra: `http://localhost:8080/configuracao-api.html`
    - Clique em "Modo API"
    - Clique em "Testar Conexão" para verificar
 
 3. ✅ **Criar primeiro usuário**
+
    - Use Prisma Studio: `npx prisma studio`
    - Ou pela API depois que estiver rodando
 
@@ -394,7 +401,10 @@ open http://localhost:8080
 4. Verifique se Redis está rodando: `redis-cli ping`
 
 **Dúvidas?** Consulte os outros arquivos de documentação:
+
 - `INICIO_RAPIDO.md`
 - `GUIA_INTEGRACAO.md`
 - `IMPLEMENTACAO_COMPLETA.md`
+
+
 

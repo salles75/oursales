@@ -557,6 +557,297 @@ export const crmAdapter = {
   },
 };
 
+// =====================================================
+// ADAPTADORES - INDÚSTRIAS
+// =====================================================
+
+export const industriasAdapter = {
+  async listar(params = {}) {
+    if (storageMode === "api") {
+      const response = await api.industrias.listar(params);
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      return state.industrias || [];
+    }
+  },
+
+  async buscar(id) {
+    if (storageMode === "api") {
+      const response = await api.industrias.buscar(id);
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      return state.industrias?.find((i) => i.id === id) || null;
+    }
+  },
+
+  async criar(industriaData) {
+    if (storageMode === "api") {
+      const response = await api.industrias.criar(industriaData);
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      if (!state.industrias) state.industrias = [];
+
+      const novaIndustria = {
+        ...industriaData,
+        id: `ind-${Date.now()}`,
+        criadoEm: new Date().toISOString(),
+        tabelasPrecos: [],
+        _count: { produtos: 0 },
+      };
+
+      state.industrias.push(novaIndustria);
+      localStorage.setItem("oursales:data", JSON.stringify(state));
+      return novaIndustria;
+    }
+  },
+
+  async atualizar(id, industriaData) {
+    if (storageMode === "api") {
+      const response = await api.industrias.atualizar(id, industriaData);
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      const industriaIndex = state.industrias?.findIndex((i) => i.id === id);
+      
+      if (industriaIndex >= 0) {
+        state.industrias[industriaIndex] = {
+          ...state.industrias[industriaIndex],
+          ...industriaData,
+          atualizadoEm: new Date().toISOString(),
+        };
+        localStorage.setItem("oursales:data", JSON.stringify(state));
+        return state.industrias[industriaIndex];
+      }
+      return null;
+    }
+  },
+
+  async deletar(id) {
+    if (storageMode === "api") {
+      const response = await api.industrias.deletar(id);
+      return response;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      state.industrias = state.industrias?.filter((i) => i.id !== id) || [];
+      localStorage.setItem("oursales:data", JSON.stringify(state));
+      return { success: true };
+    }
+  },
+
+  async obterEstatisticas() {
+    if (storageMode === "api") {
+      const response = await api.industrias.obterEstatisticas();
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      const industrias = state.industrias || [];
+      
+      return {
+        totalIndustrias: industrias.length,
+        industriasAtivas: industrias.filter(i => i.status === "ativo").length,
+        industriasInativas: industrias.filter(i => i.status !== "ativo").length,
+        totalProdutos: state.produtos?.filter(p => p.industriaId).length || 0,
+        totalTabelasPrecos: industrias.reduce((acc, i) => acc + (i.tabelasPrecos?.length || 0), 0),
+      };
+    }
+  },
+};
+
+// =====================================================
+// ADAPTADORES - TABELAS DE PREÇOS
+// =====================================================
+
+export const tabelasPrecosAdapter = {
+  async listar(params = {}) {
+    if (storageMode === "api") {
+      const response = await api.tabelasPrecos.listar(params);
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      const industrias = state.industrias || [];
+      
+      // Extrair todas as tabelas de preços das indústrias
+      let tabelas = [];
+      industrias.forEach(industria => {
+        if (industria.tabelasPrecos) {
+          industria.tabelasPrecos.forEach(tabela => {
+            tabelas.push({
+              ...tabela,
+              industria: {
+                id: industria.id,
+                nomeFantasia: industria.nomeFantasia,
+                razaoSocial: industria.razaoSocial,
+              },
+              _count: { produtos: tabela.produtos?.length || 0 },
+            });
+          });
+        }
+      });
+      
+      return tabelas;
+    }
+  },
+
+  async buscar(id) {
+    if (storageMode === "api") {
+      const response = await api.tabelasPrecos.buscar(id);
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      const industrias = state.industrias || [];
+      
+      for (const industria of industrias) {
+        if (industria.tabelasPrecos) {
+          const tabela = industria.tabelasPrecos.find(t => t.id === id);
+          if (tabela) {
+            return {
+              ...tabela,
+              industria: {
+                id: industria.id,
+                nomeFantasia: industria.nomeFantasia,
+                razaoSocial: industria.razaoSocial,
+              },
+              produtos: tabela.produtos || [],
+            };
+          }
+        }
+      }
+      return null;
+    }
+  },
+
+  async criar(tabelaData) {
+    if (storageMode === "api") {
+      const response = await api.tabelasPrecos.criar(tabelaData);
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      const industria = state.industrias?.find(i => i.id === tabelaData.industriaId);
+      
+      if (industria) {
+        if (!industria.tabelasPrecos) industria.tabelasPrecos = [];
+        
+        const novaTabela = {
+          ...tabelaData,
+          id: `tab-${Date.now()}`,
+          criadoEm: new Date().toISOString(),
+          produtos: [],
+        };
+        
+        industria.tabelasPrecos.push(novaTabela);
+        localStorage.setItem("oursales:data", JSON.stringify(state));
+        return novaTabela;
+      }
+      return null;
+    }
+  },
+
+  async adicionarProduto(tabelaId, produtoData) {
+    if (storageMode === "api") {
+      const response = await api.tabelasPrecos.adicionarProduto(tabelaId, produtoData);
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      const industrias = state.industrias || [];
+      
+      for (const industria of industrias) {
+        if (industria.tabelasPrecos) {
+          const tabela = industria.tabelasPrecos.find(t => t.id === tabelaId);
+          if (tabela) {
+            if (!tabela.produtos) tabela.produtos = [];
+            
+            const produto = state.produtos?.find(p => p.id === produtoData.produtoId);
+            if (produto) {
+              const tabelaPrecoProduto = {
+                id: `tpp-${Date.now()}`,
+                tabelaPrecoId: tabelaId,
+                produtoId: produtoData.produtoId,
+                preco: produtoData.preco,
+                margemLucro: produtoData.margemLucro,
+                desconto: produtoData.desconto || 0,
+                observacoes: produtoData.observacoes,
+                ativo: true,
+                criadoEm: new Date().toISOString(),
+                produto: {
+                  id: produto.id,
+                  codigo: produto.codigo,
+                  nome: produto.nome,
+                  precoVenda: produto.precoVenda,
+                  precoCusto: produto.precoCusto,
+                  estoqueAtual: produto.estoqueAtual,
+                },
+              };
+              
+              tabela.produtos.push(tabelaPrecoProduto);
+              localStorage.setItem("oursales:data", JSON.stringify(state));
+              return tabelaPrecoProduto;
+            }
+          }
+        }
+      }
+      return null;
+    }
+  },
+
+  async importarProdutos(tabelaId, produtos) {
+    if (storageMode === "api") {
+      const response = await api.tabelasPrecos.importarProdutos(tabelaId, produtos);
+      return response.data;
+    } else {
+      const state = JSON.parse(localStorage.getItem("oursales:data") || "{}");
+      const industrias = state.industrias || [];
+      let importados = 0;
+      
+      for (const industria of industrias) {
+        if (industria.tabelasPrecos) {
+          const tabela = industria.tabelasPrecos.find(t => t.id === tabelaId);
+          if (tabela) {
+            if (!tabela.produtos) tabela.produtos = [];
+            
+            for (const produtoData of produtos) {
+              const produto = state.produtos?.find(p => p.id === produtoData.produtoId);
+              if (produto && !tabela.produtos.find(tp => tp.produtoId === produtoData.produtoId)) {
+                const tabelaPrecoProduto = {
+                  id: `tpp-${Date.now()}-${importados}`,
+                  tabelaPrecoId: tabelaId,
+                  produtoId: produtoData.produtoId,
+                  preco: produtoData.preco,
+                  margemLucro: produtoData.margemLucro,
+                  desconto: produtoData.desconto || 0,
+                  observacoes: produtoData.observacoes,
+                  ativo: true,
+                  criadoEm: new Date().toISOString(),
+                  produto: {
+                    id: produto.id,
+                    codigo: produto.codigo,
+                    nome: produto.nome,
+                    precoVenda: produto.precoVenda,
+                    precoCusto: produto.precoCusto,
+                    estoqueAtual: produto.estoqueAtual,
+                  },
+                };
+                
+                tabela.produtos.push(tabelaPrecoProduto);
+                importados++;
+              }
+            }
+            break;
+          }
+        }
+      }
+      
+      localStorage.setItem("oursales:data", JSON.stringify(state));
+      return {
+        importados,
+        total: produtos.length,
+      };
+    }
+  },
+};
+
 // Exportar tudo
 export default {
   setStorageMode,
@@ -567,4 +858,9 @@ export default {
   pedidos: pedidosAdapter,
   transportadoras: transportadorasAdapter,
   crm: crmAdapter,
+  industrias: industriasAdapter,
+  tabelasPrecos: tabelasPrecosAdapter,
 };
+
+
+
