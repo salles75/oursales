@@ -8,11 +8,30 @@
   </head>
   <body data-page="produtos">
     <header>
-      <h1>Produtos</h1>
-      <p>
-        Organize o catálogo de produtos com informações de preço, estoque e
-        descrição para apoiar o time comercial.
-      </p>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>Produtos</h1>
+          <p>
+            Organize o catálogo de produtos com informações de preço, estoque e
+            descrição para apoiar o time comercial.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <nav>
@@ -29,6 +48,7 @@
     </nav>
 
     <main>
+<<<<<<< Updated upstream
       <section>
         <div class="section-header">
           <div>
@@ -56,9 +76,51 @@
               Remover
             </button>
           </div>
+=======
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Produtos cadastrados</h2>
+          <p class="modern-list-description">
+            Selecione um item para atualizar dados ou remover do catálogo.
+          </p>
+>>>>>>> Stashed changes
         </div>
-        <div class="list" id="produtosLista"></div>
-      </section>
+        <div class="modern-list-toolbar">
+          <button
+            type="button"
+            id="produtoCriar"
+            class="square-card-button primary"
+          >
+            Novo produto
+          </button>
+          <button
+            type="button"
+            id="produtoEditar"
+            class="square-card-button secondary"
+            disabled
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            id="produtoImportar"
+            class="square-card-button secondary"
+          >
+            📥 Importar
+          </button>
+          <button
+            type="button"
+            id="produtoRemover"
+            class="square-card-button secondary"
+            disabled
+          >
+            Remover
+          </button>
+        </div>
+        <div class="modern-list-content">
+          <div class="list" id="produtosLista"></div>
+        </div>
+      </div>
     </main>
 
     <div class="overlay" id="produtoOverlay" hidden></div>

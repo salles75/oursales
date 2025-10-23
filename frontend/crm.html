@@ -8,11 +8,30 @@
   </head>
   <body data-page="crm">
     <header>
-      <h1>CRM e Relacionamento</h1>
-      <p>
-        Centralize os feedbacks dos vendedores, organize por canal de contato e
-        acompanhe o histórico de cada cliente.
-      </p>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>CRM e Relacionamento</h1>
+          <p>
+            Centralize os feedbacks dos vendedores, organize por canal de
+            contato e acompanhe o histórico de cada cliente.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <nav>
@@ -29,34 +48,39 @@
     </nav>
 
     <main>
-      <section>
-        <div class="section-header">
-          <div>
-            <h2>Clientes</h2>
-            <p>
-              Selecione um cliente para visualizar ou registrar novos feedbacks.
-            </p>
-          </div>
-          <div class="toolbar">
-            <button type="button" id="crmRegistrar" disabled>
-              Registrar feedback
-            </button>
-          </div>
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Clientes</h2>
+          <p class="modern-list-description">
+            Selecione um cliente para visualizar ou registrar novos feedbacks.
+          </p>
         </div>
-        <div class="list" id="crmClientesLista"></div>
-      </section>
+        <div class="modern-list-toolbar">
+          <button
+            type="button"
+            id="crmRegistrar"
+            class="square-card-button primary"
+            disabled
+          >
+            Registrar feedback
+          </button>
+        </div>
+        <div class="modern-list-content">
+          <div class="list" id="crmClientesLista"></div>
+        </div>
+      </div>
 
-      <section>
-        <div class="section-header">
-          <div>
-            <h2>Histórico de interações</h2>
-            <p id="crmTimelineDescricao">
-              Selecione um cliente para visualizar conversas recentes.
-            </p>
-          </div>
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Histórico de interações</h2>
+          <p class="modern-list-description" id="crmTimelineDescricao">
+            Selecione um cliente para visualizar conversas recentes.
+          </p>
         </div>
-        <div id="crmTimeline" class="timeline"></div>
-      </section>
+        <div class="modern-list-content">
+          <div id="crmTimeline" class="timeline"></div>
+        </div>
+      </div>
     </main>
 
     <div class="overlay" id="crmOverlay" hidden></div>

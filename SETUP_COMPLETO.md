@@ -398,3 +398,9 @@ open http://localhost:8080
 - `GUIA_INTEGRACAO.md`
 - `IMPLEMENTACAO_COMPLETA.md`
 
+<<<<<<< Updated upstream
+=======
+
+
+
+>>>>>>> Stashed changes

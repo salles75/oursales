@@ -35,8 +35,9 @@ export const getPedidos = asyncHandler(async (req, res) => {
     clienteId,
     vendedorId,
     search,
-    sortBy = "dataPedido",
+    sortBy = "criadoEm",
     order = "desc",
+    columns,
   } = req.query;
 
   const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -85,6 +86,14 @@ export const getPedidos = asyncHandler(async (req, res) => {
             nomeCompleto: true,
             razaoSocial: true,
             nomeFantasia: true,
+            cnpj: true,
+            cpf: true,
+            cidade: true,
+            estado: true,
+            telefone: true,
+            email: true,
+            segmento: true,
+            status: true,
           },
         },
         vendedor: {
@@ -92,6 +101,7 @@ export const getPedidos = asyncHandler(async (req, res) => {
             id: true,
             nome: true,
             email: true,
+            telefone: true,
           },
         },
         transportadora: {
@@ -99,6 +109,20 @@ export const getPedidos = asyncHandler(async (req, res) => {
             id: true,
             razaoSocial: true,
             nomeFantasia: true,
+            cidade: true,
+            estado: true,
+          },
+        },
+        criadoPor: {
+          select: {
+            id: true,
+            nome: true,
+          },
+        },
+        aprovadoPor: {
+          select: {
+            id: true,
+            nome: true,
           },
         },
         _count: {

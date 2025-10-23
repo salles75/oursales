@@ -367,3 +367,10 @@ O sistema OurSales está **completamente funcional** e **integrado**! Todos os m
 - ✅ Frontend pode usar localStorage OU API backend
 
 **Aproveite seu sistema de gestão comercial completo! 🚀**
+<<<<<<< Updated upstream
+=======
+
+
+
+
+>>>>>>> Stashed changes

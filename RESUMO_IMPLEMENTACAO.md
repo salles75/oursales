@@ -308,3 +308,10 @@ console.log("Estoque:", prodAtual.data.estoqueAtual); // 45 ✅
 ✅ Logs e auditoria
 
 **Pronto para uso em produção (após ajustes de segurança)! 🚀**
+<<<<<<< Updated upstream
+=======
+
+
+
+
+>>>>>>> Stashed changes

@@ -3,15 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OurSales • Cadastrar Produto</title>
+    <title>OurSales • Produto</title>
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body data-page="produto-form">
     <header>
-      <h1 id="produtoFormTitle">📦 Produto Cadastrando</h1>
-      <p>
-        Preencha as informações do produto, defina preços e controle o catálogo.
-      </p>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1 id="produtoFormTitle">📦 Produto - Novo</h1>
+          <p>
+            Cadastre produtos com informações completas de preços, estoque,
+            dimensões e características para melhor controle comercial.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <nav>
@@ -28,492 +48,599 @@
     </nav>
 
     <main>
-      <form id="produtoForm" autocomplete="off">
+      <form id="produtoForm" class="modern-form">
         <input type="hidden" id="produtoId" />
 
-        <!-- Ações do formulário -->
-        <section class="card">
-          <div class="hero-actions">
-            <button type="submit" id="produtoSalvar">Salvar</button>
-            <a href="produtos.html" class="button button-secondary">Cancelar</a>
-            <button
-              type="button"
-              id="personalizarCampos"
-              class="button-secondary"
-              style="margin-left: auto"
-            >
-              ⚙️ Personalizar Campos
-            </button>
-          </div>
-        </section>
+        <div class="modern-form-header">
+          <h2 class="modern-form-title" id="produtoFormTitle">
+            Informações do Produto
+          </h2>
+          <p class="modern-form-description">
+            Preencha as informações básicas do produto e configure preços e
+            estoque.
+          </p>
+        </div>
 
-        <!-- Informações do Produto -->
-        <section class="card">
-          <h3>Informações do Produto</h3>
-          <div class="grouped three">
-            <label>
-              Indústria *
-              <select id="produtoIndustria" required>
-                <option value="">Selecione</option>
-                <option value="nacional">Nacional</option>
-                <option value="importado">Importado</option>
-              </select>
-            </label>
-            <label>
-              Código do Produto (SKU) *
-              <div style="display: flex; gap: 0.5rem">
+        <div class="modern-form-content">
+          <!-- Seção: Informações Básicas -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                📦
+              </div>
+              <h3 class="modern-form-section-title">Informações Básicas</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="produtoIndustria" class="modern-form-label required"
+                  >Indústria</label
+                >
+                <select
+                  id="produtoIndustria"
+                  class="modern-form-select"
+                  required
+                >
+                  <option value="">Selecione uma indústria</option>
+                </select>
+                <div class="modern-form-help">
+                  Indústria responsável pelo produto
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoSKU" class="modern-form-label required"
+                  >SKU</label
+                >
                 <input
                   type="text"
                   id="produtoSKU"
+                  class="modern-form-input"
                   required
-                  placeholder="Ex: PROD-001"
-                  style="flex: 1"
+                  placeholder="Código SKU do produto"
                 />
-                <button
-                  type="button"
-                  id="gerarCodigo"
-                  class="button-secondary"
-                  title="Gerar código automaticamente"
-                >
-                  🔄 Gerar Código
-                </button>
+                <div class="modern-form-help">Código único do produto</div>
               </div>
-            </label>
-            <label>
-              Nome do Produto *
-              <input
-                type="text"
-                id="produtoNome"
-                required
-                placeholder="Ex: Produto Evolution 500ml"
-              />
-            </label>
+              <div class="modern-form-field">
+                <label for="produtoNome" class="modern-form-label required"
+                  >Nome do Produto</label
+                >
+                <input
+                  type="text"
+                  id="produtoNome"
+                  class="modern-form-input"
+                  required
+                  placeholder="Nome completo do produto"
+                />
+                <div class="modern-form-help">Nome descritivo do produto</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoCategoria" class="modern-form-label"
+                  >Categoria</label
+                >
+                <input
+                  type="text"
+                  id="produtoCategoria"
+                  class="modern-form-input"
+                  placeholder="Categoria do produto"
+                />
+                <div class="modern-form-help">Categoria para organização</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="produtoMarca" class="modern-form-label"
+                  >Marca</label
+                >
+                <input
+                  type="text"
+                  id="produtoMarca"
+                  class="modern-form-input"
+                  placeholder="Marca do produto"
+                />
+                <div class="modern-form-help">Marca do produto</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoModelo" class="modern-form-label"
+                  >Modelo</label
+                >
+                <input
+                  type="text"
+                  id="produtoModelo"
+                  class="modern-form-input"
+                  placeholder="Modelo do produto"
+                />
+                <div class="modern-form-help">Modelo específico</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoCodigoOriginal" class="modern-form-label"
+                  >Código Original</label
+                >
+                <input
+                  type="text"
+                  id="produtoCodigoOriginal"
+                  class="modern-form-input"
+                  placeholder="Código do fabricante"
+                />
+                <div class="modern-form-help">
+                  Código original do fabricante
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoCores" class="modern-form-label"
+                  >Cores</label
+                >
+                <input
+                  type="text"
+                  id="produtoCores"
+                  class="modern-form-input"
+                  placeholder="Cores disponíveis"
+                />
+                <div class="modern-form-help">Cores disponíveis</div>
+              </div>
+            </div>
+            <div class="modern-form-field">
+              <label for="produtoObservacoes" class="modern-form-label"
+                >Observações</label
+              >
+              <textarea
+                id="produtoObservacoes"
+                class="modern-form-textarea"
+                rows="3"
+                placeholder="Observações gerais sobre o produto..."
+              ></textarea>
+              <div class="modern-form-help">
+                Observações importantes sobre o produto
+              </div>
+            </div>
           </div>
 
-          <div class="grouped three">
-            <label>
-              Preço de Venda
-              <div style="display: flex; gap: 0.5rem">
+          <!-- Seção: Preços e Custos -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                💰
+              </div>
+              <h3 class="modern-form-section-title">Preços e Custos</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="produtoPrecoCompra" class="modern-form-label"
+                  >Preço de Compra</label
+                >
+                <input
+                  type="number"
+                  id="produtoPrecoCompra"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Preço de compra do produto</div>
+              </div>
+              <div class="modern-form-field">
+                <label
+                  for="produtoPrecoVenda"
+                  class="modern-form-label required"
+                  >Preço de Venda</label
+                >
                 <input
                   type="number"
                   id="produtoPrecoVenda"
-                  min="0"
+                  class="modern-form-input"
                   step="0.01"
+                  min="0"
+                  required
                   placeholder="0,00"
-                  style="flex: 1"
                 />
-                <button
-                  type="button"
-                  id="calcularPrecoVenda"
-                  class="button-secondary"
-                  title="Calcular preço de venda"
-                >
-                  🧮 Calcular Preço de Venda
-                </button>
+                <div class="modern-form-help">Preço de venda ao cliente</div>
               </div>
-            </label>
-            <label>
-              NCM (Mercosul)
-              <input
-                type="text"
-                id="produtoNCM"
-                placeholder="Ex: 12345678"
-                maxlength="8"
-              />
-            </label>
-            <label>
-              Preço em Promoção
-              <input
-                type="number"
-                id="produtoPrecoPromocao"
-                min="0"
-                step="0.01"
-                placeholder="0,00"
-              />
-            </label>
-          </div>
-
-          <div class="grouped two">
-            <label>
-              Cores Disponíveis
-              <textarea
-                id="produtoCores"
-                rows="3"
-                placeholder="Ex: Azul, Vermelho, Verde..."
-              ></textarea>
-            </label>
-            <label>
-              Marca do produto
-              <input
-                type="text"
-                id="produtoMarca"
-                placeholder="Ex: Evolution"
-              />
-            </label>
-          </div>
-        </section>
-
-        <!-- Custo e Precificação -->
-        <section class="card">
-          <h3>Custo e Precificação</h3>
-
-          <div class="grouped three">
-            <label>
-              Markup Multiplicador
-              <input
-                type="number"
-                id="produtoMarkup"
-                min="0"
-                step="0.01"
-                placeholder="Ex: 2.5"
-              />
-            </label>
-            <label>
-              Margem de Lucro (%)
-              <div style="display: flex; gap: 0.5rem">
+              <div class="modern-form-field">
+                <label for="produtoPrecoPromocao" class="modern-form-label"
+                  >Preço Promocional</label
+                >
+                <input
+                  type="number"
+                  id="produtoPrecoPromocao"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Preço promocional (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoCustoMedio" class="modern-form-label"
+                  >Custo Médio</label
+                >
+                <select id="produtoCustoMedio" class="modern-form-select">
+                  <option value="ultimo">Último Preço</option>
+                  <option value="medio">Preço Médio</option>
+                  <option value="fifo">FIFO</option>
+                  <option value="lifo">LIFO</option>
+                </select>
+                <div class="modern-form-help">Método de cálculo do custo</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="produtoMarkup" class="modern-form-label"
+                  >Markup (%)</label
+                >
+                <input
+                  type="number"
+                  id="produtoMarkup"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Percentual de markup</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoMargemLucro" class="modern-form-label"
+                  >Margem de Lucro (%)</label
+                >
                 <input
                   type="number"
                   id="produtoMargemLucro"
-                  min="0"
-                  max="100"
+                  class="modern-form-input"
                   step="0.01"
+                  min="0"
                   placeholder="0,00"
-                  style="flex: 1"
                 />
-                <button
-                  type="button"
-                  id="calcularPrecoVendaMargem"
-                  class="button-secondary"
-                  title="Calcular preço de venda"
-                >
-                  🧮 Calcular Preço de Venda
-                </button>
+                <div class="modern-form-help">Margem de lucro percentual</div>
               </div>
-            </label>
-            <label>
-              Preço de Compra / Fabricação
-              <input
-                type="number"
-                id="produtoPrecoCompra"
-                min="0"
-                step="0.01"
-                placeholder="0,00"
-              />
-            </label>
+              <div class="modern-form-field">
+                <label for="produtoMargemMinima" class="modern-form-label"
+                  >Margem Mínima (%)</label
+                >
+                <input
+                  type="number"
+                  id="produtoMargemMinima"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Margem mínima aceitável</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoMargemSeguranca" class="modern-form-label"
+                  >Margem de Segurança (%)</label
+                >
+                <input
+                  type="number"
+                  id="produtoMargemSeguranca"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Margem de segurança</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="produtoIPI" class="modern-form-label"
+                  >IPI (%)</label
+                >
+                <input
+                  type="number"
+                  id="produtoIPI"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Percentual de IPI</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoNCM" class="modern-form-label">NCM</label>
+                <input
+                  type="text"
+                  id="produtoNCM"
+                  class="modern-form-input"
+                  placeholder="Código NCM"
+                />
+                <div class="modern-form-help">
+                  Código NCM para classificação fiscal
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoTabelaPreco" class="modern-form-label"
+                  >Tabela de Preço</label
+                >
+                <input
+                  type="text"
+                  id="produtoTabelaPreco"
+                  class="modern-form-input"
+                  placeholder="Tabela de preço"
+                />
+                <div class="modern-form-help">Tabela de preço aplicável</div>
+              </div>
+            </div>
           </div>
 
-          <div class="grouped three">
-            <label>
-              Cálculo do Custo Médio (Compra)
-              <select id="produtoCustoMedio">
-                <option value="ultimo">Último preço de compra</option>
-                <option value="media">Média dos últimos preços</option>
-                <option value="manual">Manual</option>
-              </select>
-            </label>
-            <label>
-              Margem de Lucro Mínima (%)
-              <input
-                type="number"
-                id="produtoMargemMinima"
-                min="0"
-                max="100"
-                step="0.01"
-                placeholder="0,00"
-              />
-            </label>
-            <label>
-              Margem de Segurança (Lucro)
-              <input
-                type="number"
-                id="produtoMargemSeguranca"
-                min="0"
-                step="0.01"
-                placeholder="0,00"
-              />
-            </label>
-          </div>
-        </section>
-
-        <!-- Informações Complementares -->
-        <section class="card">
-          <h3>Informações Complementares</h3>
-
-          <div class="grouped three">
-            <label>
-              IPI (%) *
-              <input
-                type="number"
-                id="produtoIPI"
-                min="0"
-                max="100"
-                step="0.01"
-                value="0"
-                required
-              />
-            </label>
-            <label>
-              Unidade Medida
-              <input
-                type="text"
-                id="produtoUnidadeMedida"
-                placeholder="Exemplo: UN, KG, PCT, CX, FARDO"
-              />
-            </label>
-            <label>
-              Embalagem
-              <input
-                type="text"
-                id="produtoEmbalagem"
-                placeholder="Quantidade de produto por embalagem: 1, 6, 12, 24 etc."
-              />
-            </label>
-          </div>
-
-          <label>
-            Observações
-            <textarea
-              id="produtoObservacoes"
-              rows="3"
-              placeholder="Informações adicionais sobre o produto..."
-            ></textarea>
-          </label>
-
-          <div class="grouped three">
-            <label>
-              Tabela de Preço
-              <select id="produtoTabelaPreco">
-                <option value="">Selecione</option>
-                <option value="tabela1">Tabela 1</option>
-                <option value="tabela2">Tabela 2</option>
-                <option value="tabela3">Tabela 3</option>
-              </select>
-            </label>
-            <label>
-              Categoria
-              <select id="produtoCategoria">
-                <option value="">Escolha...</option>
-                <option value="bebidas">Bebidas</option>
-                <option value="alimentos">Alimentos</option>
-                <option value="suplementos">Suplementos</option>
-                <option value="kits">Kits</option>
-              </select>
-            </label>
-            <label>
-              Status *
-              <select id="produtoStatus" required>
-                <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
-              </select>
-            </label>
+          <!-- Seção: Controle de Estoque -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--amber-500),
+                    var(--amber-600)
+                  );
+                "
+              >
+                📊
+              </div>
+              <h3 class="modern-form-section-title">Controle de Estoque</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="produtoUnidadeMedida" class="modern-form-label"
+                  >Unidade de Medida</label
+                >
+                <select id="produtoUnidadeMedida" class="modern-form-select">
+                  <option value="">Selecione</option>
+                  <option value="UN">Unidade</option>
+                  <option value="KG">Quilograma</option>
+                  <option value="G">Grama</option>
+                  <option value="L">Litro</option>
+                  <option value="ML">Mililitro</option>
+                  <option value="M">Metro</option>
+                  <option value="CM">Centímetro</option>
+                  <option value="M2">Metro Quadrado</option>
+                  <option value="M3">Metro Cúbico</option>
+                  <option value="CX">Caixa</option>
+                  <option value="PC">Peça</option>
+                  <option value="DZ">Dúzia</option>
+                  <option value="GR">Grosa</option>
+                </select>
+                <div class="modern-form-help">Unidade de medida do produto</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoEmbalagem" class="modern-form-label"
+                  >Embalagem</label
+                >
+                <input
+                  type="text"
+                  id="produtoEmbalagem"
+                  class="modern-form-input"
+                  placeholder="Tipo de embalagem"
+                />
+                <div class="modern-form-help">Tipo de embalagem</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoStatus" class="modern-form-label"
+                  >Status</label
+                >
+                <select id="produtoStatus" class="modern-form-select">
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
+                  <option value="descontinuado">Descontinuado</option>
+                  <option value="semestoque">Sem Estoque</option>
+                </select>
+                <div class="modern-form-help">Status do produto</div>
+              </div>
+            </div>
           </div>
 
-          <div class="grouped three">
-            <label>
-              Altura da Unidade (m)
-              <input
-                type="number"
-                id="produtoAltura"
-                min="0"
-                step="0.01"
-                placeholder="0,00"
-              />
-            </label>
-            <label>
-              Largura da Unidade (m)
-              <input
-                type="number"
-                id="produtoLargura"
-                min="0"
-                step="0.01"
-                placeholder="0,00"
-              />
-            </label>
-            <label>
-              Comprimento da Unidade (m)
-              <input
-                type="number"
-                id="produtoComprimento"
-                min="0"
-                step="0.01"
-                placeholder="0,00"
-              />
-            </label>
+          <!-- Seção: Dimensões e Peso -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--secondary-500),
+                    var(--secondary-600)
+                  );
+                "
+              >
+                📏
+              </div>
+              <h3 class="modern-form-section-title">Dimensões e Peso</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="produtoAltura" class="modern-form-label"
+                  >Altura (cm)</label
+                >
+                <input
+                  type="number"
+                  id="produtoAltura"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Altura em centímetros</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoLargura" class="modern-form-label"
+                  >Largura (cm)</label
+                >
+                <input
+                  type="number"
+                  id="produtoLargura"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Largura em centímetros</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoComprimento" class="modern-form-label"
+                  >Comprimento (cm)</label
+                >
+                <input
+                  type="number"
+                  id="produtoComprimento"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Comprimento em centímetros</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="produtoPesoLiquido" class="modern-form-label"
+                  >Peso Líquido (kg)</label
+                >
+                <input
+                  type="number"
+                  id="produtoPesoLiquido"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Peso líquido em quilogramas</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="produtoFatorCubagem" class="modern-form-label"
+                  >Fator Cubagem</label
+                >
+                <input
+                  type="number"
+                  id="produtoFatorCubagem"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">
+                  Fator para cálculo de cubagem
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="grouped three">
-            <label>
-              Código Original
-              <input
-                type="text"
-                id="produtoCodigoOriginal"
-                placeholder="Código do fabricante"
-              />
-            </label>
-            <label>
-              Modelo
-              <input type="text" id="produtoModelo" placeholder="Modelo" />
-            </label>
-            <label>
-              Peso Líquido (Kg)
-              <input
-                type="number"
-                id="produtoPesoLiquido"
-                min="0"
-                step="0.001"
-                placeholder="0,000"
-              />
-            </label>
-          </div>
-
-          <div class="grouped one">
-            <label>
-              Fator Cubagem (Kg/m3)
-              <input
-                type="number"
-                id="produtoFatorCubagem"
-                min="0"
-                step="0.01"
-                placeholder="Ex: 300"
-              />
-            </label>
-          </div>
-        </section>
-
-        <!-- Foto do Produto -->
-        <section class="card">
-          <h3>Foto do Produto</h3>
-
-          <div class="grouped two">
-            <label>
-              Informe a URL da foto do produto
+          <!-- Seção: Mídia -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--purple-500),
+                    var(--purple-600)
+                  );
+                "
+              >
+                🖼️
+              </div>
+              <h3 class="modern-form-section-title">Mídia</h3>
+            </div>
+            <div class="modern-form-field">
+              <label for="produtoFotoURL" class="modern-form-label"
+                >URL da Foto</label
+              >
               <input
                 type="url"
                 id="produtoFotoURL"
+                class="modern-form-input"
                 placeholder="https://exemplo.com/foto.jpg"
               />
-            </label>
-            <div style="display: flex; align-items: flex-end">
+              <div class="modern-form-help">
+                URL da foto principal do produto
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Substituições Tributárias -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--gray-500),
+                    var(--gray-600)
+                  );
+                "
+              >
+                🏛️
+              </div>
+              <h3 class="modern-form-section-title">
+                Substituições Tributárias
+              </h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Estado</th>
+                    <th>Alíquota (%)</th>
+                    <th>Base de Cálculo</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="produtoSTTbody">
+                  <tr>
+                    <td colspan="4" class="empty-state">
+                      Nenhuma substituição tributária adicionada!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
               <button
                 type="button"
-                id="uploadPorURL"
-                class="button-secondary"
-                style="width: 100%"
+                id="produtoSTAdicionar"
+                class="modern-form-button secondary"
               >
-                Upload por Url da Imagem
+                <span>➕</span> Adicionar ST
               </button>
             </div>
           </div>
+        </div>
 
-          <div class="file-upload-area">
-            <div class="upload-zone" id="uploadZone">
-              <p style="margin: 0; color: var(--text-500)">
-                Arraste as imagens e solte aqui
-              </p>
-            </div>
-            <input
-              type="file"
-              id="produtoFotoInput"
-              accept="image/*"
-              multiple
-              style="display: none"
-            />
-          </div>
-
-          <div id="imagensPreview" style="margin-top: 1rem"></div>
-        </section>
-
-        <!-- Substituição Tributária por Estado -->
-        <section class="card">
-          <h3>Substituição Tributária por Estado</h3>
-
-          <div class="grouped three" style="align-items: flex-end">
-            <label>
-              Estado
-              <select id="stEstado">
-                <option value="AC">AC</option>
-                <option value="AL">AL</option>
-                <option value="AP">AP</option>
-                <option value="AM">AM</option>
-                <option value="BA">BA</option>
-                <option value="CE">CE</option>
-                <option value="DF">DF</option>
-                <option value="ES">ES</option>
-                <option value="GO">GO</option>
-                <option value="MA">MA</option>
-                <option value="MT">MT</option>
-                <option value="MS">MS</option>
-                <option value="MG">MG</option>
-                <option value="PA">PA</option>
-                <option value="PB">PB</option>
-                <option value="PR">PR</option>
-                <option value="PE">PE</option>
-                <option value="PI">PI</option>
-                <option value="RJ">RJ</option>
-                <option value="RN">RN</option>
-                <option value="RS">RS</option>
-                <option value="RO">RO</option>
-                <option value="RR">RR</option>
-                <option value="SC">SC</option>
-                <option value="SP">SP</option>
-                <option value="SE">SE</option>
-                <option value="TO">TO</option>
-              </select>
-            </label>
-            <label>
-              S. Tributária (%)
-              <input
-                type="number"
-                id="stAliquota"
-                min="0"
-                max="100"
-                step="0.01"
-                placeholder="0,00"
-              />
-            </label>
-            <button
-              type="button"
-              id="adicionarST"
-              class="button-secondary"
-              style="height: fit-content"
-            >
-              ➕ Adicionar
-            </button>
-          </div>
-
-          <div class="table-wrapper" style="margin-top: 1rem">
-            <table>
-              <thead>
-                <tr>
-                  <th>Estado</th>
-                  <th>S. Tributária (%)</th>
-                  <th style="width: 80px">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="stListaEstados">
-                <tr>
-                  <td colspan="3" class="empty-state">
-                    Nenhuma substituição tributária cadastrada
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Ações finais -->
-        <section class="card">
-          <div class="hero-actions">
-            <button type="submit">Salvar Produto</button>
-            <a href="produtos.html" class="button button-secondary">Cancelar</a>
-          </div>
-        </section>
+        <div class="modern-form-actions">
+          <a href="produtos.html" class="modern-form-button secondary">
+            <span>↩️</span> Cancelar
+          </a>
+          <button
+            type="submit"
+            id="produtoSalvar"
+            class="modern-form-button primary"
+          >
+            <span>💾</span> Salvar Produto
+          </button>
+        </div>
       </form>
     </main>
 
     <footer>
-      Mantenha o catálogo sempre atualizado para garantir propostas
-      consistentes.
+      Cadastre produtos com informações completas para melhor controle de
+      estoque e precificação.
     </footer>
 
     <script src="assets/js/app.js" defer></script>

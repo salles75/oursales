@@ -27,6 +27,13 @@ import pedidosRoutes from "./routes/pedidos.routes.js";
 import crmRoutes from "./routes/crm.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import relatoriosRoutes from "./routes/relatorios.routes.js";
+<<<<<<< Updated upstream
+=======
+import industriasRoutes from "./routes/industrias.routes.js";
+import tabelasPrecosRoutes from "./routes/tabelas-precos.routes.js";
+import configuracoesRoutes from "./routes/configuracoes.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
+>>>>>>> Stashed changes
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -131,6 +138,13 @@ app.use("/api/pedidos", pedidosRoutes);
 app.use("/api/crm", crmRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/relatorios", relatoriosRoutes);
+<<<<<<< Updated upstream
+=======
+app.use("/api/industrias", industriasRoutes);
+app.use("/api/tabelas-precos", tabelasPrecosRoutes);
+app.use("/api/configuracoes", configuracoesRoutes);
+app.use("/api/admin", adminRoutes);
+>>>>>>> Stashed changes
 
 // =====================================================
 // Rota raiz
