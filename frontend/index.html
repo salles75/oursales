@@ -4,16 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Painel Comercial</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/fix-animations.css" />
   </head>
   <body data-page="home">
     <header>
-      <h1>OurSales</h1>
-      <p>
-        Painel de vendas para representantes gerenciarem clientes,
-        transportadoras, orçamentos e pedidos, com dados armazenados no
-        navegador.
-      </p>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>OurSales</h1>
+          <p>Sistema de Gestão Comercial</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <nav>
@@ -41,16 +58,6 @@
           <a href="clientes.html">Começar pelos clientes</a>
           <a href="orcamentos.html" class="secondary">Criar orçamento</a>
         </div>
-      </section>
-
-      <section class="card">
-        <div class="section-header">
-          <div>
-            <h2>📊 Visão Geral</h2>
-            <p>Acompanhe suas principais métricas em tempo real</p>
-          </div>
-        </div>
-        <div id="dataStats" class="data-stats"></div>
       </section>
 
       <div class="page-grid two">
@@ -103,8 +110,8 @@
         <div class="card">
           <h2>Pedidos</h2>
           <p>
-            Registre pedidos fechados com transportadora responsável, valores e
-            data prevista de entrega.
+            Registre vendas fechadas com cliente, transportadora e valor
+            faturado. Acompanhe entregas e prazos.
           </p>
           <div class="hero-actions">
             <a href="pedidos.html"><span>Ir para Pedidos</span></a>
@@ -114,8 +121,8 @@
         <div class="card">
           <h2>CRM</h2>
           <p>
-            Consolide feedbacks dos vendedores por canal e acompanhe o histórico
-            de relacionamento com cada cliente.
+            Centralize feedbacks dos vendedores, organize por canal e acompanhe
+            histórico de relacionamento.
           </p>
           <div class="hero-actions">
             <a href="crm.html"><span>Ir para CRM</span></a>
@@ -125,10 +132,13 @@
     </main>
 
     <footer>
-      Exemplo criado para demonstrar fluxo de vendas para representantes. Adapte
-      conforme os processos do seu time.
+      OurSales • Sistema de Gestão Comercial • Desenvolvido para otimizar sua
+      operação
     </footer>
 
+    <script src="assets/js/input-masks.js"></script>
+    <script src="assets/js/disable-animations.js" defer></script>
+    <script src="assets/js/oursales-fixes.js" defer></script>
     <script src="assets/js/app.js" defer></script>
   </body>
 </html>

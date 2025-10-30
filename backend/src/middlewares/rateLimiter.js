@@ -12,7 +12,7 @@ import { logger } from "../config/logger.js";
  */
 export const rateLimiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000", 10), // 15 minutos
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "100", 10),
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "1000", 10), // Aumentado para desenvolvimento
   message: {
     success: false,
     error: {

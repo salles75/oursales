@@ -5,14 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Indústrias</title>
     <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/fix-animations.css" />
+    <link rel="stylesheet" href="assets/css/table-improvements.css" />
   </head>
   <body data-page="industrias">
     <header>
-      <h1>Indústrias</h1>
-      <p>
-        Gerencie seus fornecedores e parceiros industriais. Mantenha cadastro
-        completo com dados de contato e condições comerciais.
-      </p>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>Indústrias</h1>
+          <p>
+            Gerencie seus fornecedores e parceiros industriais. Mantenha
+            cadastro completo com dados de contato e condições comerciais.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <nav>
@@ -29,43 +50,53 @@
     </nav>
 
     <main>
-      <section>
-        <div class="section-header">
-          <div>
-            <h2>Indústrias cadastradas</h2>
-            <p>
-              Selecione uma indústria para atualizar informações ou remover do
-              cadastro.
-            </p>
-          </div>
-          <div class="toolbar">
-            <button type="button" id="industriaCriar">Nova indústria</button>
-            <button
-              type="button"
-              id="industriaEditar"
-              class="button-secondary"
-              disabled
-            >
-              Editar
-            </button>
-            <button
-              type="button"
-              id="industriaRemover"
-              class="button-danger"
-              disabled
-            >
-              Remover
-            </button>
-          </div>
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Indústrias cadastradas</h2>
+          <p class="modern-list-description">
+            Selecione uma indústria para atualizar informações ou remover do
+            cadastro.
+          </p>
         </div>
-        <div class="list" id="industriasLista"></div>
-      </section>
+        <div class="modern-list-toolbar">
+          <button
+            type="button"
+            id="industriaCriar"
+            class="square-card-button primary"
+          >
+            Nova indústria
+          </button>
+          <button
+            type="button"
+            id="industriaEditar"
+            class="square-card-button secondary"
+            disabled
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            id="industriaRemover"
+            class="square-card-button secondary"
+            disabled
+          >
+            Remover
+          </button>
+        </div>
+        <div class="modern-list-content">
+          <div class="list" id="industriasLista"></div>
+        </div>
+      </div>
     </main>
 
     <footer>
       Mantenha o cadastro de fornecedores atualizado para otimizar suas compras.
     </footer>
 
+    <script src="assets/js/column-customizer.js" defer></script>
+    <script src="assets/js/disable-animations.js" defer></script>
+    <script src="assets/js/oursales-fixes.js" defer></script>
+    <script src="assets/js/input-masks.js"></script>
     <script src="assets/js/app.js" defer></script>
   </body>
 </html>

@@ -8,11 +8,30 @@
   </head>
   <body data-page="pedido-form">
     <header>
-      <h1 id="pedidoFormTitle">🛒 Pedido - Novo</h1>
-      <p>
-        Preencha as informações do pedido, adicione produtos e controle o
-        faturamento.
-      </p>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1 id="pedidoFormTitle">🛒 Pedido - Novo</h1>
+          <p>
+            Preencha as informações do pedido, adicione produtos e controle o
+            faturamento.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <nav>
@@ -29,440 +48,701 @@
     </nav>
 
     <main>
-      <form id="pedidoForm" autocomplete="off">
+      <form id="pedidoForm" class="modern-form" autocomplete="off">
         <input type="hidden" id="pedidoId" />
 
-        <!-- Ações do formulário -->
-        <section class="card">
-          <div class="hero-actions">
-            <button type="submit" id="pedidoSalvar">Salvar</button>
-            <button
-              type="button"
-              id="pedidoSalvarEnviar"
-              class="button-secondary"
-            >
-              Salvar e Enviar
-            </button>
-            <button
-              type="button"
-              id="pedidoVisualizar"
-              class="button-secondary"
-            >
-              Visualizar
-            </button>
-            <a href="pedidos.html" class="button button-danger">Cancelar</a>
-            <button
-              type="button"
-              id="personalizarCampos"
-              class="button-secondary"
-              style="margin-left: auto"
-            >
-              ⚙️ Personalizar Campos
-            </button>
-          </div>
-        </section>
+        <div class="modern-form-header">
+          <h2 class="modern-form-title" id="pedidoFormTitle">
+            Informações do Pedido
+          </h2>
+          <p class="modern-form-description">
+            Preencha as informações básicas do pedido e adicione os produtos.
+          </p>
+        </div>
 
-        <!-- Informações sobre o Pedido -->
-        <section class="card">
-          <h3>Informações sobre o Pedido</h3>
-          <div class="grouped three">
-            <label>
-              Cliente *
-              <div style="display: flex; gap: 0.5rem">
+        <div class="modern-form-content">
+          <!-- Seção: Informações Básicas -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                📋
+              </div>
+              <h3 class="modern-form-section-title">Informações Básicas</h3>
+            </div>
+
+            <div class="modern-form-field">
+              <label
+                for="pedidoClienteSearch"
+                class="modern-form-label required"
+                >Cliente</label
+              >
+              <div
+                style="
+                  display: flex;
+                  gap: var(--space-2);
+                  margin-bottom: var(--space-2);
+                "
+              >
                 <input
                   type="text"
                   id="pedidoClienteSearch"
+                  class="modern-form-input"
                   placeholder="Razão Social, Nome Fantasia, Código ou CNPJ/CPF"
                   style="flex: 1"
                 />
                 <button
                   type="button"
                   id="pedidoClienteProcurar"
-                  class="button-secondary"
+                  class="modern-form-button secondary"
                 >
-                  🔍 Procurar
+                  <span>🔍</span> Procurar
                 </button>
               </div>
-              <select id="pedidoCliente" required style="margin-top: 0.5rem">
+              <select id="pedidoCliente" class="modern-form-select" required>
                 <option value="">Selecione um cliente</option>
               </select>
-            </label>
-          </div>
+              <div class="modern-form-help">
+                Selecione o cliente para o pedido
+              </div>
+            </div>
 
-          <div class="grouped three">
-            <label>
-              Comprador
-              <select id="pedidoComprador">
-                <option value="">Selecione</option>
-              </select>
-            </label>
-            <label>
-              Transportadora
-              <select id="pedidoTransportadora">
-                <option value="">Selecione uma transportadora</option>
-              </select>
-            </label>
-            <label>
-              Frete
-              <select id="pedidoTipoFrete">
-                <option value="">Selecione</option>
-                <option value="cif">CIF</option>
-                <option value="fob">FOB</option>
-                <option value="sem">Sem Frete</option>
-              </select>
-            </label>
-          </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pedidoComprador" class="modern-form-label"
+                  >Comprador</label
+                >
+                <select id="pedidoComprador" class="modern-form-select">
+                  <option value="">Selecione</option>
+                </select>
+                <div class="modern-form-help">
+                  Comprador responsável (opcional)
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pedidoTransportadora" class="modern-form-label"
+                  >Transportadora</label
+                >
+                <select id="pedidoTransportadora" class="modern-form-select">
+                  <option value="">Selecione uma transportadora</option>
+                </select>
+                <div class="modern-form-help">
+                  Transportadora para entrega (opcional)
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pedidoTipoFrete" class="modern-form-label"
+                  >Frete</label
+                >
+                <select id="pedidoTipoFrete" class="modern-form-select">
+                  <option value="">Selecione</option>
+                  <option value="cif">CIF</option>
+                  <option value="fob">FOB</option>
+                  <option value="sem">Sem Frete</option>
+                </select>
+                <div class="modern-form-help">Tipo de frete</div>
+              </div>
+            </div>
 
-          <div class="grouped four">
-            <label>
-              Dt. Venda *
-              <input type="date" id="pedidoDataVenda" required />
-            </label>
-            <label>
-              Previsão Entrega
-              <div style="display: flex; gap: 0.5rem; align-items: center">
-                <input type="date" id="pedidoPrevisaoEntrega" style="flex: 1" />
-                <a
-                  href="#"
-                  id="adicionarAgendaSV"
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pedidoDataVenda" class="modern-form-label required"
+                  >Data da Venda</label
+                >
+                <input
+                  type="date"
+                  id="pedidoDataVenda"
+                  class="modern-form-input"
+                  required
+                />
+                <div class="modern-form-help">Data da venda</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pedidoPrevisaoEntrega" class="modern-form-label"
+                  >Previsão de Entrega</label
+                >
+                <div
                   style="
-                    font-size: 0.875rem;
-                    color: #007bff;
-                    text-decoration: none;
-                    white-space: nowrap;
+                    display: flex;
+                    gap: var(--space-2);
+                    align-items: center;
                   "
                 >
-                  📅 Adicionar na Agenda SV
-                </a>
-              </div>
-            </label>
-            <label>
-              Dt. Fatura
-              <input type="date" id="pedidoDataFatura" />
-            </label>
-            <label>
-              Nota Fiscal
-              <input
-                type="text"
-                id="pedidoNotaFiscal"
-                placeholder="Número da NF"
-              />
-            </label>
-          </div>
-        </section>
-
-        <!-- Itens do Pedido -->
-        <section class="card">
-          <div class="section-header">
-            <div>
-              <h3>Itens do Pedido</h3>
-            </div>
-            <div class="toolbar">
-              <button
-                type="button"
-                id="buscarProdutos"
-                class="button-secondary"
-              >
-                🔍 Busca Avançada
-              </button>
-              <button type="button" id="modoCesta" class="button-secondary">
-                🛒 Modo Cesta de Compra
-              </button>
-              <button type="button" id="excluirItem" class="button-danger">
-                🗑️ Excluir item
-              </button>
-              <button type="button" id="maisAcoes" class="button-secondary">
-                ⋮ Mais Ações
-              </button>
-            </div>
-          </div>
-
-          <div
-            class="alert alert-info"
-            style="
-              margin-bottom: 1rem;
-              padding: 0.75rem 1rem;
-              background: #fff3cd;
-              border: 1px solid #ffc107;
-              border-radius: 4px;
-              color: #856404;
-            "
-          >
-            ⚠️ Agora o campo de importação de produtos está dentro de Mais
-            Ações.
-          </div>
-
-          <div class="search-product-container">
-            <input
-              type="text"
-              id="produtoSearch"
-              placeholder="Nome do produto, código/código original ou EAN"
-              class="search-product-input"
-            />
-            <button
-              type="button"
-              id="adicionarProduto"
-              class="button-secondary"
-            >
-              ➕ Adicionar
-            </button>
-          </div>
-
-          <!-- Filtros de quantidade -->
-          <div
-            class="quantity-filters"
-            style="
-              display: flex;
-              gap: 0.5rem;
-              margin-top: 1rem;
-              align-items: center;
-            "
-          >
-            <input
-              type="number"
-              placeholder="0"
-              style="width: 60px"
-              id="filtro1"
-            />
-            <input
-              type="number"
-              placeholder="0"
-              style="width: 60px"
-              id="filtro2"
-            />
-            <input
-              type="number"
-              placeholder="0"
-              style="width: 60px"
-              id="filtro3"
-            />
-            <input
-              type="number"
-              placeholder="0"
-              style="width: 60px"
-              id="filtro4"
-            />
-            <input
-              type="number"
-              placeholder="0"
-              style="width: 60px"
-              id="filtro5"
-            />
-            <input
-              type="number"
-              placeholder="0"
-              style="width: 60px"
-              id="filtro6"
-            />
-            <input
-              type="number"
-              placeholder="0"
-              style="width: 60px"
-              id="filtro7"
-            />
-            <button type="button" id="aplicarFiltros" class="button-secondary">
-              Aplicar
-            </button>
-            <button type="button" id="limparFiltros" class="button-secondary">
-              Limpar %
-            </button>
-          </div>
-
-          <div class="table-wrapper" style="margin-top: 1rem">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width: 40px">
-                    <input type="checkbox" id="selecionarTodos" />
-                  </th>
-                  <th>Código</th>
-                  <th>Descrição</th>
-                  <th>Fornecedor/Marca</th>
-                  <th>Comissão 👁️</th>
-                  <th>R$ Tabela</th>
-                  <th>Preço Final</th>
-                  <th>Qtde</th>
-                  <th>Qtde. Faturada</th>
-                  <th>Total R$</th>
-                </tr>
-              </thead>
-              <tbody id="pedidoItensList">
-                <tr>
-                  <td colspan="10" class="empty-state">
-                    Nenhum produto adicionado neste pedido!
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="9" style="text-align: right; font-weight: bold">
-                    Total:
-                  </td>
-                  <td
-                    id="tabelaTotalPedido"
-                    style="font-weight: bold; text-align: right"
+                  <input
+                    type="date"
+                    id="pedidoPrevisaoEntrega"
+                    class="modern-form-input"
+                    style="flex: 1"
+                  />
+                  <a
+                    href="#"
+                    id="adicionarAgendaSV"
+                    style="
+                      font-size: var(--font-size-sm);
+                      color: var(--primary-500);
+                      text-decoration: none;
+                      white-space: nowrap;
+                    "
                   >
-                    0,00
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </section>
-
-        <!-- Totais do Pedido -->
-        <section class="card">
-          <h3>Totais do Pedido</h3>
-
-          <div class="totals-grid">
-            <div class="totals-column">
-              <div class="total-item">
-                <span class="total-label">Qtde. Itens</span>
-                <span class="total-value" id="totalItens">0,00</span>
+                    📅 Adicionar na Agenda SV
+                  </a>
+                </div>
+                <div class="modern-form-help">Data prevista para entrega</div>
               </div>
-              <div class="total-item">
-                <span class="total-label">Qtde Produtos</span>
-                <span class="total-value" id="totalProdutos">0,00</span>
-              </div>
-              <div class="total-item">
-                <span class="total-label">Total Peso Líquido</span>
-                <span class="total-value" id="totalPesoLiquido">0,000 Kg</span>
-              </div>
-              <div class="total-item">
-                <span class="total-label">Total IPI</span>
-                <span class="total-value" id="totalIPI">R$ 0,00</span>
-              </div>
-            </div>
-
-            <div class="totals-column">
-              <div class="total-item">
-                <span class="total-label">Acréscimo</span>
-                <span class="total-value" id="totalAcrescimo">R$ 0,00</span>
-              </div>
-              <div class="total-item">
-                <span class="total-label">Total Peso Bruto</span>
-                <span class="total-value" id="totalPesoBruto">0,000 Kg</span>
-              </div>
-              <div class="total-item">
-                <span class="total-label">Total S/ Impostos</span>
-                <span class="total-value" id="totalSemImpostos">R$ 0,00</span>
-              </div>
-            </div>
-
-            <div class="totals-column">
-              <div class="total-item">
-                <span class="total-label">Frete</span>
-                <span class="total-value" id="totalFrete">R$ 0,00</span>
-              </div>
-              <div class="total-item">
-                <span class="total-label">Desconto</span>
-                <span class="total-value" id="totalDesconto">R$ 0,00</span>
-              </div>
-              <div class="total-item">
-                <span class="total-label">Total ST</span>
-                <span class="total-value" id="totalST">R$ 0,00</span>
-              </div>
-              <div class="total-item highlight">
-                <span class="total-label"><strong>Total Final</strong></span>
-                <span class="total-value"
-                  ><strong id="totalFinal">R$ 0,00</strong></span
+              <div class="modern-form-field">
+                <label for="pedidoDataFatura" class="modern-form-label"
+                  >Data do Faturamento</label
                 >
+                <input
+                  type="date"
+                  id="pedidoDataFatura"
+                  class="modern-form-input"
+                />
+                <div class="modern-form-help">
+                  Data do faturamento (opcional)
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pedidoNotaFiscal" class="modern-form-label"
+                  >Nota Fiscal</label
+                >
+                <input
+                  type="text"
+                  id="pedidoNotaFiscal"
+                  class="modern-form-input"
+                  placeholder="Número da NF"
+                />
+                <div class="modern-form-help">
+                  Número da nota fiscal (opcional)
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="frete-calculator">
-            <h4>Calcular % Frete</h4>
-            <div class="grouped three">
-              <label>
-                Valor do Frete (R$)
-                <input
-                  type="number"
-                  id="valorFrete"
-                  min="0"
-                  step="0.01"
-                  value="0"
-                />
-              </label>
-              <label>
-                Acréscimo (R$)
-                <input
-                  type="number"
-                  id="valorAcrescimo"
-                  min="0"
-                  step="0.01"
-                  value="0"
-                />
-              </label>
-              <label>
-                Desconto (R$)
-                <input
-                  type="number"
-                  id="valorDesconto"
-                  min="0"
-                  step="0.01"
-                  value="0"
-                />
-              </label>
+          <!-- Seção: Itens do Pedido -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                📦
+              </div>
+              <h3 class="modern-form-section-title">Itens do Pedido</h3>
             </div>
-          </div>
-        </section>
 
-        <!-- Informações Complementares -->
-        <section class="card">
-          <h3>Informações Complementares</h3>
+            <div
+              style="
+                background: rgba(255, 243, 205, 0.8);
+                border: 1px solid rgba(255, 193, 7, 0.5);
+                border-radius: var(--radius-lg);
+                padding: var(--space-3);
+                margin-bottom: var(--space-4);
+                color: #856404;
+              "
+            >
+              ⚠️ Agora o campo de importação de produtos está dentro de Mais
+              Ações.
+            </div>
 
-          <div class="grouped two">
-            <label>
-              Condição de Pagamento
-              <div style="display: flex; gap: 0.5rem">
-                <textarea
-                  id="pedidoCondicaoPagamento"
-                  rows="2"
-                  placeholder="Inclua algum produto no Pedido"
-                  style="flex: 1"
-                ></textarea>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="produtoSearch" class="modern-form-label"
+                  >Buscar Produto</label
+                >
+                <input
+                  type="text"
+                  id="produtoSearch"
+                  class="modern-form-input"
+                  placeholder="Nome do produto, código/código original ou EAN"
+                />
+                <div class="modern-form-help">Digite para buscar produtos</div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">&nbsp;</label>
                 <button
                   type="button"
-                  id="copiarCondicao"
-                  class="button-secondary"
-                  style="padding: 0.5rem"
-                  title="Copiar condição"
+                  id="adicionarProduto"
+                  class="modern-form-button secondary"
                 >
-                  📋
+                  <span>➕</span> Adicionar Produto
                 </button>
               </div>
-            </label>
-            <label>
-              Tipo
-              <select id="pedidoTipo">
-                <option value="pedido">Pedido</option>
-                <option value="orcamento">Orçamento</option>
-                <option value="cotacao">Cotação</option>
-              </select>
-            </label>
+            </div>
+
+            <!-- Filtros de quantidade -->
+            <div
+              style="
+                display: flex;
+                gap: var(--space-2);
+                margin: var(--space-4) 0;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro1"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro2"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro3"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro4"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro5"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro6"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro7"
+              />
+              <button
+                type="button"
+                id="aplicarFiltros"
+                class="modern-form-button secondary"
+              >
+                Aplicar
+              </button>
+              <button
+                type="button"
+                id="limparFiltros"
+                class="modern-form-button secondary"
+              >
+                Limpar %
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40px">
+                      <input type="checkbox" id="selecionarTodos" />
+                    </th>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Fornecedor/Marca</th>
+                    <th>Comissão 👁️</th>
+                    <th>R$ Tabela</th>
+                    <th>Preço Final</th>
+                    <th>Qtde</th>
+                    <th>Qtde. Faturada</th>
+                    <th>Total R$</th>
+                  </tr>
+                </thead>
+                <tbody id="pedidoItensList">
+                  <tr>
+                    <td colspan="10" class="empty-state">
+                      Nenhum produto adicionado neste pedido!
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td
+                      colspan="9"
+                      style="text-align: right; font-weight: bold"
+                    >
+                      Total:
+                    </td>
+                    <td
+                      id="tabelaTotalPedido"
+                      style="font-weight: bold; text-align: right"
+                    >
+                      0,00
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
 
-          <div class="grouped two">
-            <label class="checkbox-label">
-              <input type="checkbox" id="pedidoCancelado" />
-              Cancelado
-            </label>
-            <label>
-              Vendedor *
-              <select id="pedidoVendedor" required>
-                <option value="">Selecione</option>
-                <option value="guilherme">Guilherme</option>
-                <option value="vendedor1">Vendedor 1</option>
-                <option value="vendedor2">Vendedor 2</option>
-              </select>
-            </label>
+          <!-- Seção: Totais -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--amber-500),
+                    var(--amber-600)
+                  );
+                "
+              >
+                💰
+              </div>
+              <h3 class="modern-form-section-title">Totais do Pedido</h3>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-label">Qtde. Itens</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalItens">0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Qtde Produtos</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalProdutos">0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total Peso Líquido</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalPesoLiquido">0,000 Kg</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total IPI</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalIPI">R$ 0,00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-label">Acréscimo</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalAcrescimo">R$ 0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total Peso Bruto</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalPesoBruto">0,000 Kg</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total S/ Impostos</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalSemImpostos">R$ 0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Frete</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalFrete">R$ 0,00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-label">Desconto</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalDesconto">R$ 0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total ST</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalST">R$ 0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label"
+                  ><strong>Total Final</strong></label
+                >
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      var(--primary-500),
+                      var(--primary-600)
+                    );
+                    color: white;
+                    font-weight: var(--font-weight-bold);
+                    font-size: var(--font-size-lg);
+                  "
+                >
+                  <span id="totalFinal">R$ 0,00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Calculadora de Frete -->
+            <div
+              style="
+                margin-top: var(--space-6);
+                padding-top: var(--space-4);
+                border-top: 1px solid rgba(226, 232, 240, 0.3);
+              "
+            >
+              <h4
+                style="
+                  margin-bottom: var(--space-4);
+                  color: var(--text-primary);
+                "
+              >
+                Calcular % Frete
+              </h4>
+              <div class="modern-form-grid">
+                <div class="modern-form-field">
+                  <label for="valorFrete" class="modern-form-label"
+                    >Valor do Frete (R$)</label
+                  >
+                  <input
+                    type="number"
+                    id="valorFrete"
+                    class="modern-form-input"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+                <div class="modern-form-field">
+                  <label for="valorAcrescimo" class="modern-form-label"
+                    >Acréscimo (R$)</label
+                  >
+                  <input
+                    type="number"
+                    id="valorAcrescimo"
+                    class="modern-form-input"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+                <div class="modern-form-field">
+                  <label for="valorDesconto" class="modern-form-label"
+                    >Desconto (R$)</label
+                  >
+                  <input
+                    type="number"
+                    id="valorDesconto"
+                    class="modern-form-input"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="grouped one">
-            <label>
-              Status
-              <select id="pedidoStatus">
+          <!-- Seção: Informações Complementares -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--secondary-500),
+                    var(--secondary-600)
+                  );
+                "
+              >
+                📝
+              </div>
+              <h3 class="modern-form-section-title">
+                Informações Complementares
+              </h3>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pedidoCondicaoPagamento" class="modern-form-label"
+                  >Condição de Pagamento</label
+                >
+                <div style="display: flex; gap: var(--space-2)">
+                  <textarea
+                    id="pedidoCondicaoPagamento"
+                    class="modern-form-textarea"
+                    rows="2"
+                    placeholder="Inclua algum produto no Pedido"
+                    style="flex: 1"
+                  ></textarea>
+                  <button
+                    type="button"
+                    id="copiarCondicao"
+                    class="modern-form-button secondary"
+                    style="padding: var(--space-2)"
+                    title="Copiar condição"
+                  >
+                    <span>📋</span>
+                  </button>
+                </div>
+                <div class="modern-form-help">Condições de pagamento</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pedidoTipo" class="modern-form-label">Tipo</label>
+                <select id="pedidoTipo" class="modern-form-select">
+                  <option value="pedido">Pedido</option>
+                  <option value="orcamento">Orçamento</option>
+                  <option value="cotacao">Cotação</option>
+                </select>
+                <div class="modern-form-help">Tipo do documento</div>
+              </div>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-label">
+                  <input
+                    type="checkbox"
+                    id="pedidoCancelado"
+                    style="margin-right: var(--space-2)"
+                  />
+                  Cancelado
+                </label>
+              </div>
+              <div class="modern-form-field">
+                <label for="pedidoVendedor" class="modern-form-label required"
+                  >Vendedor</label
+                >
+                <select id="pedidoVendedor" class="modern-form-select" required>
+                  <option value="">Selecione</option>
+                  <option value="guilherme">Guilherme</option>
+                  <option value="vendedor1">Vendedor 1</option>
+                  <option value="vendedor2">Vendedor 2</option>
+                </select>
+                <div class="modern-form-help">Vendedor responsável</div>
+              </div>
+            </div>
+
+            <div class="modern-form-field">
+              <label for="pedidoStatus" class="modern-form-label">Status</label>
+              <select id="pedidoStatus" class="modern-form-select">
                 <option value="">Selecione</option>
                 <option value="pendente">Pendente</option>
                 <option value="aprovado">Aprovado</option>
@@ -472,73 +752,132 @@
                 <option value="entregue">Entregue</option>
                 <option value="cancelado">Cancelado</option>
               </select>
-            </label>
+              <div class="modern-form-help">Status atual do pedido</div>
+            </div>
+
+            <div class="modern-form-field">
+              <label for="pedidoObservacoes" class="modern-form-label"
+                >Observações</label
+              >
+              <textarea
+                id="pedidoObservacoes"
+                class="modern-form-textarea"
+                rows="3"
+                placeholder="Informações sobre o pedido, condições especiais..."
+              ></textarea>
+              <div class="modern-form-help">Observações gerais do pedido</div>
+            </div>
+
+            <div class="modern-form-field">
+              <label for="pedidoObservacaoPrivada" class="modern-form-label"
+                >Observação Privada</label
+              >
+              <textarea
+                id="pedidoObservacaoPrivada"
+                class="modern-form-textarea"
+                rows="2"
+                placeholder="Anotações internas (não aparece no pedido)"
+              ></textarea>
+              <div class="modern-form-help">
+                Anotações internas (não aparecem no pedido)
+              </div>
+            </div>
+
+            <div class="modern-form-field">
+              <label for="pedidoEnderecoEntrega" class="modern-form-label"
+                >Endereço de Entrega</label
+              >
+              <textarea
+                id="pedidoEnderecoEntrega"
+                class="modern-form-textarea"
+                rows="3"
+                placeholder="Endereço completo de entrega..."
+              ></textarea>
+              <div class="modern-form-help">Endereço completo para entrega</div>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pedidoFatorCubagem" class="modern-form-label"
+                  >Fator Cubagem (Kg/m³)</label
+                >
+                <input
+                  type="number"
+                  id="pedidoFatorCubagem"
+                  class="modern-form-input"
+                  min="0"
+                  step="0.01"
+                  placeholder="Ex: 300"
+                />
+                <div class="modern-form-help">
+                  Fator de cubagem para cálculo de frete
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pedidoOrdemCompra" class="modern-form-label"
+                  >Nº Ordem de Compra</label
+                >
+                <input
+                  type="text"
+                  id="pedidoOrdemCompra"
+                  class="modern-form-input"
+                  placeholder="Número da OC"
+                />
+                <div class="modern-form-help">
+                  Número da ordem de compra (opcional)
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pedidoNumeroERP" class="modern-form-label"
+                  >Nº Pedido ERP</label
+                >
+                <input
+                  type="text"
+                  id="pedidoNumeroERP"
+                  class="modern-form-input"
+                  placeholder="Número do pedido no ERP"
+                />
+                <div class="modern-form-help">
+                  Número do pedido no sistema ERP (opcional)
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <label>
-            Observações
-            <textarea
-              id="pedidoObservacoes"
-              rows="3"
-              placeholder="Informações sobre o pedido, condições especiais..."
-            ></textarea>
-          </label>
-
-          <label>
-            Observação Privada
-            <textarea
-              id="pedidoObservacaoPrivada"
-              rows="2"
-              placeholder="Anotações internas (não aparece no pedido)"
-            ></textarea>
-          </label>
-
-          <label>
-            Endereço de Entrega
-            <textarea
-              id="pedidoEnderecoEntrega"
-              rows="3"
-              placeholder="Endereço completo de entrega..."
-            ></textarea>
-          </label>
-
-          <div class="grouped three">
-            <label>
-              Fator Cubagem (Kg/m3)
-              <input
-                type="number"
-                id="pedidoFatorCubagem"
-                min="0"
-                step="0.01"
-                placeholder="Ex: 300"
-              />
-            </label>
-            <label>
-              Nº Ordem de Compra
-              <input
-                type="text"
-                id="pedidoOrdemCompra"
-                placeholder="Número da OC"
-              />
-            </label>
-            <label>
-              Nº Pedido ERP
-              <input
-                type="text"
-                id="pedidoNumeroERP"
-                placeholder="Número do pedido no ERP"
-              />
-            </label>
-          </div>
-        </section>
-
-        <!-- Ações finais -->
-        <section class="card">
-          <div class="hero-actions">
-            <button type="submit">Salvar Pedido</button>
-            <a href="pedidos.html" class="button button-secondary">Cancelar</a>
-          </div>
-        </section>
+        <div class="modern-form-actions">
+          <button
+            type="button"
+            id="personalizarCampos"
+            class="modern-form-button secondary"
+          >
+            <span>⚙️</span> Personalizar Campos
+          </button>
+          <button
+            type="button"
+            id="pedidoVisualizar"
+            class="modern-form-button secondary"
+          >
+            <span>👁️</span> Visualizar
+          </button>
+          <button
+            type="button"
+            id="pedidoSalvarEnviar"
+            class="modern-form-button secondary"
+          >
+            <span>📤</span> Salvar e Enviar
+          </button>
+          <a href="pedidos.html" class="modern-form-button secondary">
+            <span>↩️</span> Cancelar
+          </a>
+          <button
+            type="submit"
+            id="pedidoSalvar"
+            class="modern-form-button primary"
+          >
+            <span>💾</span> Salvar Pedido
+          </button>
+        </div>
       </form>
     </main>
 

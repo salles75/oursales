@@ -1,3 +1,53 @@
+// === FUNÇÕES AUXILIARES PARA PERSONALIZAÇÃO DE COLUNAS ===
+
+function getCustomColumns(page) {
+  try {
+    const saved = localStorage.getItem("oursales-custom-columns");
+    const customColumns = saved ? JSON.parse(saved) : {};
+    return customColumns[page] || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function toggleSelectAll(checkbox) {
+  const table = checkbox.closest("table");
+  const rowCheckboxes = table.querySelectorAll('tbody input[type="checkbox"]');
+
+  rowCheckboxes.forEach((cb) => {
+    cb.checked = checkbox.checked;
+    // Disparar evento de change para cada checkbox
+    cb.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+
+  // Atualizar estado dos botões de ação
+  updateActionsState();
+}
+
+// Função para validar seleção única para edição/CRM
+function validateSingleSelection(actionType) {
+  const checkedBoxes = document.querySelectorAll(
+    'tbody input[type="checkbox"]:checked'
+  );
+
+  if (checkedBoxes.length === 0) {
+    alert("Selecione pelo menos um item.");
+    return false;
+  }
+
+  if (
+    (actionType === "edit" || actionType === "crm") &&
+    checkedBoxes.length > 1
+  ) {
+    alert("Para editar ou abrir CRM, selecione apenas um item.");
+    return false;
+  }
+
+  return true;
+}
+
+// === INICIALIZAÇÃO DO SISTEMA ===
+
 const storageKey = "oursales:data";
 const defaultState = {
   clientes: [],
@@ -113,7 +163,7 @@ function syncSelection(container, radioName, selectedId) {
     .forEach((input) => {
       const isSelected = input.value === selectedId;
       input.checked = isSelected;
-      const row = input.closest("tr");
+      const row = input.closest("tr") || input.closest(".list-item");
       if (row) {
         row.classList.toggle("is-selected", isSelected);
       }
@@ -158,9 +208,30 @@ const storage = {
   },
   persist() {
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(this.cache));
+      if (!this.cache) {
+        console.error("❌ ERRO: Tentando persistir cache vazio!");
+        return;
+      }
+      
+      const jsonString = JSON.stringify(this.cache);
+      window.localStorage.setItem(storageKey, jsonString);
+      console.log("💾 localStorage atualizado com sucesso. Tamanho:", jsonString.length, "bytes");
+      
+      // Verificar se realmente foi salvo
+      const verification = window.localStorage.getItem(storageKey);
+      if (!verification) {
+        console.error("❌ ERRO: localStorage não contém dados após setItem!");
+      } else {
+        const parsed = JSON.parse(verification);
+        console.log("✅ Verificação: localStorage contém", Object.keys(parsed).length, "coleções");
+        console.log("✅ Verificação: industrias tem", parsed.industrias?.length || 0, "itens");
+      }
     } catch (error) {
-      console.warn("Falha ao salvar dados:", error);
+      console.error("❌ ERRO ao salvar dados no localStorage:", error);
+      console.error("Detalhes do erro:", error.message);
+      if (error.name === 'QuotaExceededError') {
+        console.error("💾 ERRO: Espaço insuficiente no localStorage!");
+      }
     }
   },
   set(nextState) {
@@ -174,6 +245,12 @@ const storage = {
     return this.set(draft);
   },
 };
+
+// Funções auxiliares para industrias
+function getIndustrias() {
+  const state = storage.load();
+  return state.industrias || [];
+}
 
 function seedDataIfEmpty() {
   const state = storage.load();
@@ -434,9 +511,17 @@ function initClientesPage() {
       render();
       return;
     }
+
+    // Se o cliente não tem tipo definido, detectar pelo documento
+    let tipoCliente = cliente.tipo;
+    if (!tipoCliente) {
+      // Inferir tipo pelo tamanho do documento (CPF tem 11 dígitos, CNPJ tem 14)
+      const docNumeros = (cliente.documento || "").replace(/\D/g, "");
+      tipoCliente = docNumeros.length === 14 ? "PJ" : "PF";
+    }
+
     // Redirecionar para a página correta baseado no tipo
-    const pagina =
-      cliente.tipo === "PJ" ? "cliente-pj.html" : "cliente-pf.html";
+    const pagina = tipoCliente === "PJ" ? "cliente-pj.html" : "cliente-pf.html";
     window.location.href = `${pagina}?id=${selectedId}`;
   });
 
@@ -585,30 +670,110 @@ function initClientesPage() {
       return;
     }
 
+    // Obter colunas personalizadas
+    const customColumns = getCustomColumns("clientes");
+    const allColumns = [
+      "nome",
+      "documento",
+      "email",
+      "telefone",
+      "observacoes",
+    ];
+    const visibleColumns =
+      customColumns.length > 0 ? customColumns : allColumns;
+
     const linhas = clientes
-      .map(
-        (cliente) => `
-          <tr class="table-row${
-            cliente.id === selectedId ? " is-selected" : ""
-          }" data-id="${cliente.id}">
-            <td class="select-cell">
-              <label class="select-radio">
-                <input type="radio" name="clienteSelecionado" value="${
-                  cliente.id
-                }" ${cliente.id === selectedId ? "checked" : ""} />
-                <span class="bubble"></span>
-              </label>
-            </td>
-            <td>
-              <strong>${cliente.nome}</strong>
-              <div class="muted">${cliente.email}</div>
-            </td>
-            <td>${cliente.documento}</td>
-            <td>${cliente.telefone}</td>
-            <td>${cliente.observacoes || "-"}</td>
-          </tr>
-        `
-      )
+      .map((cliente) => {
+        let rowContent = `
+            <tr class="table-row${
+              cliente.id === selectedId ? " is-selected" : ""
+            }" data-id="${cliente.id}">
+              <td class="select-cell">
+                <label class="select-radio">
+                  <input type="checkbox" name="clienteSelecionado" value="${
+                    cliente.id
+                  }" />
+                </label>
+              </td>`;
+
+        // Renderizar colunas dinamicamente
+        visibleColumns.forEach((column) => {
+          let cellContent = "";
+          switch (column) {
+            case "nome":
+              cellContent = `<strong>${cliente.nome}</strong>`;
+              break;
+            case "documento":
+              cellContent = cliente.documento || "-";
+              break;
+            case "email":
+              cellContent = cliente.email || "-";
+              break;
+            case "telefone":
+              cellContent = cliente.telefone || "-";
+              break;
+            case "observacoes":
+              cellContent = cliente.observacoes || "-";
+              break;
+            case "endereco":
+              cellContent = cliente.endereco || "-";
+              break;
+            case "cidade":
+              cellContent = cliente.cidade || "-";
+              break;
+            case "estado":
+              cellContent = cliente.estado || "-";
+              break;
+            case "cep":
+              cellContent = cliente.cep || "-";
+              break;
+            case "dataCadastro":
+              cellContent = cliente.dataCadastro
+                ? new Date(cliente.dataCadastro).toLocaleDateString("pt-BR")
+                : "-";
+              break;
+            case "ultimaCompra":
+              cellContent = cliente.ultimaCompra
+                ? new Date(cliente.ultimaCompra).toLocaleDateString("pt-BR")
+                : "-";
+              break;
+            case "totalCompras":
+              cellContent = cliente.totalCompras
+                ? `R$ ${cliente.totalCompras.toFixed(2).replace(".", ",")}`
+                : "R$ 0,00";
+              break;
+            default:
+              cellContent = "-";
+          }
+
+          const className = column === "nome" ? "" : "dynamic-column";
+          rowContent += `<td class="${className}">${cellContent}</td>`;
+        });
+
+        rowContent += "</tr>";
+        return rowContent;
+      })
+      .join("");
+
+    // Construir cabeçalho dinamicamente
+    const headerCells = visibleColumns
+      .map((column) => {
+        const labels = {
+          nome: "Cliente",
+          documento: "CNPJ/CPF",
+          email: "E-mail",
+          telefone: "Telefone",
+          observacoes: "Observações",
+          endereco: "Endereço",
+          cidade: "Cidade",
+          estado: "Estado",
+          cep: "CEP",
+          dataCadastro: "Data Cadastro",
+          ultimaCompra: "Última Compra",
+          totalCompras: "Total Compras",
+        };
+        return `<th>${labels[column] || column}</th>`;
+      })
       .join("");
 
     listContainer.innerHTML = `
@@ -616,11 +781,10 @@ function initClientesPage() {
         <table>
           <thead>
             <tr>
-              <th class="select-cell">Selecionar</th>
-              <th>Cliente</th>
-              <th>Documento</th>
-              <th>Telefone</th>
-              <th>Observações</th>
+              <th class="select-cell">
+                <input type="checkbox" class="select-all-checkbox" title="Selecionar todos">
+              </th>
+              ${headerCells}
             </tr>
           </thead>
           <tbody>${linhas}</tbody>
@@ -630,6 +794,64 @@ function initClientesPage() {
 
     syncSelection(listContainer, "clienteSelecionado", selectedId);
     updateActionsState();
+
+    // Adicionar click nas linhas para seleção
+    listContainer.querySelectorAll("tbody tr").forEach((row) => {
+      row.style.cursor = "pointer";
+      row.addEventListener("click", (e) => {
+        // Não selecionar se clicou no checkbox ou botão
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      });
+      
+      // Double click para editar
+      row.addEventListener("dblclick", (e) => {
+        // Não editar se clicou no checkbox ou botão
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+        
+        const clienteId = row.getAttribute("data-id");
+        if (clienteId) {
+          // Selecionar o cliente
+          const checkbox = row.querySelector('input[type="checkbox"]');
+          if (checkbox) {
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          // Aguardar um pouco para garantir que a seleção foi processada
+          setTimeout(() => {
+            selectedId = clienteId;
+            const cliente = storage.load().clientes.find((item) => item.id === clienteId);
+            if (cliente) {
+              // Se o cliente não tem tipo definido, detectar pelo documento
+              let tipoCliente = cliente.tipo;
+              if (!tipoCliente) {
+                // Inferir tipo pelo tamanho do documento (CPF tem 11 dígitos, CNPJ tem 14)
+                const docNumeros = (cliente.documento || "").replace(/\D/g, "");
+                tipoCliente = docNumeros.length === 14 ? "PJ" : "PF";
+              }
+              // Redirecionar para a página correta baseado no tipo
+              const pagina = tipoCliente === "PJ" ? "cliente-pj.html" : "cliente-pf.html";
+              window.location.href = `${pagina}?id=${clienteId}`;
+            }
+          }, 100);
+        }
+      });
+    });
   }
 
   render();
@@ -782,13 +1004,100 @@ function initClientePJPage() {
         <input type="checkbox" name="contatoComprador" ${compradorChecked} />
       </td>
       <td class="actions">
-        <button type="button" class="button-danger" data-action="remove">Remover</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
       </td>
     `;
-    tr.querySelector('[data-action="remove"]').addEventListener(
-      "click",
-      (event) => event.currentTarget.closest("tr").remove()
-    );
+
+    // Event listener para botão adicionar
+    tr.querySelector(".button-add-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Coletar dados da linha atual
+      const inputs = tr.querySelectorAll("input");
+      const dados = {};
+
+      inputs.forEach((input) => {
+        if (input.type === "checkbox") {
+          dados[input.name] = input.checked;
+        } else {
+          dados[input.name] = input.value.trim();
+        }
+      });
+
+      // Verificar se há dados preenchidos
+      const temDados = Object.values(dados).some((valor) =>
+        typeof valor === "string" ? valor.length > 0 : valor === true
+      );
+
+      if (temDados) {
+        console.log("✅ CONTATO ADICIONADO À LISTA:", dados);
+
+        // Remover mensagem "Nenhum contato adicionado!"
+        const emptyRows = contatosBody.querySelectorAll("tr");
+        emptyRows.forEach((row) => {
+          const cells = row.querySelectorAll("td");
+          if (
+            cells.length === 1 &&
+            cells[0].textContent.includes("Nenhum contato adicionado!")
+          ) {
+            row.remove();
+          }
+        });
+
+        // Criar nova linha na lista com os dados
+        const newListRow = document.createElement("tr");
+        newListRow.innerHTML = `
+          <td>${dados.contatoNome || ""}</td>
+          <td>${dados.contatoEmail || ""}</td>
+          <td>${dados.contatoTelefone || ""}</td>
+          <td>${dados.contatoAniversario || ""}</td>
+          <td>${dados.contatoCargo || ""}</td>
+          <td>${dados.contatoComprador ? "Sim" : "Não"}</td>
+          <td>
+            <button type="button" class="button-remove-inline" title="Remover contato" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+          </td>
+        `;
+
+        // Adicionar event listener para remover da lista
+        newListRow
+          .querySelector(".button-remove-inline")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            newListRow.remove();
+
+            // Se não há mais contatos, mostrar mensagem vazia
+            if (contatosBody.querySelectorAll("tr").length === 0) {
+              const emptyRow = document.createElement("tr");
+              emptyRow.innerHTML =
+                '<td colspan="7">📋 Nenhum contato adicionado!</td>';
+              contatosBody.appendChild(emptyRow);
+            }
+          });
+
+        // Inserir antes da linha de input
+        contatosBody.insertBefore(newListRow, tr);
+
+        // Limpar campos da linha de input
+        inputs.forEach((input) => {
+          if (input.type === "checkbox") {
+            input.checked = false;
+          } else {
+            input.value = "";
+          }
+        });
+      } else {
+        console.log("⚠️ Nenhum dado preenchido para adicionar");
+      }
+    });
+
+    // Event listener para botão remover
+    tr.querySelector(".button-remove-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.closest("tr").remove();
+    });
     contatosBody.appendChild(tr);
   }
 
@@ -880,13 +1189,103 @@ function initClientePJPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-danger" data-action="remove">Remover</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
       </td>
     `;
-    tr.querySelector('[data-action="remove"]').addEventListener(
-      "click",
-      (event) => event.currentTarget.closest("tr").remove()
-    );
+
+    // Event listener para botão adicionar
+    tr.querySelector(".button-add-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Coletar dados da linha atual
+      const inputs = tr.querySelectorAll("input, select");
+      const dados = {};
+
+      inputs.forEach((input) => {
+        if (input.type === "checkbox") {
+          dados[input.name] = input.checked;
+        } else {
+          dados[input.name] = input.value.trim();
+        }
+      });
+
+      // Verificar se há dados preenchidos
+      const temDados = Object.values(dados).some((valor) =>
+        typeof valor === "string" ? valor.length > 0 : valor === true
+      );
+
+      if (temDados) {
+        console.log("✅ PAGAMENTO ADICIONADO À LISTA:", dados);
+
+        // Remover mensagem "Nenhuma condição de pagamento adicionada!"
+        const emptyRows = pagamentosBody.querySelectorAll("tr");
+        emptyRows.forEach((row) => {
+          const cells = row.querySelectorAll("td");
+          if (
+            cells.length === 1 &&
+            cells[0].textContent.includes(
+              "Nenhuma condição de pagamento adicionada!"
+            )
+          ) {
+            row.remove();
+          }
+        });
+
+        // Criar nova linha na lista com os dados
+        const newListRow = document.createElement("tr");
+        newListRow.innerHTML = `
+          <td>${dados.pagamentoDescricao || ""}</td>
+          <td>${dados.pagamentoParcelas || ""}</td>
+          <td>${dados.pagamentoIntervalo || ""}</td>
+          <td>${dados.pagamentoDesconto || ""}</td>
+          <td>${dados.pagamentoMinimo || ""}</td>
+          <td>${dados.pagamentoIndustria || ""}</td>
+          <td>
+            <button type="button" class="button-remove-inline" title="Remover pagamento" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+          </td>
+        `;
+
+        // Adicionar event listener para remover da lista
+        newListRow
+          .querySelector(".button-remove-inline")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            newListRow.remove();
+
+            // Se não há mais pagamentos, mostrar mensagem vazia
+            if (pagamentosBody.querySelectorAll("tr").length === 0) {
+              const emptyRow = document.createElement("tr");
+              emptyRow.innerHTML =
+                '<td colspan="7">📋 Nenhuma condição de pagamento adicionada!</td>';
+              pagamentosBody.appendChild(emptyRow);
+            }
+          });
+
+        // Inserir antes da linha de input
+        pagamentosBody.insertBefore(newListRow, tr);
+
+        // Limpar campos da linha de input
+        inputs.forEach((input) => {
+          if (input.type === "checkbox") {
+            input.checked = false;
+          } else {
+            input.value = "";
+          }
+        });
+      } else {
+        console.log("⚠️ Nenhum dado preenchido para adicionar");
+      }
+    });
+
+    // Event listener para botão remover
+    tr.querySelector(".button-remove-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.closest("tr").remove();
+    });
     pagamentosBody.appendChild(tr);
   }
 
@@ -903,13 +1302,96 @@ function initClientePJPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-danger" data-action="remove">Remover</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
       </td>
     `;
-    tr.querySelector('[data-action="remove"]').addEventListener(
-      "click",
-      (event) => event.currentTarget.closest("tr").remove()
-    );
+
+    // Event listener para botão adicionar
+    tr.querySelector(".button-add-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Coletar dados da linha atual
+      const inputs = tr.querySelectorAll("input, select");
+      const dados = {};
+
+      inputs.forEach((input) => {
+        if (input.type === "checkbox") {
+          dados[input.name] = input.checked;
+        } else {
+          dados[input.name] = input.value.trim();
+        }
+      });
+
+      // Verificar se há dados preenchidos
+      const temDados = Object.values(dados).some((valor) =>
+        typeof valor === "string" ? valor.length > 0 : valor === true
+      );
+
+      if (temDados) {
+        console.log("✅ VENDEDOR ADICIONADO À LISTA:", dados);
+
+        // Remover mensagem "Nenhum vendedor adicionado!"
+        const emptyRows = vendedoresBody.querySelectorAll("tr");
+        emptyRows.forEach((row) => {
+          const cells = row.querySelectorAll("td");
+          if (
+            cells.length === 1 &&
+            cells[0].textContent.includes("Nenhum vendedor adicionado!")
+          ) {
+            row.remove();
+          }
+        });
+
+        // Criar nova linha na lista com os dados
+        const newListRow = document.createElement("tr");
+        newListRow.innerHTML = `
+          <td>${dados.pjVendedor || ""}</td>
+          <td>
+            <button type="button" class="button-remove-inline" title="Remover vendedor" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+          </td>
+        `;
+
+        // Adicionar event listener para remover da lista
+        newListRow
+          .querySelector(".button-remove-inline")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            newListRow.remove();
+
+            // Se não há mais vendedores, mostrar mensagem vazia
+            if (vendedoresBody.querySelectorAll("tr").length === 0) {
+              const emptyRow = document.createElement("tr");
+              emptyRow.innerHTML =
+                '<td colspan="2">📋 Nenhum vendedor adicionado!</td>';
+              vendedoresBody.appendChild(emptyRow);
+            }
+          });
+
+        // Inserir antes da linha de input
+        vendedoresBody.insertBefore(newListRow, tr);
+
+        // Limpar campos da linha de input
+        inputs.forEach((input) => {
+          if (input.type === "checkbox") {
+            input.checked = false;
+          } else {
+            input.value = "";
+          }
+        });
+      } else {
+        console.log("⚠️ Nenhum dado preenchido para adicionar");
+      }
+    });
+
+    // Event listener para botão remover
+    tr.querySelector(".button-remove-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.closest("tr").remove();
+    });
     vendedoresBody.appendChild(tr);
   }
 
@@ -950,13 +1432,98 @@ function initClientePJPage() {
         />
       </td>
       <td class="actions">
-        <button type="button" class="button-danger" data-action="remove">Remover</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
       </td>
     `;
-    tr.querySelector('[data-action="remove"]').addEventListener(
-      "click",
-      (event) => event.currentTarget.closest("tr").remove()
-    );
+
+    // Event listener para botão adicionar
+    tr.querySelector(".button-add-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Coletar dados da linha atual
+      const inputs = tr.querySelectorAll("input, select");
+      const dados = {};
+
+      inputs.forEach((input) => {
+        if (input.type === "checkbox") {
+          dados[input.name] = input.checked;
+        } else {
+          dados[input.name] = input.value.trim();
+        }
+      });
+
+      // Verificar se há dados preenchidos
+      const temDados = Object.values(dados).some((valor) =>
+        typeof valor === "string" ? valor.length > 0 : valor === true
+      );
+
+      if (temDados) {
+        console.log("✅ INDÚSTRIA ADICIONADA À LISTA:", dados);
+
+        // Remover mensagem "Nenhuma indústria adicionada!"
+        const emptyRows = industriasBody.querySelectorAll("tr");
+        emptyRows.forEach((row) => {
+          const cells = row.querySelectorAll("td");
+          if (
+            cells.length === 1 &&
+            cells[0].textContent.includes("Nenhuma indústria adicionada!")
+          ) {
+            row.remove();
+          }
+        });
+
+        // Criar nova linha na lista com os dados
+        const newListRow = document.createElement("tr");
+        newListRow.innerHTML = `
+          <td>${dados.pjIndustria || ""}</td>
+          <td>${dados.pjTabelaPreco || ""}</td>
+          <td>${dados.pjIndustriaDesconto || ""}</td>
+          <td>
+            <button type="button" class="button-remove-inline" title="Remover indústria" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+          </td>
+        `;
+
+        // Adicionar event listener para remover da lista
+        newListRow
+          .querySelector(".button-remove-inline")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            newListRow.remove();
+
+            // Se não há mais indústrias, mostrar mensagem vazia
+            if (industriasBody.querySelectorAll("tr").length === 0) {
+              const emptyRow = document.createElement("tr");
+              emptyRow.innerHTML =
+                '<td colspan="4">📋 Nenhuma indústria adicionada!</td>';
+              industriasBody.appendChild(emptyRow);
+            }
+          });
+
+        // Inserir antes da linha de input
+        industriasBody.insertBefore(newListRow, tr);
+
+        // Limpar campos da linha de input
+        inputs.forEach((input) => {
+          if (input.type === "checkbox") {
+            input.checked = false;
+          } else {
+            input.value = "";
+          }
+        });
+      } else {
+        console.log("⚠️ Nenhum dado preenchido para adicionar");
+      }
+    });
+
+    // Event listener para botão remover
+    tr.querySelector(".button-remove-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.closest("tr").remove();
+    });
     industriasBody.appendChild(tr);
   }
 
@@ -974,13 +1541,96 @@ function initClientePJPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-danger" data-action="remove">Remover</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
       </td>
     `;
-    tr.querySelector('[data-action="remove"]').addEventListener(
-      "click",
-      (event) => event.currentTarget.closest("tr").remove()
-    );
+
+    // Event listener para botão adicionar
+    tr.querySelector(".button-add-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Coletar dados da linha atual
+      const inputs = tr.querySelectorAll("input, select");
+      const dados = {};
+
+      inputs.forEach((input) => {
+        if (input.type === "checkbox") {
+          dados[input.name] = input.checked;
+        } else {
+          dados[input.name] = input.value.trim();
+        }
+      });
+
+      // Verificar se há dados preenchidos
+      const temDados = Object.values(dados).some((valor) =>
+        typeof valor === "string" ? valor.length > 0 : valor === true
+      );
+
+      if (temDados) {
+        console.log("✅ TRANSPORTADORA ADICIONADA À LISTA:", dados);
+
+        // Remover mensagem "Nenhuma transportadora adicionada!"
+        const emptyRows = transportadorasBody.querySelectorAll("tr");
+        emptyRows.forEach((row) => {
+          const cells = row.querySelectorAll("td");
+          if (
+            cells.length === 1 &&
+            cells[0].textContent.includes("Nenhuma transportadora adicionada!")
+          ) {
+            row.remove();
+          }
+        });
+
+        // Criar nova linha na lista com os dados
+        const newListRow = document.createElement("tr");
+        newListRow.innerHTML = `
+          <td>${dados.pjTransportadora || ""}</td>
+          <td>
+            <button type="button" class="button-remove-inline" title="Remover transportadora" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+          </td>
+        `;
+
+        // Adicionar event listener para remover da lista
+        newListRow
+          .querySelector(".button-remove-inline")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            newListRow.remove();
+
+            // Se não há mais transportadoras, mostrar mensagem vazia
+            if (transportadorasBody.querySelectorAll("tr").length === 0) {
+              const emptyRow = document.createElement("tr");
+              emptyRow.innerHTML =
+                '<td colspan="2">📋 Nenhuma transportadora adicionada!</td>';
+              transportadorasBody.appendChild(emptyRow);
+            }
+          });
+
+        // Inserir antes da linha de input
+        transportadorasBody.insertBefore(newListRow, tr);
+
+        // Limpar campos da linha de input
+        inputs.forEach((input) => {
+          if (input.type === "checkbox") {
+            input.checked = false;
+          } else {
+            input.value = "";
+          }
+        });
+      } else {
+        console.log("⚠️ Nenhum dado preenchido para adicionar");
+      }
+    });
+
+    // Event listener para botão remover
+    tr.querySelector(".button-remove-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.closest("tr").remove();
+    });
     transportadorasBody.appendChild(tr);
   }
 
@@ -1002,7 +1652,7 @@ function initClientePJPage() {
 
   if (clienteId) {
     const cliente = storage.load().clientes.find((c) => c.id === clienteId);
-    if (cliente && cliente.tipo === "PJ" && cliente.dadosPJ) {
+    if (cliente) {
       // Atualizar título e botão
       document.querySelector("#pjFormTitle").textContent =
         "Editar Cliente (Pessoa Jurídica)";
@@ -1013,86 +1663,110 @@ function initClientePJPage() {
       // Carregar ID
       fields.id.value = cliente.id;
 
-      // Carregar informações básicas
-      const info = cliente.dadosPJ.informacoes || {};
-      fields.razaoSocial.value = info.razaoSocial || "";
-      fields.nomeFantasia.value = info.nomeFantasia || "";
-      fields.rede.value = info.rede || "";
-      fields.cnpj.value = info.cnpj || "";
-      fields.inscricaoEstadual.value = info.inscricaoEstadual || "";
-      fields.codigo.value = info.codigo || "";
-      fields.matriz.value = info.matriz || "";
-      fields.segmento.value = info.segmento || "";
+      // Se o cliente tem dadosPJ, carregar estrutura completa
+      if (cliente.dadosPJ) {
+        // Carregar informações básicas
+        const info = cliente.dadosPJ.informacoes || {};
+        fields.razaoSocial.value = info.razaoSocial || "";
+        fields.nomeFantasia.value = info.nomeFantasia || "";
+        fields.rede.value = info.rede || "";
+        fields.cnpj.value = info.cnpj || "";
+        fields.inscricaoEstadual.value = info.inscricaoEstadual || "";
+        fields.codigo.value = info.codigo || "";
+        fields.matriz.value = info.matriz || "";
+        fields.segmento.value = info.segmento || "";
 
-      // Carregar endereço
-      const end = cliente.dadosPJ.endereco || {};
-      fields.endereco.value = end.endereco || "";
-      fields.bairro.value = end.bairro || "";
-      fields.numero.value = end.numero || "";
-      fields.cep.value = end.cep || "";
-      fields.cidade.value = end.cidade || "";
-      fields.estado.value = end.estado || "";
+        // Carregar endereço
+        const end = cliente.dadosPJ.endereco || {};
+        fields.endereco.value = end.endereco || "";
+        fields.bairro.value = end.bairro || "";
+        fields.numero.value = end.numero || "";
+        fields.cep.value = end.cep || "";
+        fields.cidade.value = end.cidade || "";
+        fields.estado.value = end.estado || "";
 
-      // Carregar comunicação
-      const com = cliente.dadosPJ.comunicacao || {};
-      fields.telefone.value = com.telefone || "";
-      fields.fax.value = com.fax || "";
-      fields.telefoneAdicional.value = com.telefoneAdicional || "";
-      fields.website.value = com.website || "";
-      fields.email.value = com.email || "";
-      fields.emailNfe.value = com.emailNfe || "";
+        // Carregar comunicação
+        const com = cliente.dadosPJ.comunicacao || {};
+        fields.telefone.value = com.telefone || "";
+        fields.fax.value = com.fax || "";
+        fields.telefoneAdicional.value = com.telefoneAdicional || "";
+        fields.website.value = com.website || "";
+        fields.email.value = com.email || "";
+        fields.emailNfe.value = com.emailNfe || "";
 
-      // Carregar status
-      const st = cliente.dadosPJ.status || {};
-      fields.status.value = st.status || "Ativo";
-      fields.observacoes.value = st.observacoes || "";
-      fields.dataAbertura.value = st.dataAbertura || "";
-      fields.regiao.value = st.regiao || "";
+        // Carregar status
+        const st = cliente.dadosPJ.status || {};
+        fields.status.value = st.status || "Ativo";
+        fields.observacoes.value = st.observacoes || "";
+        fields.dataAbertura.value = st.dataAbertura || "";
+        fields.regiao.value = st.regiao || "";
 
-      // Limpar tabelas antes de carregar
-      contatosBody.innerHTML = "";
-      pagamentosBody.innerHTML = "";
-      vendedoresBody.innerHTML = "";
-      industriasBody.innerHTML = "";
-      transportadorasBody.innerHTML = "";
+        // Limpar tabelas antes de carregar
+        contatosBody.innerHTML = "";
+        pagamentosBody.innerHTML = "";
+        vendedoresBody.innerHTML = "";
+        industriasBody.innerHTML = "";
+        transportadorasBody.innerHTML = "";
 
-      // Carregar contatos
-      const contatos = cliente.dadosPJ.contatos || [];
-      if (contatos.length > 0) {
-        contatos.forEach((contato) => addContatoRow(contato));
+        // Carregar contatos
+        const contatos = cliente.dadosPJ.contatos || [];
+        if (contatos.length > 0) {
+          contatos.forEach((contato) => addContatoRow(contato));
+        } else {
+          addContatoRow();
+        }
+
+        // Carregar pagamentos
+        const pagamentos = cliente.dadosPJ.pagamentos || [];
+        if (pagamentos.length > 0) {
+          pagamentos.forEach((pag) => addPagamentoRow(pag));
+        } else {
+          addPagamentoRow();
+        }
+
+        // Carregar vendedores
+        const vendedores = cliente.dadosPJ.vendedores || [];
+        if (vendedores.length > 0) {
+          vendedores.forEach((vend) => addVendedorRow(vend));
+        } else {
+          addVendedorRow();
+        }
+
+        // Carregar indústrias
+        const industrias = cliente.dadosPJ.industrias || [];
+        if (industrias.length > 0) {
+          industrias.forEach((ind) => addIndustriaRow(ind));
+        } else {
+          addIndustriaRow();
+        }
+
+        // Carregar transportadoras
+        const transportadoras = cliente.dadosPJ.transportadoras || [];
+        if (transportadoras.length > 0) {
+          transportadoras.forEach((transp) => addTransportadoraRow(transp));
+        } else {
+          addTransportadoraRow();
+        }
       } else {
+        // Cliente antigo sem dadosPJ - carregar dados básicos disponíveis
+        fields.razaoSocial.value = cliente.nome || "";
+        fields.nomeFantasia.value = cliente.fantasia || cliente.nome || "";
+        fields.cnpj.value = cliente.documento || "";
+        fields.email.value = cliente.email || "";
+        fields.telefone.value = cliente.telefone || "";
+        fields.observacoes.value = cliente.observacoes || "";
+
+        // Limpar tabelas e adicionar linhas vazias
+        contatosBody.innerHTML = "";
+        pagamentosBody.innerHTML = "";
+        vendedoresBody.innerHTML = "";
+        industriasBody.innerHTML = "";
+        transportadorasBody.innerHTML = "";
+
         addContatoRow();
-      }
-
-      // Carregar pagamentos
-      const pagamentos = cliente.dadosPJ.pagamentos || [];
-      if (pagamentos.length > 0) {
-        pagamentos.forEach((pag) => addPagamentoRow(pag));
-      } else {
         addPagamentoRow();
-      }
-
-      // Carregar vendedores
-      const vendedores = cliente.dadosPJ.vendedores || [];
-      if (vendedores.length > 0) {
-        vendedores.forEach((vend) => addVendedorRow(vend));
-      } else {
         addVendedorRow();
-      }
-
-      // Carregar indústrias
-      const industrias = cliente.dadosPJ.industrias || [];
-      if (industrias.length > 0) {
-        industrias.forEach((ind) => addIndustriaRow(ind));
-      } else {
         addIndustriaRow();
-      }
-
-      // Carregar transportadoras
-      const transportadoras = cliente.dadosPJ.transportadoras || [];
-      if (transportadoras.length > 0) {
-        transportadoras.forEach((transp) => addTransportadoraRow(transp));
-      } else {
         addTransportadoraRow();
       }
     }
@@ -1290,6 +1964,7 @@ function initClientePJPage() {
       storage.update((draft) => {
         const clienteExistente = draft.clientes.find((c) => c.id === clienteId);
         if (clienteExistente) {
+          clienteExistente.tipo = "PJ";
           clienteExistente.nome =
             informacoes.razaoSocial || informacoes.nomeFantasia;
           clienteExistente.fantasia = informacoes.nomeFantasia;
@@ -1605,13 +2280,24 @@ function initClientePFPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-danger" data-action="remove">Remover</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
       </td>
     `;
-    tr.querySelector('[data-action="remove"]').addEventListener(
-      "click",
-      (event) => event.currentTarget.closest("tr").remove()
-    );
+
+    // Event listener para botão adicionar
+    tr.querySelector(".button-add-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addContatoRow();
+    });
+
+    // Event listener para botão remover
+    tr.querySelector(".button-remove-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.closest("tr").remove();
+    });
     pagamentosBody.appendChild(tr);
   }
 
@@ -1628,13 +2314,24 @@ function initClientePFPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-danger" data-action="remove">Remover</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
       </td>
     `;
-    tr.querySelector('[data-action="remove"]').addEventListener(
-      "click",
-      (event) => event.currentTarget.closest("tr").remove()
-    );
+
+    // Event listener para botão adicionar
+    tr.querySelector(".button-add-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addContatoRow();
+    });
+
+    // Event listener para botão remover
+    tr.querySelector(".button-remove-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.closest("tr").remove();
+    });
     vendedoresBody.appendChild(tr);
   }
 
@@ -1675,13 +2372,24 @@ function initClientePFPage() {
         />
       </td>
       <td class="actions">
-        <button type="button" class="button-danger" data-action="remove">Remover</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
       </td>
     `;
-    tr.querySelector('[data-action="remove"]').addEventListener(
-      "click",
-      (event) => event.currentTarget.closest("tr").remove()
-    );
+
+    // Event listener para botão adicionar
+    tr.querySelector(".button-add-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addContatoRow();
+    });
+
+    // Event listener para botão remover
+    tr.querySelector(".button-remove-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.closest("tr").remove();
+    });
     industriasBody.appendChild(tr);
   }
 
@@ -1699,13 +2407,24 @@ function initClientePFPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-danger" data-action="remove">Remover</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
       </td>
     `;
-    tr.querySelector('[data-action="remove"]').addEventListener(
-      "click",
-      (event) => event.currentTarget.closest("tr").remove()
-    );
+
+    // Event listener para botão adicionar
+    tr.querySelector(".button-add-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addContatoRow();
+    });
+
+    // Event listener para botão remover
+    tr.querySelector(".button-remove-inline").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.closest("tr").remove();
+    });
     transportadorasBody.appendChild(tr);
   }
 
@@ -1727,7 +2446,7 @@ function initClientePFPage() {
 
   if (clienteId) {
     const cliente = storage.load().clientes.find((c) => c.id === clienteId);
-    if (cliente && cliente.tipo === "PF" && cliente.dadosPF) {
+    if (cliente) {
       // Atualizar título e botão
       document.querySelector("#pfFormTitle").textContent =
         "Editar Cliente (Pessoa Física)";
@@ -1738,86 +2457,109 @@ function initClientePFPage() {
       // Carregar ID
       fields.id.value = cliente.id;
 
-      // Carregar informações básicas
-      const info = cliente.dadosPF.informacoes || {};
-      fields.nome.value = info.nome || "";
-      fields.codigo.value = info.codigo || "";
-      fields.cpf.value = info.cpf || "";
-      fields.inscricaoEstadual.value = info.inscricaoEstadual || "";
-      fields.rg.value = info.rg || "";
-      fields.estadoCivil.value = info.estadoCivil || "";
-      fields.sexo.value = info.sexo || "";
-      fields.suframa.value = info.suframa || "";
+      // Se o cliente tem dadosPF, carregar estrutura completa
+      if (cliente.dadosPF) {
+        // Carregar informações básicas
+        const info = cliente.dadosPF.informacoes || {};
+        fields.nome.value = info.nome || "";
+        fields.codigo.value = info.codigo || "";
+        fields.cpf.value = info.cpf || "";
+        fields.inscricaoEstadual.value = info.inscricaoEstadual || "";
+        fields.rg.value = info.rg || "";
+        fields.estadoCivil.value = info.estadoCivil || "";
+        fields.sexo.value = info.sexo || "";
+        fields.suframa.value = info.suframa || "";
 
-      // Carregar endereço
-      const end = cliente.dadosPF.endereco || {};
-      fields.endereco.value = end.endereco || "";
-      fields.bairro.value = end.bairro || "";
-      fields.numero.value = end.numero || "";
-      fields.cep.value = end.cep || "";
-      fields.cidade.value = end.cidade || "";
-      fields.estado.value = end.estado || "";
+        // Carregar endereço
+        const end = cliente.dadosPF.endereco || {};
+        fields.endereco.value = end.endereco || "";
+        fields.bairro.value = end.bairro || "";
+        fields.numero.value = end.numero || "";
+        fields.cep.value = end.cep || "";
+        fields.cidade.value = end.cidade || "";
+        fields.estado.value = end.estado || "";
 
-      // Carregar comunicação
-      const com = cliente.dadosPF.comunicacao || {};
-      fields.telefone.value = com.telefone || "";
-      fields.fax.value = com.fax || "";
-      fields.telefoneAdicional.value = com.telefoneAdicional || "";
-      fields.website.value = com.website || "";
-      fields.email.value = com.email || "";
-      fields.emailNfe.value = com.emailNfe || "";
+        // Carregar comunicação
+        const com = cliente.dadosPF.comunicacao || {};
+        fields.telefone.value = com.telefone || "";
+        fields.fax.value = com.fax || "";
+        fields.telefoneAdicional.value = com.telefoneAdicional || "";
+        fields.website.value = com.website || "";
+        fields.email.value = com.email || "";
+        fields.emailNfe.value = com.emailNfe || "";
 
-      // Carregar status
-      const st = cliente.dadosPF.status || {};
-      fields.status.value = st.status || "Ativo";
-      fields.observacoes.value = st.observacoes || "";
-      fields.dataCadastro.value = st.dataCadastro || "";
-      fields.regiao.value = st.regiao || "";
+        // Carregar status
+        const st = cliente.dadosPF.status || {};
+        fields.status.value = st.status || "Ativo";
+        fields.observacoes.value = st.observacoes || "";
+        fields.dataCadastro.value = st.dataCadastro || "";
+        fields.regiao.value = st.regiao || "";
 
-      // Limpar tabelas antes de carregar
-      contatosBody.innerHTML = "";
-      pagamentosBody.innerHTML = "";
-      vendedoresBody.innerHTML = "";
-      industriasBody.innerHTML = "";
-      transportadorasBody.innerHTML = "";
+        // Limpar tabelas antes de carregar
+        contatosBody.innerHTML = "";
+        pagamentosBody.innerHTML = "";
+        vendedoresBody.innerHTML = "";
+        industriasBody.innerHTML = "";
+        transportadorasBody.innerHTML = "";
 
-      // Carregar contatos
-      const contatos = cliente.dadosPF.contatos || [];
-      if (contatos.length > 0) {
-        contatos.forEach((contato) => addContatoRow(contato));
+        // Carregar contatos
+        const contatos = cliente.dadosPF.contatos || [];
+        if (contatos.length > 0) {
+          contatos.forEach((contato) => addContatoRow(contato));
+        } else {
+          addContatoRow();
+        }
+
+        // Carregar pagamentos
+        const pagamentos = cliente.dadosPF.pagamentos || [];
+        if (pagamentos.length > 0) {
+          pagamentos.forEach((pag) => addPagamentoRow(pag));
+        } else {
+          addPagamentoRow();
+        }
+
+        // Carregar vendedores
+        const vendedores = cliente.dadosPF.vendedores || [];
+        if (vendedores.length > 0) {
+          vendedores.forEach((vend) => addVendedorRow(vend));
+        } else {
+          addVendedorRow();
+        }
+
+        // Carregar indústrias
+        const industrias = cliente.dadosPF.industrias || [];
+        if (industrias.length > 0) {
+          industrias.forEach((ind) => addIndustriaRow(ind));
+        } else {
+          addIndustriaRow();
+        }
+
+        // Carregar transportadoras
+        const transportadoras = cliente.dadosPF.transportadoras || [];
+        if (transportadoras.length > 0) {
+          transportadoras.forEach((transp) => addTransportadoraRow(transp));
+        } else {
+          addTransportadoraRow();
+        }
       } else {
+        // Cliente antigo sem dadosPF - carregar dados básicos disponíveis
+        fields.nome.value = cliente.nome || "";
+        fields.cpf.value = cliente.documento || "";
+        fields.email.value = cliente.email || "";
+        fields.telefone.value = cliente.telefone || "";
+        fields.observacoes.value = cliente.observacoes || "";
+
+        // Limpar tabelas e adicionar linhas vazias
+        contatosBody.innerHTML = "";
+        pagamentosBody.innerHTML = "";
+        vendedoresBody.innerHTML = "";
+        industriasBody.innerHTML = "";
+        transportadorasBody.innerHTML = "";
+
         addContatoRow();
-      }
-
-      // Carregar pagamentos
-      const pagamentos = cliente.dadosPF.pagamentos || [];
-      if (pagamentos.length > 0) {
-        pagamentos.forEach((pag) => addPagamentoRow(pag));
-      } else {
         addPagamentoRow();
-      }
-
-      // Carregar vendedores
-      const vendedores = cliente.dadosPF.vendedores || [];
-      if (vendedores.length > 0) {
-        vendedores.forEach((vend) => addVendedorRow(vend));
-      } else {
         addVendedorRow();
-      }
-
-      // Carregar indústrias
-      const industrias = cliente.dadosPF.industrias || [];
-      if (industrias.length > 0) {
-        industrias.forEach((ind) => addIndustriaRow(ind));
-      } else {
         addIndustriaRow();
-      }
-
-      // Carregar transportadoras
-      const transportadoras = cliente.dadosPF.transportadoras || [];
-      if (transportadoras.length > 0) {
-        transportadoras.forEach((transp) => addTransportadoraRow(transp));
-      } else {
         addTransportadoraRow();
       }
     }
@@ -2014,6 +2756,7 @@ function initClientePFPage() {
       storage.update((draft) => {
         const clienteExistente = draft.clientes.find((c) => c.id === clienteId);
         if (clienteExistente) {
+          clienteExistente.tipo = "PF";
           clienteExistente.nome = informacoes.nome;
           clienteExistente.documento = informacoes.cpf;
           clienteExistente.email = comunicacao.email;
@@ -2357,8 +3100,15 @@ function initIndustriasPage() {
   let selectedId = "";
 
   const updateActionsState = () => {
-    const hasSelection = Boolean(selectedId);
-    if (editBtn) editBtn.disabled = !hasSelection;
+    const checkedBoxes = listContainer?.querySelectorAll(
+      'input[type="checkbox"][name="industriaSelecionada"]:checked'
+    ) || [];
+    const hasSelection = checkedBoxes.length > 0;
+    const hasSingleSelection = checkedBoxes.length === 1;
+    
+    // Editar só funciona com uma seleção
+    if (editBtn) editBtn.disabled = !hasSingleSelection;
+    // Remover funciona com uma ou múltiplas seleções
     if (removeBtn) removeBtn.disabled = !hasSelection;
   };
 
@@ -2366,28 +3116,29 @@ function initIndustriasPage() {
     window.location.href = "industria-form.html";
   });
 
-  editBtn?.addEventListener("click", () => {
-    if (!selectedId) {
-      window.alert("Selecione uma indústria para editar.");
-      return;
-    }
-    window.sessionStorage.setItem("oursales:editIndustria", selectedId);
-    window.location.href = "industria-form.html";
-  });
-
   removeBtn?.addEventListener("click", () => {
-    if (!selectedId) {
-      window.alert("Selecione uma indústria para remover.");
+    const checkedBoxes = listContainer?.querySelectorAll(
+      'input[type="checkbox"][name="industriaSelecionada"]:checked'
+    ) || [];
+    
+    if (checkedBoxes.length === 0) {
+      window.alert("Selecione uma ou mais indústrias para remover.");
       return;
     }
 
-    if (!window.confirm("Confirma remover esta indústria?")) {
+    const count = checkedBoxes.length;
+    const message = count === 1 
+      ? "Confirma remover esta indústria?"
+      : `Confirma remover ${count} indústrias?`;
+    
+    if (!window.confirm(message)) {
       return;
     }
 
+    const idsToRemove = Array.from(checkedBoxes).map(cb => cb.value);
     storage.update((draft) => {
       draft.industrias = draft.industrias.filter(
-        (industria) => industria.id !== selectedId
+        (industria) => !idsToRemove.includes(industria.id)
       );
     });
 
@@ -2395,34 +3146,47 @@ function initIndustriasPage() {
     render();
   });
 
+  // Event listener para seleção via checkbox
   listContainer?.addEventListener("change", (event) => {
     const input = event.target.closest(
-      'input[type="radio"][name="industriaSelecionada"]'
+      'input[type="checkbox"][name="industriaSelecionada"]'
     );
     if (!input) return;
-    selectedId = input.value;
-    syncSelection(listContainer, "industriaSelecionada", selectedId);
+
+    // Atualizar selectedId se apenas uma estiver selecionada
+    const checkedBoxes = listContainer.querySelectorAll(
+      'input[type="checkbox"][name="industriaSelecionada"]:checked'
+    );
+    if (checkedBoxes.length === 1) {
+      selectedId = checkedBoxes[0].value;
+    } else if (checkedBoxes.length === 0) {
+      selectedId = "";
+    } else {
+      // Múltiplas seleções - não atualizar selectedId para edição
+      selectedId = "";
+    }
+
     updateActionsState();
   });
 
-  listContainer?.addEventListener("click", (event) => {
-    const row = event.target.closest("tr[data-id]");
-    if (!row) return;
-    const input = row.querySelector(
-      'input[type="radio"][name="industriaSelecionada"]'
-    );
-    if (input) {
-      // Toggle: se já está selecionado, desmarcar
-      if (selectedId === input.value) {
-        input.checked = false;
-        selectedId = "";
-      } else {
-        input.checked = true;
-        selectedId = input.value;
-      }
-      syncSelection(listContainer, "industriaSelecionada", selectedId);
-      updateActionsState();
+  editBtn?.addEventListener("click", () => {
+    const checkedBoxes = listContainer?.querySelectorAll(
+      'input[type="checkbox"][name="industriaSelecionada"]:checked'
+    ) || [];
+    
+    if (checkedBoxes.length === 0) {
+      window.alert("Selecione uma indústria para editar.");
+      return;
     }
+    
+    if (checkedBoxes.length > 1) {
+      window.alert("Selecione apenas uma indústria para editar.");
+      return;
+    }
+    
+    selectedId = checkedBoxes[0].value;
+    window.sessionStorage.setItem("oursales:editIndustria", selectedId);
+    window.location.href = "industria-form.html";
   });
 
   function render() {
@@ -2441,33 +3205,96 @@ function initIndustriasPage() {
       return;
     }
 
+    // Obter colunas personalizadas
+    const customColumns = getCustomColumns("industrias");
+    const allColumns = [
+      "razaoSocial",
+      "nomeFantasia",
+      "cnpj",
+      "contato",
+      "telefone",
+      "email",
+      "endereco",
+      "dataCadastro",
+      "observacoes",
+    ];
+    const visibleColumns =
+      customColumns.length > 0 ? customColumns : allColumns;
+
     const linhas = industrias
-      .map(
-        (industria) => `
+      .map((industria) => {
+        let rowContent = `
           <tr class="table-row${
             industria.id === selectedId ? " is-selected" : ""
           }" data-id="${industria.id}">
             <td class="select-cell">
               <label class="select-radio">
-                <input type="radio" name="industriaSelecionada" value="${
+                <input type="checkbox" name="industriaSelecionada" value="${
                   industria.id
-                }" ${industria.id === selectedId ? "checked" : ""} />
-                <span class="bubble"></span>
+                }" />
               </label>
-            </td>
-            <td>
-              <strong>${industria.nome}</strong>
-              <div class="muted">${industria.cnpj || "CNPJ não informado"}</div>
-            </td>
-            <td>${industria.telefone || "-"}</td>
-            <td>${industria.email || "-"}</td>
-            <td>${
-              industria.prazoEntrega ? industria.prazoEntrega + " dias" : "-"
-            }</td>
-            <td>${industria.condicaoPagamento || "-"}</td>
-          </tr>
-        `
-      )
+            </td>`;
+
+        // Renderizar colunas dinamicamente
+        visibleColumns.forEach((column) => {
+          let cellContent = "";
+          switch (column) {
+            case "razaoSocial":
+              cellContent = industria.razaoSocial || "-";
+              break;
+            case "nomeFantasia":
+              cellContent = industria.nomeFantasia || industria.nome || "-";
+              break;
+            case "cnpj":
+              cellContent = industria.cnpj || "-";
+              break;
+            case "telefone":
+              cellContent = industria.telefone || "-";
+              break;
+            case "email":
+              cellContent = industria.email || "-";
+              break;
+            case "contato":
+              cellContent = industria.contato || "-";
+              break;
+            case "endereco":
+              cellContent = industria.endereco || "-";
+              break;
+            case "dataCadastro":
+              cellContent = industria.dataCadastro || "-";
+              break;
+            case "observacoes":
+              cellContent = industria.observacoes || "-";
+              break;
+            default:
+              cellContent = "-";
+          }
+
+          const className = column === "razaoSocial" ? "" : "dynamic-column";
+          rowContent += `<td class="${className}">${cellContent}</td>`;
+        });
+
+        rowContent += "</tr>";
+        return rowContent;
+      })
+      .join("");
+
+    // Construir cabeçalho dinamicamente
+    const headerCells = visibleColumns
+      .map((column) => {
+        const labels = {
+          razaoSocial: "Razão Social",
+          nomeFantasia: "Nome Fantasia",
+          cnpj: "CNPJ",
+          telefone: "Telefone",
+          email: "E-mail",
+          contato: "Contato",
+          endereco: "Endereço",
+          dataCadastro: "Data de Cadastro",
+          observacoes: "Observações",
+        };
+        return `<th>${labels[column] || column}</th>`;
+      })
       .join("");
 
     listContainer.innerHTML = `
@@ -2475,12 +3302,10 @@ function initIndustriasPage() {
         <table>
           <thead>
             <tr>
-              <th class="select-cell">Selecionar</th>
-              <th>Indústria / Fornecedor</th>
-              <th>Telefone</th>
-              <th>E-mail</th>
-              <th>Prazo Entrega</th>
-              <th>Condição Pagamento</th>
+              <th class="select-cell">
+                <input type="checkbox" class="select-all-checkbox" title="Selecionar todos">
+              </th>
+              ${headerCells}
             </tr>
           </thead>
           <tbody>${linhas}</tbody>
@@ -2488,8 +3313,54 @@ function initIndustriasPage() {
       </div>
     `;
 
-    syncSelection(listContainer, "industriaSelecionada", selectedId);
+    // Atualizar estado dos botões baseado na seleção
     updateActionsState();
+
+    // Adicionar click nas linhas para seleção (igual às outras páginas)
+    listContainer.querySelectorAll("tbody tr").forEach((row) => {
+      row.style.cursor = "pointer";
+      row.addEventListener("click", (e) => {
+        // Não selecionar se clicou no checkbox ou botão
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      });
+      
+      // Double click para editar
+      row.addEventListener("dblclick", (e) => {
+        // Não editar se clicou no checkbox ou botão
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+        
+        const industriaId = row.getAttribute("data-id");
+        if (industriaId) {
+          // Selecionar a indústria
+          const checkbox = row.querySelector('input[type="checkbox"]');
+          if (checkbox) {
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          // Aguardar um pouco para garantir que a seleção foi processada
+          setTimeout(() => {
+            window.sessionStorage.setItem("oursales:editIndustria", industriaId);
+            window.location.href = "industria-form.html";
+          }, 100);
+        }
+      });
+    });
   }
 
   render();
@@ -2500,7 +3371,10 @@ function initIndustriasPage() {
  */
 function initIndustriaFormPage() {
   const form = document.querySelector("#industriaForm");
-  if (!form) return;
+  if (!form) {
+    console.error("Formulário #industriaForm não encontrado");
+    return;
+  }
 
   const formTitle = document.querySelector("#industriaFormTitle");
 
@@ -2525,10 +3399,21 @@ function initIndustriaFormPage() {
     observacoes: document.querySelector("#industriaObservacoes"),
     validarEmbalagem: document.querySelector("#industriaValidarEmbalagem"),
   };
+  
+  // Verificar se campos obrigatórios foram encontrados
+  if (!fields.razaoSocial) {
+    console.error("Campo razaoSocial não encontrado");
+  }
+  if (!fields.cnpj) {
+    console.error("Campo cnpj não encontrado");
+  }
+  
+  console.log("Campos encontrados:", fields);
 
-  let tabelasPrecos = [];
   let condicoesPagamento = [];
   let contatos = [];
+  let tabelasPrecos = [];
+  let selectedTabelaId = "";
   let editingIndustriaId =
     window.sessionStorage.getItem("oursales:editIndustria") || null;
 
@@ -2536,13 +3421,182 @@ function initIndustriaFormPage() {
     window.sessionStorage.removeItem("oursales:editIndustria");
   }
 
-  // Funções para Tabelas de Preço
+  // Elementos para tabelas de preços
+  const novaTabelaNome = document.querySelector("#novaTabelaNome");
+  const tabelaAdicionarBtn = document.querySelector("#tabelaAdicionar");
+  const tabelasLista = document.querySelector("#tabelasLista");
+
+  // Submit do formulário
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    console.log("Formulário de indústria submetido");
+    console.log("Campos:", fields);
+    
+    // Verificar se os campos obrigatórios estão preenchidos
+    if (!fields.razaoSocial || !fields.razaoSocial.value.trim()) {
+      window.alert("Por favor, preencha a Razão Social.");
+      fields.razaoSocial?.focus();
+      return;
+    }
+    
+    if (!fields.cnpj || !fields.cnpj.value.trim()) {
+      window.alert("Por favor, preencha o CNPJ.");
+      fields.cnpj?.focus();
+      return;
+    }
+
+    const data = {
+      razaoSocial: fields.razaoSocial.value.trim(),
+      nomeFantasia: fields.nomeFantasia.value.trim(),
+      cnpj: fields.cnpj.value.trim(),
+      inscricaoEstadual: fields.inscricaoEstadual.value.trim(),
+      email: fields.email.value.trim(),
+      comissao: Number.parseFloat(fields.comissao.value) || 0,
+      pagamentoComissao: fields.pagamentoComissao.value,
+      status: fields.status.value,
+      logoURL: fields.logoURL.value.trim(),
+      endereco: fields.endereco.value.trim(),
+      bairro: fields.bairro.value.trim(),
+      cep: fields.cep.value.trim(),
+      cidade: fields.cidade.value.trim(),
+      estado: fields.estado.value,
+      telefone: fields.telefone.value.trim(),
+      telefoneAdicional: fields.telefoneAdicional.value.trim(),
+      observacoes: fields.observacoes.value.trim(),
+      validarEmbalagem: fields.validarEmbalagem.checked,
+      tabelasPrecos: tabelasPrecos,
+      condicoesPagamento: condicoesPagamento,
+      contatos: contatos,
+      // Campos compatíveis com a versão antiga
+      nome: fields.nomeFantasia.value.trim(),
+    };
+
+    console.log("Dados a serem salvos:", data);
+    
+    try {
+      if (editingIndustriaId) {
+        console.log("Editando indústria ID:", editingIndustriaId);
+        storage.update((draft) => {
+          const industria = draft.industrias.find(
+            (item) => item.id === editingIndustriaId
+          );
+          if (industria) {
+            Object.assign(industria, data);
+            console.log("Indústria atualizada:", industria);
+          } else {
+            console.error("Indústria não encontrada para edição");
+            throw new Error("Indústria não encontrada");
+          }
+        });
+        
+        // Garantir persistência
+        storage.persist();
+        console.log("Persistência concluída - Atualização");
+        
+        window.alert("Indústria atualizada com sucesso!");
+      } else {
+        console.log("Criando nova indústria");
+        const novaId = generateId("ind");
+        console.log("Novo ID gerado:", novaId);
+        
+        // Verificar estado antes
+        const beforeState = storage.load();
+        console.log("📊 Indústrias ANTES de adicionar:", beforeState.industrias.length);
+        console.log("📊 Cache antes:", storage.cache?.industrias?.length || 0);
+        
+        storage.update((draft) => {
+          console.log("🔄 Dentro do update - draft.industrias antes:", draft.industrias?.length || 0);
+          if (!Array.isArray(draft.industrias)) {
+            console.error("❌ ERRO: draft.industrias não é um array!", draft.industrias);
+            draft.industrias = [];
+          }
+          
+          const nova = { id: novaId, ...data };
+          draft.industrias.push(nova);
+          
+          console.log("✅ Dentro do update - indústria adicionada:", nova);
+          console.log("✅ Dentro do update - draft.industrias depois:", draft.industrias.length);
+        });
+        
+        // Verificar cache após update
+        console.log("📊 Cache APÓS update:", storage.cache?.industrias?.length || 0);
+        if (storage.cache?.industrias) {
+          const encontrada = storage.cache.industrias.find(ind => ind.id === novaId);
+          console.log("🔍 Indústria encontrada no cache:", encontrada ? "✅ SIM" : "❌ NÃO");
+        }
+        
+        // Garantir persistência (storage.update já chamou persist, mas vamos verificar)
+        try {
+          storage.persist();
+          console.log("💾 persist() chamado novamente com sucesso");
+          
+          // Verificar localStorage diretamente
+          const raw = window.localStorage.getItem("oursales:data");
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            console.log("📦 Dados no localStorage após persist:", parsed.industrias?.length || 0);
+            const noLocalStorage = parsed.industrias?.find(ind => ind.id === novaId);
+            if (noLocalStorage) {
+              console.log("✅ Indústria encontrada no localStorage:", noLocalStorage);
+            } else {
+              console.error("❌ Indústria NÃO encontrada no localStorage!");
+              console.error("📋 Todas as indústrias no localStorage:", parsed.industrias);
+              console.error("🆔 IDs no localStorage:", parsed.industrias?.map(ind => ind.id) || []);
+              console.error("🆔 ID procurado:", novaId);
+              window.alert("❌ Erro: Indústria não foi salva. Verifique o console (F12) para mais detalhes.");
+              return;
+            }
+          } else {
+            console.error("❌ ERRO: localStorage está vazio após persist()!");
+            window.alert("❌ Erro: localStorage está vazio. Verifique o console (F12).");
+            return;
+          }
+        } catch (persistError) {
+          console.error("❌ ERRO ao chamar persist():", persistError);
+          window.alert("❌ Erro ao salvar: " + persistError.message);
+          return;
+        }
+        
+        // Limpar cache para verificar se realmente foi salvo
+        storage.cache = null;
+        
+        // Verificar se foi salvo após limpar cache
+        const saved = storage.load();
+        console.log("📊 Indústrias DEPOIS de limpar cache e recarregar:", saved.industrias.length);
+        const savedIndustria = saved.industrias.find(ind => ind.id === novaId);
+        
+        if (!savedIndustria) {
+          console.error("❌ ERRO: Indústria não foi encontrada após recarregar!");
+          console.error("📋 Todas as indústrias carregadas:", saved.industrias);
+          console.error("🆔 IDs das indústrias:", saved.industrias.map(ind => ind.id));
+          console.error("🆔 ID procurado:", novaId);
+          window.alert("❌ Erro: Indústria não foi encontrada após salvar. Verifique o console (F12).");
+          return; // Não redirecionar se não salvou
+        }
+        
+        console.log("✅ Indústria confirmada salva:", savedIndustria);
+        console.log("✅ Total de indústrias salvas:", saved.industrias.length);
+        window.alert("✅ Indústria cadastrada com sucesso!");
+      }
+      
+      // Pequeno delay para garantir que o salvamento foi concluído
+      setTimeout(() => {
+        window.location.href = "industrias.html";
+      }, 300);
+    } catch (error) {
+      console.error("Erro ao salvar indústria:", error);
+      console.error("Stack trace:", error.stack);
+      window.alert("Erro ao salvar indústria: " + error.message + ". Por favor, verifique o console para mais detalhes.");
+    }
+  });
+
+  // Funções para Tabelas de Preços
   const renderTabelasPrecos = () => {
-    const tbody = document.querySelector("#tabelasPrecosLista");
-    if (!tbody) return;
+    if (!tabelasLista) return;
 
     if (tabelasPrecos.length === 0) {
-      tbody.innerHTML = `
+      tabelasLista.innerHTML = `
         <tr>
           <td colspan="2" class="empty-state">
             Nenhuma tabela de preço cadastrada
@@ -2552,7 +3606,7 @@ function initIndustriaFormPage() {
       return;
     }
 
-    tbody.innerHTML = tabelasPrecos
+    tabelasLista.innerHTML = tabelasPrecos
       .map(
         (tabela, index) => `
         <tr>
@@ -2563,7 +3617,7 @@ function initIndustriaFormPage() {
               class="button-danger button-small"
               onclick="window.removeTabelaPreco(${index})"
             >
-              remover
+              Remover
             </button>
           </td>
         </tr>
@@ -2572,23 +3626,37 @@ function initIndustriaFormPage() {
       .join("");
   };
 
-  const adicionarTabelaPrecoBtn = document.querySelector(
-    "#adicionarTabelaPreco"
-  );
-  adicionarTabelaPrecoBtn?.addEventListener("click", () => {
-    const nome = document.querySelector("#tabelaPrecoNome")?.value.trim();
+  const adicionarTabelaPreco = () => {
+    const nome = novaTabelaNome?.value.trim();
 
     if (!nome) {
       window.alert("Preencha o nome da tabela.");
       return;
     }
 
-    tabelasPrecos.push({ nome });
+    // Verificar se já existe uma tabela com esse nome
+    const existeTabela = tabelasPrecos.some(
+      (t) => t.nome.toLowerCase() === nome.toLowerCase()
+    );
+    if (existeTabela) {
+      window.alert("Já existe uma tabela com esse nome.");
+      return;
+    }
+
+    const novaTabela = {
+      id: `tab-${Date.now()}`,
+      nome: nome,
+      produtos: [],
+    };
+
+    tabelasPrecos.push(novaTabela);
     renderTabelasPrecos();
 
     // Limpar campo
-    document.querySelector("#tabelaPrecoNome").value = "";
-  });
+    novaTabelaNome.value = "";
+
+    window.alert("Tabela de preço adicionada com sucesso!");
+  };
 
   window.removeTabelaPreco = (index) => {
     if (window.confirm("Confirma remover esta tabela de preço?")) {
@@ -2596,6 +3664,65 @@ function initIndustriaFormPage() {
       renderTabelasPrecos();
     }
   };
+
+  // Event listeners para tabelas de preços
+  tabelaAdicionarBtn?.addEventListener("click", adicionarTabelaPreco);
+
+  // Permitir adicionar com Enter
+  novaTabelaNome?.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      adicionarTabelaPreco();
+    }
+  });
+
+  // Inicialização
+  if (editingIndustriaId) {
+    const industria = storage
+      .load()
+      .industrias.find((item) => item.id === editingIndustriaId);
+    if (industria) {
+      formTitle.textContent = `🏭 Fornecedor - Editando ${
+        industria.nomeFantasia || industria.nome
+      }`;
+      fields.razaoSocial.value = industria.razaoSocial || "";
+      fields.nomeFantasia.value =
+        industria.nomeFantasia || industria.nome || "";
+      fields.cnpj.value = industria.cnpj || "";
+      fields.inscricaoEstadual.value = industria.inscricaoEstadual || "";
+      fields.email.value = industria.email || "";
+      fields.comissao.value = industria.comissao || 0;
+      fields.pagamentoComissao.value = industria.pagamentoComissao || "";
+      fields.status.value = industria.status || "ativo";
+      fields.logoURL.value = industria.logoURL || "";
+      fields.endereco.value = industria.endereco || "";
+      fields.bairro.value = industria.bairro || "";
+      fields.cep.value = industria.cep || "";
+      fields.cidade.value = industria.cidade || "";
+      fields.estado.value = industria.estado || "";
+      fields.telefone.value = industria.telefone || "";
+      fields.telefoneAdicional.value = industria.telefoneAdicional || "";
+      fields.observacoes.value = industria.observacoes || "";
+      fields.validarEmbalagem.checked = industria.validarEmbalagem || false;
+
+      // Carregar tabelas de preços
+      if (industria.tabelasPrecos) {
+        tabelasPrecos = [...industria.tabelasPrecos];
+        renderTabelasPrecos();
+      }
+
+      // Carregar condições de pagamento
+      if (industria.condicoesPagamento) {
+        condicoesPagamento = [...industria.condicoesPagamento];
+        renderCondicoesPagamento();
+      }
+
+      // Carregar contatos
+      if (industria.contatos) {
+        contatos = [...industria.contatos];
+        renderContatos();
+      }
+    }
+  }
 
   // Funções para Condições de Pagamento
   const renderCondicoesPagamento = () => {
@@ -2761,106 +3888,6 @@ function initIndustriaFormPage() {
     }
   };
 
-  // Submit do formulário
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const data = {
-      razaoSocial: fields.razaoSocial.value.trim(),
-      nomeFantasia: fields.nomeFantasia.value.trim(),
-      cnpj: fields.cnpj.value.trim(),
-      inscricaoEstadual: fields.inscricaoEstadual.value.trim(),
-      email: fields.email.value.trim(),
-      comissao: Number.parseFloat(fields.comissao.value) || 0,
-      pagamentoComissao: fields.pagamentoComissao.value,
-      status: fields.status.value,
-      logoURL: fields.logoURL.value.trim(),
-      endereco: fields.endereco.value.trim(),
-      bairro: fields.bairro.value.trim(),
-      cep: fields.cep.value.trim(),
-      cidade: fields.cidade.value.trim(),
-      estado: fields.estado.value,
-      telefone: fields.telefone.value.trim(),
-      telefoneAdicional: fields.telefoneAdicional.value.trim(),
-      observacoes: fields.observacoes.value.trim(),
-      validarEmbalagem: fields.validarEmbalagem.checked,
-      tabelasPrecos: tabelasPrecos,
-      condicoesPagamento: condicoesPagamento,
-      contatos: contatos,
-      // Campos compatíveis com a versão antiga
-      nome: fields.nomeFantasia.value.trim(),
-    };
-
-    if (editingIndustriaId) {
-      storage.update((draft) => {
-        const industria = draft.industrias.find(
-          (item) => item.id === editingIndustriaId
-        );
-        if (industria) {
-          Object.assign(industria, data);
-        }
-      });
-      window.alert("Indústria atualizada com sucesso!");
-    } else {
-      storage.update((draft) => {
-        const nova = { id: generateId("ind"), ...data };
-        draft.industrias.push(nova);
-      });
-      window.alert("Indústria cadastrada com sucesso!");
-    }
-
-    window.location.href = "industrias.html";
-  });
-
-  // Inicialização
-  if (editingIndustriaId) {
-    const industria = storage
-      .load()
-      .industrias.find((item) => item.id === editingIndustriaId);
-    if (industria) {
-      formTitle.textContent = `🏭 Fornecedor - Editando ${
-        industria.nomeFantasia || industria.nome
-      }`;
-      fields.razaoSocial.value = industria.razaoSocial || "";
-      fields.nomeFantasia.value =
-        industria.nomeFantasia || industria.nome || "";
-      fields.cnpj.value = industria.cnpj || "";
-      fields.inscricaoEstadual.value = industria.inscricaoEstadual || "";
-      fields.email.value = industria.email || "";
-      fields.comissao.value = industria.comissao || 0;
-      fields.pagamentoComissao.value = industria.pagamentoComissao || "";
-      fields.status.value = industria.status || "ativo";
-      fields.logoURL.value = industria.logoURL || "";
-      fields.endereco.value = industria.endereco || "";
-      fields.bairro.value = industria.bairro || "";
-      fields.cep.value = industria.cep || "";
-      fields.cidade.value = industria.cidade || "";
-      fields.estado.value = industria.estado || "";
-      fields.telefone.value = industria.telefone || "";
-      fields.telefoneAdicional.value = industria.telefoneAdicional || "";
-      fields.observacoes.value = industria.observacoes || "";
-      fields.validarEmbalagem.checked = industria.validarEmbalagem || false;
-
-      // Carregar tabelas de preço
-      if (industria.tabelasPrecos) {
-        tabelasPrecos = [...industria.tabelasPrecos];
-        renderTabelasPrecos();
-      }
-
-      // Carregar condições de pagamento
-      if (industria.condicoesPagamento) {
-        condicoesPagamento = [...industria.condicoesPagamento];
-        renderCondicoesPagamento();
-      }
-
-      // Carregar contatos
-      if (industria.contatos) {
-        contatos = [...industria.contatos];
-        renderContatos();
-      }
-    }
-  }
-
   renderTabelasPrecos();
   renderCondicoesPagamento();
   renderContatos();
@@ -2876,11 +3903,30 @@ function initProdutosPage() {
   const descEl = document.querySelector("#produtoDrawerDescricao");
   const openBtn = document.querySelector("#produtoCriar");
   const editBtn = document.querySelector("#produtoEditar");
+  const importBtn = document.querySelector("#produtoImportar");
   const removeBtn = document.querySelector("#produtoRemover");
   const closeBtn = document.querySelector("#produtoDrawerFechar");
   const cancelBtn = document.querySelector("#produtoCancelar");
   const submitBtn = form.querySelector('button[type="submit"]');
   const listContainer = document.querySelector("#produtosLista");
+
+  // Elementos para drawer de importação
+  const importProdutosOverlay = document.querySelector(
+    "#importProdutosOverlay"
+  );
+  const importProdutosDrawer = document.querySelector("#importProdutosDrawer");
+  const importProdutosCloseBtn = document.querySelector(
+    "#importProdutosDrawerFechar"
+  );
+  const importProdutosCancelBtn = document.querySelector(
+    "#importProdutosCancelar"
+  );
+  const importProdutosForm = document.querySelector("#importProdutosForm");
+  const importIndustriaSelect = document.querySelector("#importIndustria");
+  const importTabelaPrecoSelect = document.querySelector("#importTabelaPreco");
+  const produtosImportacaoLista = document.querySelector(
+    "#produtosImportacaoLista"
+  );
 
   const fields = {
     id: document.querySelector("#produtoId"),
@@ -2918,13 +3964,106 @@ function initProdutosPage() {
     window.location.href = "produto-form.html";
   });
 
-  editBtn?.addEventListener("click", () => {
-    if (!selectedId) {
-      window.alert("Selecione um produto para editar.");
+  // Event listeners para importação
+  importBtn?.addEventListener("click", () => {
+    window.location.href = "importar-produtos.html";
+  });
+
+  importProdutosOverlay?.addEventListener("click", () => {
+    hideDrawer(importProdutosDrawer, importProdutosOverlay);
+  });
+  importProdutosCloseBtn?.addEventListener("click", () => {
+    hideDrawer(importProdutosDrawer, importProdutosOverlay);
+  });
+  importProdutosCancelBtn?.addEventListener("click", () => {
+    hideDrawer(importProdutosDrawer, importProdutosOverlay);
+  });
+
+  importIndustriaSelect?.addEventListener("change", (e) => {
+    carregarTabelasPrecosParaImportacao(e.target.value);
+    carregarProdutosParaImportacao("");
+  });
+
+  importTabelaPrecoSelect?.addEventListener("change", (e) => {
+    carregarProdutosParaImportacao(e.target.value);
+  });
+
+  importProdutosForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const industriaId = importIndustriaSelect.value;
+    const tabelaId = importTabelaPrecoSelect.value;
+    const importarTodos = document.querySelector(
+      "#importarTodosProdutos"
+    ).checked;
+    const precoPadrao =
+      parseFloat(document.querySelector("#precoPadraoImportacao").value) || 100;
+
+    if (!industriaId || !tabelaId) {
+      window.alert("Selecione uma indústria e tabela de preços.");
       return;
     }
-    window.sessionStorage.setItem("oursales:editProduto", selectedId);
-    window.location.href = "produto-form.html";
+
+    try {
+      const tabela = getTabelaPreco(tabelaId);
+      if (!tabela || !tabela.produtos) {
+        window.alert("Nenhum produto encontrado na tabela selecionada.");
+        return;
+      }
+
+      let produtosParaImportar = [];
+
+      if (importarTodos) {
+        produtosParaImportar = tabela.produtos.map((item) => ({
+          ...item.produto,
+          precoVenda: item.preco * (precoPadrao / 100),
+          industriaId: industriaId,
+        }));
+      } else {
+        const checkboxes = document.querySelectorAll(
+          'input[name="produtoImportacao"]:checked'
+        );
+        if (checkboxes.length === 0) {
+          window.alert("Selecione pelo menos um produto para importar.");
+          return;
+        }
+
+        produtosParaImportar = Array.from(checkboxes).map((checkbox) => {
+          const item = tabela.produtos.find(
+            (p) => p.produto.id === checkbox.value
+          );
+          return {
+            ...item.produto,
+            precoVenda: item.preco * (precoPadrao / 100),
+            industriaId: industriaId,
+          };
+        });
+      }
+
+      // Adicionar produtos ao catálogo geral
+      storage.update((draft) => {
+        produtosParaImportar.forEach((produto) => {
+          const produtoExistente = draft.produtos.find(
+            (p) => p.sku === produto.sku
+          );
+          if (!produtoExistente) {
+            draft.produtos.push({
+              id: generateId("pro"),
+              ...produto,
+            });
+          }
+        });
+      });
+
+      hideDrawer(importProdutosDrawer, importProdutosOverlay);
+      render();
+      window.alert(
+        `${produtosParaImportar.length} produto(s) importado(s) com sucesso!`
+      );
+    } catch (error) {
+      console.error("Erro ao importar produtos:", error);
+      window.alert("Erro ao importar produtos.");
+    }
   });
 
   removeBtn?.addEventListener("click", () => {
@@ -3014,24 +4153,36 @@ function initProdutosPage() {
     updateActionsState();
   });
 
-  listContainer?.addEventListener("click", (event) => {
-    const row = event.target.closest("tr[data-id]");
-    if (!row) return;
-    const input = row.querySelector(
-      'input[type="radio"][name="produtoSelecionado"]'
+  listContainer?.addEventListener("change", (event) => {
+    const input = event.target.closest(
+      'input[type="checkbox"][name="produtoSelecionado"]'
     );
-    if (input) {
-      // Toggle: se já está selecionado, desmarcar
-      if (selectedId === input.value) {
-        input.checked = false;
-        selectedId = "";
-      } else {
-        input.checked = true;
-        selectedId = input.value;
-      }
-      syncSelection(listContainer, "produtoSelecionado", selectedId);
-      updateActionsState();
+    if (!input) return;
+
+    // Atualizar seleção
+    const checkedBoxes = listContainer.querySelectorAll(
+      'input[type="checkbox"][name="produtoSelecionado"]:checked'
+    );
+    if (checkedBoxes.length === 1) {
+      selectedId = checkedBoxes[0].value;
+    } else if (checkedBoxes.length === 0) {
+      selectedId = "";
     }
+
+    syncSelection(listContainer, "produtoSelecionado", selectedId);
+    updateActionsState();
+  });
+
+  editBtn?.addEventListener("click", () => {
+    if (!validateSingleSelection("edit")) {
+      return;
+    }
+    const checkedBoxes = listContainer.querySelectorAll(
+      'input[type="checkbox"][name="produtoSelecionado"]:checked'
+    );
+    selectedId = checkedBoxes[0].value;
+    window.sessionStorage.setItem("oursales:editProduto", selectedId);
+    window.location.href = "produto-form.html";
   });
 
   function render() {
@@ -3047,31 +4198,102 @@ function initProdutosPage() {
       return;
     }
 
+    // Obter colunas personalizadas
+    const customColumns = getCustomColumns("produtos");
+    const allColumns = [
+      "nome",
+      "categoria",
+      "preco",
+      "estoque",
+      "descricao",
+      "sku",
+      "marca",
+    ];
+    const visibleColumns =
+      customColumns.length > 0 ? customColumns : allColumns;
+
     const linhas = produtos
-      .map(
-        (produto) => `
+      .map((produto) => {
+        let rowContent = `
           <tr class="table-row${
             produto.id === selectedId ? " is-selected" : ""
           }" data-id="${produto.id}">
             <td class="select-cell">
               <label class="select-radio">
-                <input type="radio" name="produtoSelecionado" value="${
+                <input type="checkbox" name="produtoSelecionado" value="${
                   produto.id
-                }" ${produto.id === selectedId ? "checked" : ""} />
-                <span class="bubble"></span>
+                }" />
               </label>
-            </td>
-            <td>
-              <strong>${produto.nome}</strong>
-              <div class="muted">SKU: ${produto.sku}</div>
-            </td>
-            <td>${produto.categoria || "-"}</td>
-            <td>${formatCurrency(produto.preco)}</td>
-            <td>${produto.estoque}</td>
-            <td>${produto.descricao || "-"}</td>
-          </tr>
-        `
-      )
+            </td>`;
+
+        // Renderizar colunas dinamicamente
+        visibleColumns.forEach((column) => {
+          let cellContent = "";
+          switch (column) {
+            case "nome":
+              cellContent = produto.nome || "-";
+              break;
+            case "categoria":
+              cellContent = produto.categoria || "-";
+              break;
+            case "preco":
+              cellContent = formatCurrency(produto.preco || 0);
+              break;
+            case "estoque":
+              cellContent = produto.estoque || 0;
+              break;
+            case "descricao":
+              cellContent = produto.descricao || "-";
+              break;
+            case "sku":
+              cellContent = produto.sku || "-";
+              break;
+            case "marca":
+              cellContent = produto.marca || "-";
+              break;
+            case "fornecedor":
+              cellContent = produto.fornecedor || "-";
+              break;
+            case "dataCadastro":
+              cellContent = produto.dataCadastro
+                ? new Date(produto.dataCadastro).toLocaleDateString("pt-BR")
+                : "-";
+              break;
+            case "ultimaVenda":
+              cellContent = produto.ultimaVenda
+                ? new Date(produto.ultimaVenda).toLocaleDateString("pt-BR")
+                : "-";
+              break;
+            default:
+              cellContent = "-";
+          }
+
+          const className = column === "nome" ? "" : "dynamic-column";
+          rowContent += `<td class="${className}">${cellContent}</td>`;
+        });
+
+        rowContent += "</tr>";
+        return rowContent;
+      })
+      .join("");
+
+    // Construir cabeçalho dinamicamente
+    const headerCells = visibleColumns
+      .map((column) => {
+        const labels = {
+          nome: "Produto",
+          categoria: "Categoria",
+          preco: "Preço",
+          estoque: "Estoque",
+          descricao: "Descrição",
+          sku: "SKU",
+          marca: "Marca",
+          fornecedor: "Fornecedor",
+          dataCadastro: "Data Cadastro",
+          ultimaVenda: "Última Venda",
+        };
+        return `<th>${labels[column] || column}</th>`;
+      })
       .join("");
 
     listContainer.innerHTML = `
@@ -3079,12 +4301,10 @@ function initProdutosPage() {
         <table>
           <thead>
             <tr>
-              <th class="select-cell">Selecionar</th>
-              <th>Produto</th>
-              <th>Categoria</th>
-              <th>Preço</th>
-              <th>Estoque</th>
-              <th>Descrição</th>
+              <th class="select-cell">
+                <input type="checkbox" class="select-all-checkbox" title="Selecionar todos">
+              </th>
+              ${headerCells}
             </tr>
           </thead>
           <tbody>${linhas}</tbody>
@@ -3094,6 +4314,50 @@ function initProdutosPage() {
 
     syncSelection(listContainer, "produtoSelecionado", selectedId);
     updateActionsState();
+
+    // Adicionar click nas linhas para seleção
+    listContainer.querySelectorAll("tbody tr").forEach((row) => {
+      row.style.cursor = "pointer";
+      row.addEventListener("click", (e) => {
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      });
+      
+      // Double click para editar
+      row.addEventListener("dblclick", (e) => {
+        // Não editar se clicou no checkbox ou botão
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+        
+        const produtoId = row.getAttribute("data-id");
+        if (produtoId) {
+          // Selecionar o produto
+          const checkbox = row.querySelector('input[type="checkbox"]');
+          if (checkbox) {
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          // Aguardar um pouco para garantir que a seleção foi processada
+          setTimeout(() => {
+            window.sessionStorage.setItem("oursales:editProduto", produtoId);
+            window.location.href = "produto-form.html";
+          }, 100);
+        }
+      });
+    });
   }
 
   render();
@@ -3148,6 +4412,30 @@ function initProdutoFormPage() {
   if (editingProdutoId) {
     window.sessionStorage.removeItem("oursales:editProduto");
   }
+
+  // Carregar indústrias para o select
+  function carregarIndustrias() {
+    try {
+      const industrias = getIndustrias();
+      const selectIndustria = fields.industria;
+
+      // Limpar opções existentes (exceto a primeira)
+      selectIndustria.innerHTML = '<option value="">Selecione</option>';
+
+      // Adicionar indústrias
+      industrias.forEach((industria) => {
+        const option = document.createElement("option");
+        option.value = industria.id;
+        option.textContent = industria.nomeFantasia || industria.razaoSocial;
+        selectIndustria.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Erro ao carregar indústrias:", error);
+    }
+  }
+
+  // Carregar indústrias ao inicializar
+  carregarIndustrias();
 
   // Funções auxiliares
   const calcularPrecoVenda = () => {
@@ -3268,7 +4556,7 @@ function initProdutoFormPage() {
     e.preventDefault();
 
     const data = {
-      industria: fields.industria.value,
+      industriaId: fields.industria.value,
       sku: fields.sku.value.trim(),
       nome: fields.nome.value.trim(),
       precoVenda: Number.parseFloat(fields.precoVenda.value) || 0,
@@ -3323,6 +4611,36 @@ function initProdutoFormPage() {
     }
 
     window.location.href = "produtos.html";
+  });
+
+  // Event listener para botão Personalizar Campos
+  const personalizarBtn = document.querySelector("#personalizarCampos");
+  personalizarBtn?.addEventListener("click", () => {
+    // Simular personalização de campos
+    const camposPersonalizaveis = [
+      "NCM",
+      "Código Original",
+      "Modelo",
+      "Peso Líquido",
+      "Fator de Cubagem",
+      "Altura",
+      "Largura",
+      "Comprimento",
+      "Foto URL",
+      "Substituições Tributárias",
+    ];
+
+    const camposSelecionados = camposPersonalizaveis.filter((campo) =>
+      window.confirm(`Incluir campo "${campo}" no formulário?`)
+    );
+
+    if (camposSelecionados.length > 0) {
+      window.alert(
+        `Campos personalizados adicionados:\n${camposSelecionados.join("\n")}`
+      );
+    } else {
+      window.alert("Nenhum campo personalizado foi selecionado.");
+    }
   });
 
   // Inicialização
@@ -3393,10 +4711,13 @@ function initOrcamentosPage() {
   });
 
   editBtn?.addEventListener("click", () => {
-    if (!selectedId) {
-      window.alert("Selecione um orçamento para editar.");
+    if (!validateSingleSelection("edit")) {
       return;
     }
+    const checkedBoxes = listContainer.querySelectorAll(
+      'input[type="checkbox"][name="orcamentoSelecionado"]:checked'
+    );
+    selectedId = checkedBoxes[0].value;
     window.sessionStorage.setItem("oursales:editOrcamento", selectedId);
     window.location.href = "orcamento-form.html";
   });
@@ -3420,28 +4741,43 @@ function initOrcamentosPage() {
 
   listContainer?.addEventListener("change", (event) => {
     const input = event.target.closest(
-      'input[type="radio"][name="orcamentoSelecionado"]'
+      'input[type="checkbox"][name="orcamentoSelecionado"]'
     );
     if (!input) return;
-    selectedId = input.value;
+
+    // Atualizar seleção
+    const checkedBoxes = listContainer.querySelectorAll(
+      'input[type="checkbox"][name="orcamentoSelecionado"]:checked'
+    );
+    if (checkedBoxes.length === 1) {
+      selectedId = checkedBoxes[0].value;
+    } else if (checkedBoxes.length === 0) {
+      selectedId = "";
+    }
+
     syncSelection(listContainer, "orcamentoSelecionado", selectedId);
     updateActionsState();
   });
 
   listContainer?.addEventListener("click", (event) => {
-    const row = event.target.closest("tr[data-id]");
-    if (!row) return;
-    const input = row.querySelector(
+    const listItem = event.target.closest(".list-item");
+    if (!listItem) return;
+
+    const orcamentoId = listItem.dataset.id;
+    if (!orcamentoId) return;
+
+    // Encontrar o radio button correspondente e fazer toggle
+    const radioButton = listItem.querySelector(
       'input[type="radio"][name="orcamentoSelecionado"]'
     );
-    if (input) {
+    if (radioButton) {
       // Toggle: se já está selecionado, desmarcar
-      if (selectedId === input.value) {
-        input.checked = false;
+      if (selectedId === orcamentoId) {
+        radioButton.checked = false;
         selectedId = "";
       } else {
-        input.checked = true;
-        selectedId = input.value;
+        radioButton.checked = true;
+        selectedId = orcamentoId;
       }
       syncSelection(listContainer, "orcamentoSelecionado", selectedId);
       updateActionsState();
@@ -3455,36 +4791,117 @@ function initOrcamentosPage() {
     }
 
     if (!orcamentos.length) {
-      listContainer.innerHTML =
-        '<div class="empty-state">Nenhum orçamento registrado.</div>';
+      listContainer.innerHTML = `
+        <div class="empty-state">
+          <h3>Nenhum orçamento registrado</h3>
+          <p>Clique em "Novo orçamento" para começar.</p>
+        </div>
+      `;
       updateActionsState();
       return;
     }
 
+    // Obter colunas personalizadas
+    const customColumns = getCustomColumns("orcamentos");
+    const allColumns = [
+      "cliente",
+      "valorSemImposto",
+      "valorComImposto",
+      "validade",
+      "observacoes",
+      "status",
+    ];
+    const visibleColumns =
+      customColumns.length > 0 ? customColumns : allColumns;
+
     const linhas = orcamentos
-      .map(
-        (orcamento) => `
+      .map((orcamento) => {
+        let rowContent = `
           <tr class="table-row${
             orcamento.id === selectedId ? " is-selected" : ""
           }" data-id="${orcamento.id}">
             <td class="select-cell">
               <label class="select-radio">
-                <input type="radio" name="orcamentoSelecionado" value="${
+                <input type="checkbox" name="orcamentoSelecionado" value="${
                   orcamento.id
-                }" ${orcamento.id === selectedId ? "checked" : ""} />
-                <span class="bubble"></span>
+                }" />
               </label>
-            </td>
-            <td>
-              <strong>${orcamento.descricao}</strong>
-              <div class="muted">Cliente: ${orcamento.clienteNome}</div>
-            </td>
-            <td>${formatCurrency(orcamento.valor)}</td>
-            <td>${formatDate(orcamento.validade)}</td>
-            <td>${orcamento.observacoes || "-"}</td>
-          </tr>
-        `
-      )
+            </td>`;
+
+        // Renderizar colunas dinamicamente
+        visibleColumns.forEach((column) => {
+          let cellContent = "";
+          switch (column) {
+            case "cliente":
+              cellContent = orcamento.clienteNome || "-";
+              break;
+            case "valorSemImposto":
+              cellContent = formatCurrency(
+                orcamento.valorSemImposto || orcamento.valor || 0
+              );
+              break;
+            case "valorComImposto":
+              cellContent = formatCurrency(
+                orcamento.valorComImposto || orcamento.valor || 0
+              );
+              break;
+            case "validade":
+              cellContent = orcamento.validade
+                ? new Date(orcamento.validade).toLocaleDateString("pt-BR")
+                : "-";
+              break;
+            case "observacoes":
+              cellContent = orcamento.observacoes || "-";
+              break;
+            case "status":
+              cellContent = `<span class="status ${
+                orcamento.status === "ativo" ? "active" : "inactive"
+              }">${orcamento.status === "ativo" ? "Ativo" : "Inativo"}</span>`;
+              break;
+            case "dataCriacao":
+              cellContent = orcamento.dataCriacao
+                ? new Date(orcamento.dataCriacao).toLocaleDateString("pt-BR")
+                : "-";
+              break;
+            case "vendedor":
+              cellContent = orcamento.vendedor || "-";
+              break;
+            case "desconto":
+              cellContent = orcamento.desconto ? `${orcamento.desconto}%` : "-";
+              break;
+            case "prazoEntrega":
+              cellContent = orcamento.prazoEntrega || "-";
+              break;
+            default:
+              cellContent = "-";
+          }
+
+          const className = column === "cliente" ? "" : "dynamic-column";
+          rowContent += `<td class="${className}">${cellContent}</td>`;
+        });
+
+        rowContent += "</tr>";
+        return rowContent;
+      })
+      .join("");
+
+    // Construir cabeçalho dinamicamente
+    const headerCells = visibleColumns
+      .map((column) => {
+        const labels = {
+          cliente: "Cliente",
+          valorSemImposto: "Valor Sem Imposto",
+          valorComImposto: "Valor Com Imposto",
+          validade: "Validade",
+          observacoes: "Observações",
+          status: "Status",
+          dataCriacao: "Data Criação",
+          vendedor: "Vendedor",
+          desconto: "Desconto",
+          prazoEntrega: "Prazo Entrega",
+        };
+        return `<th>${labels[column] || column}</th>`;
+      })
       .join("");
 
     listContainer.innerHTML = `
@@ -3492,11 +4909,10 @@ function initOrcamentosPage() {
         <table>
           <thead>
             <tr>
-              <th class="select-cell">Selecionar</th>
-              <th>Resumo</th>
-              <th>Valor</th>
-              <th>Validade</th>
-              <th>Observações</th>
+              <th class="select-cell">
+                <input type="checkbox" class="select-all-checkbox" title="Selecionar todos">
+              </th>
+              ${headerCells}
             </tr>
           </thead>
           <tbody>${linhas}</tbody>
@@ -3506,6 +4922,50 @@ function initOrcamentosPage() {
 
     syncSelection(listContainer, "orcamentoSelecionado", selectedId);
     updateActionsState();
+
+    // Adicionar click nas linhas para seleção
+    listContainer.querySelectorAll("tbody tr").forEach((row) => {
+      row.style.cursor = "pointer";
+      row.addEventListener("click", (e) => {
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      });
+      
+      // Double click para editar
+      row.addEventListener("dblclick", (e) => {
+        // Não editar se clicou no checkbox ou botão
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+        
+        const orcamentoId = row.getAttribute("data-id");
+        if (orcamentoId) {
+          // Selecionar o orçamento
+          const checkbox = row.querySelector('input[type="checkbox"]');
+          if (checkbox) {
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          // Aguardar um pouco para garantir que a seleção foi processada
+          setTimeout(() => {
+            window.sessionStorage.setItem("oursales:editOrcamento", orcamentoId);
+            window.location.href = "orcamento-form.html";
+          }, 100);
+        }
+      });
+    });
   }
 
   // Inicialização
@@ -3652,6 +5112,82 @@ function initOrcamentoFormPage() {
     window.location.href = "orcamentos.html";
   });
 
+  // Event listeners para botões adicionais
+  const salvarEnviarBtn = document.querySelector("#orcamentoSalvarEnviar");
+  const visualizarBtn = document.querySelector("#orcamentoVisualizar");
+
+  salvarEnviarBtn?.addEventListener("click", () => {
+    // Simular envio do orçamento
+    if (
+      window.confirm("Confirma salvar e enviar o orçamento para o cliente?")
+    ) {
+      // Primeiro salvar o orçamento
+      form.dispatchEvent(new Event("submit"));
+
+      // Depois simular envio
+      setTimeout(() => {
+        window.alert("Orçamento salvo e enviado com sucesso!");
+      }, 1000);
+    }
+  });
+
+  visualizarBtn?.addEventListener("click", () => {
+    // Simular visualização do orçamento
+    const clienteId = fields.cliente.value;
+    if (!clienteId) {
+      window.alert("Selecione um cliente para visualizar o orçamento.");
+      return;
+    }
+
+    const cliente = storage.load().clientes.find((c) => c.id === clienteId);
+    if (!cliente) {
+      window.alert("Cliente não encontrado.");
+      return;
+    }
+
+    // Criar uma nova janela com a visualização
+    const visualizacao = `
+      <html>
+        <head>
+          <title>Orçamento - ${cliente.nome}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .cliente-info { margin-bottom: 20px; }
+            .totais { margin-top: 20px; text-align: right; }
+            .total-final { font-size: 1.2em; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ORÇAMENTO</h1>
+            <p>Cliente: ${cliente.nome}</p>
+            <p>Data: ${new Date().toLocaleDateString("pt-BR")}</p>
+          </div>
+          <div class="cliente-info">
+            <p><strong>Cliente:</strong> ${cliente.nome}</p>
+            <p><strong>Documento:</strong> ${cliente.documento || "N/A"}</p>
+            <p><strong>E-mail:</strong> ${cliente.email || "N/A"}</p>
+          </div>
+          <div class="totais">
+            <p>Total de Itens: ${orcamentoItens.length}</p>
+            <p>Total Final: ${formatCurrency(
+              orcamentoItens.reduce(
+                (sum, item) =>
+                  sum + (item.precoFinal || 0) * (item.quantidade || 0),
+                0
+              )
+            )}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const novaJanela = window.open("", "_blank");
+    novaJanela.document.write(visualizacao);
+    novaJanela.document.close();
+  });
+
   // Calcular totais ao mudar valores
   fields.valorFrete?.addEventListener("input", calculateTotals);
   fields.valorAcrescimo?.addEventListener("input", calculateTotals);
@@ -3684,6 +5220,301 @@ function initOrcamentoFormPage() {
 /**
  * Pedido Form Page - Página separada para criar/editar pedidos
  */
+function initPedidosPage() {
+  const openBtn = document.querySelector("#pedidoCriar");
+  const editBtn = document.querySelector("#pedidoEditar");
+  const removeBtn = document.querySelector("#pedidoRemover");
+  const listContainer = document.querySelector("#pedidosLista");
+
+  let selectedPedidoId = "";
+
+  const updateActionsState = () => {
+    const hasSelection = Boolean(selectedPedidoId);
+    if (editBtn) editBtn.disabled = !hasSelection;
+    if (removeBtn) removeBtn.disabled = !hasSelection;
+  };
+
+  const renderPedidos = () => {
+    if (!listContainer) return;
+
+    const state = storage.load();
+    const pedidos = state.pedidos || [];
+
+    if (pedidos.length === 0) {
+      listContainer.innerHTML = `
+        <div class="empty-state">
+          <h3>Nenhum pedido registrado</h3>
+          <p>Clique em "Novo pedido" para começar.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Obter colunas personalizadas
+    const customColumns = getCustomColumns("pedidos");
+    const allColumns = [
+      "cliente",
+      "valorSemImposto",
+      "valorComImposto",
+      "dataEntrega",
+      "status",
+      "transportadora",
+    ];
+    const visibleColumns =
+      customColumns.length > 0 ? customColumns : allColumns;
+
+    const linhas = pedidos
+      .map((pedido) => {
+        let rowContent = `
+          <tr class="table-row${
+            pedido.id === selectedPedidoId ? " is-selected" : ""
+          }" data-id="${pedido.id}">
+            <td class="select-cell">
+              <label class="select-radio">
+                <input type="checkbox" name="pedidoSelecionado" value="${
+                  pedido.id
+                }" />
+              </label>
+            </td>`;
+
+        // Renderizar colunas dinamicamente
+        visibleColumns.forEach((column) => {
+          let cellContent = "";
+          switch (column) {
+            case "cliente":
+              cellContent = pedido.clienteNome || "-";
+              break;
+            case "valorSemImposto":
+              cellContent = formatCurrency(
+                pedido.valorSemImposto || pedido.valorTotal || 0
+              );
+              break;
+            case "valorComImposto":
+              cellContent = formatCurrency(
+                pedido.valorComImposto || pedido.valorTotal || 0
+              );
+              break;
+            case "dataEntrega":
+              cellContent = pedido.dataEntrega
+                ? new Date(pedido.dataEntrega).toLocaleDateString("pt-BR")
+                : "-";
+              break;
+            case "status":
+              cellContent = `<span class="status ${
+                pedido.status === "ativo" ? "active" : "inactive"
+              }">${pedido.status === "ativo" ? "Ativo" : "Inativo"}</span>`;
+              break;
+            case "transportadora":
+              cellContent = pedido.transportadora || "-";
+              break;
+            case "observacoes":
+              cellContent = pedido.observacoes || "-";
+              break;
+            case "dataCriacao":
+              cellContent = pedido.dataPedido
+                ? new Date(pedido.dataPedido).toLocaleDateString("pt-BR")
+                : "-";
+              break;
+            case "vendedor":
+              cellContent = pedido.vendedor || "-";
+              break;
+            case "prazoPagamento":
+              cellContent = pedido.prazoPagamento || "-";
+              break;
+            default:
+              cellContent = "-";
+          }
+
+          const className = column === "cliente" ? "" : "dynamic-column";
+          rowContent += `<td class="${className}">${cellContent}</td>`;
+        });
+
+        rowContent += "</tr>";
+        return rowContent;
+      })
+      .join("");
+
+    // Construir cabeçalho dinamicamente
+    const headerCells = visibleColumns
+      .map((column) => {
+        const labels = {
+          cliente: "Cliente",
+          valorSemImposto: "Valor Sem Imposto",
+          valorComImposto: "Valor Com Imposto",
+          dataEntrega: "Data Entrega",
+          status: "Status",
+          transportadora: "Transportadora",
+          observacoes: "Observações",
+          dataCriacao: "Data Criação",
+          vendedor: "Vendedor",
+          prazoPagamento: "Prazo Pagamento",
+        };
+        return `<th>${labels[column] || column}</th>`;
+      })
+      .join("");
+
+    listContainer.innerHTML = `
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="select-cell">
+                <input type="checkbox" class="select-all-checkbox" title="Selecionar todos">
+              </th>
+              ${headerCells}
+            </tr>
+          </thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      </div>
+    `;
+
+    syncSelection(listContainer, "pedidoSelecionado", selectedPedidoId);
+    updateActionsState();
+
+    // Adicionar click nas linhas para seleção
+    listContainer.querySelectorAll("tbody tr").forEach((row) => {
+      row.style.cursor = "pointer";
+      row.addEventListener("click", (e) => {
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      });
+      
+      // Double click para editar
+      row.addEventListener("dblclick", (e) => {
+        // Não editar se clicou no checkbox ou botão
+        if (
+          e.target.closest('input[type="checkbox"]') ||
+          e.target.closest("button")
+        ) {
+          return;
+        }
+        
+        const pedidoId = row.getAttribute("data-id");
+        if (pedidoId) {
+          // Selecionar o pedido
+          const checkbox = row.querySelector('input[type="checkbox"]');
+          if (checkbox) {
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          // Aguardar um pouco para garantir que a seleção foi processada
+          setTimeout(() => {
+            window.sessionStorage.setItem("oursales:editPedido", pedidoId);
+            window.location.href = "pedido-form.html";
+          }, 100);
+        }
+      });
+    });
+  };
+
+  // Event listeners
+  openBtn?.addEventListener("click", () => {
+    window.location.href = "pedido-form.html";
+  });
+
+  editBtn?.addEventListener("click", () => {
+    if (!validateSingleSelection("edit")) {
+      return;
+    }
+    const checkedBoxes = listContainer.querySelectorAll(
+      'input[type="checkbox"][name="pedidoSelecionado"]:checked'
+    );
+    selectedPedidoId = checkedBoxes[0].value;
+    window.sessionStorage.setItem("oursales:editPedido", selectedPedidoId);
+    window.location.href = "pedido-form.html";
+  });
+
+  removeBtn?.addEventListener("click", () => {
+    if (!selectedPedidoId) {
+      window.alert("Selecione um pedido para remover.");
+      return;
+    }
+
+    const state = storage.load();
+    const pedido = state.pedidos?.find((p) => p.id === selectedPedidoId);
+    if (!pedido) {
+      window.alert("Pedido não encontrado.");
+      return;
+    }
+
+    const confirmacao = window.confirm(
+      `Confirma remover o pedido #${
+        pedido.numero || pedido.id
+      }?\n\nEsta ação não pode ser desfeita.`
+    );
+
+    if (!confirmacao) return;
+
+    storage.update((draft) => {
+      draft.pedidos =
+        draft.pedidos?.filter((p) => p.id !== selectedPedidoId) || [];
+    });
+
+    selectedPedidoId = "";
+    renderPedidos();
+    window.alert("Pedido removido com sucesso!");
+  });
+
+  // Event listener para seleção
+  listContainer?.addEventListener("change", (event) => {
+    const input = event.target.closest(
+      'input[type="checkbox"][name="pedidoSelecionado"]'
+    );
+    if (!input) return;
+
+    // Atualizar seleção
+    const checkedBoxes = listContainer.querySelectorAll(
+      'input[type="checkbox"][name="pedidoSelecionado"]:checked'
+    );
+    if (checkedBoxes.length === 1) {
+      selectedPedidoId = checkedBoxes[0].value;
+    } else if (checkedBoxes.length === 0) {
+      selectedPedidoId = "";
+    }
+
+    syncSelection(listContainer, "pedidoSelecionado", selectedPedidoId);
+    updateActionsState();
+  });
+
+  // Event listener para clique em qualquer área do item
+  listContainer?.addEventListener("click", (event) => {
+    const listItem = event.target.closest(".list-item");
+    if (!listItem) return;
+
+    const pedidoId = listItem.dataset.id;
+    if (!pedidoId) return;
+
+    // Encontrar o radio button correspondente e fazer toggle
+    const radioButton = listItem.querySelector(
+      'input[type="radio"][name="pedidoSelecionado"]'
+    );
+    if (radioButton) {
+      // Toggle: se já está selecionado, desmarcar
+      if (selectedPedidoId === pedidoId) {
+        radioButton.checked = false;
+        selectedPedidoId = "";
+      } else {
+        radioButton.checked = true;
+        selectedPedidoId = pedidoId;
+      }
+      syncSelection(listContainer, "pedidoSelecionado", selectedPedidoId);
+      updateActionsState();
+    }
+  });
+
+  renderPedidos();
+}
+
 function initPedidoFormPage() {
   const form = document.querySelector("#pedidoForm");
   if (!form) return;
@@ -3838,6 +5669,142 @@ function initPedidoFormPage() {
     }
 
     window.location.href = "pedidos.html";
+  });
+
+  // Event listeners para botões adicionais
+  const salvarEnviarBtn = document.querySelector("#pedidoSalvarEnviar");
+  const visualizarBtn = document.querySelector("#pedidoVisualizar");
+  const personalizarBtn = document.querySelector("#personalizarCampos");
+  const procurarBtn = document.querySelector("#pedidoClienteProcurar");
+  const clienteSearchInput = document.querySelector("#pedidoClienteSearch");
+
+  salvarEnviarBtn?.addEventListener("click", () => {
+    // Simular envio do pedido
+    if (
+      window.confirm("Confirma salvar e enviar o pedido para processamento?")
+    ) {
+      // Primeiro salvar o pedido
+      form.dispatchEvent(new Event("submit"));
+
+      // Depois simular envio
+      setTimeout(() => {
+        window.alert("Pedido salvo e enviado com sucesso!");
+      }, 1000);
+    }
+  });
+
+  visualizarBtn?.addEventListener("click", () => {
+    // Simular visualização do pedido
+    const clienteId = fields.cliente.value;
+    if (!clienteId) {
+      window.alert("Selecione um cliente para visualizar o pedido.");
+      return;
+    }
+
+    const cliente = storage.load().clientes.find((c) => c.id === clienteId);
+    if (!cliente) {
+      window.alert("Cliente não encontrado.");
+      return;
+    }
+
+    // Criar uma nova janela com a visualização
+    const visualizacao = `
+      <html>
+        <head>
+          <title>Pedido - ${cliente.nome}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .cliente-info { margin-bottom: 20px; }
+            .totais { margin-top: 20px; text-align: right; }
+            .total-final { font-size: 1.2em; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>PEDIDO</h1>
+            <p>Cliente: ${cliente.nome}</p>
+            <p>Data: ${new Date().toLocaleDateString("pt-BR")}</p>
+          </div>
+          <div class="cliente-info">
+            <p><strong>Cliente:</strong> ${cliente.nome}</p>
+            <p><strong>Documento:</strong> ${cliente.documento || "N/A"}</p>
+            <p><strong>E-mail:</strong> ${cliente.email || "N/A"}</p>
+          </div>
+          <div class="totais">
+            <p>Total de Itens: ${pedidoItens.length}</p>
+            <p>Total Final: ${formatCurrency(
+              pedidoItens.reduce(
+                (sum, item) =>
+                  sum + (item.precoFinal || 0) * (item.quantidade || 0),
+                0
+              )
+            )}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const novaJanela = window.open("", "_blank");
+    novaJanela.document.write(visualizacao);
+    novaJanela.document.close();
+  });
+
+  personalizarBtn?.addEventListener("click", () => {
+    // Simular personalização de campos
+    const camposPersonalizaveis = [
+      "Observações",
+      "Observação Privada",
+      "Endereço de Entrega",
+      "Fator de Cubagem",
+      "Número ERP",
+    ];
+
+    const camposSelecionados = camposPersonalizaveis.filter((campo) =>
+      window.confirm(`Incluir campo "${campo}" no formulário?`)
+    );
+
+    if (camposSelecionados.length > 0) {
+      window.alert(
+        `Campos personalizados adicionados:\n${camposSelecionados.join("\n")}`
+      );
+    } else {
+      window.alert("Nenhum campo personalizado foi selecionado.");
+    }
+  });
+
+  procurarBtn?.addEventListener("click", () => {
+    const termo = clienteSearchInput?.value.trim();
+    if (!termo) {
+      window.alert("Digite um termo para procurar.");
+      return;
+    }
+
+    const clientes = storage.load().clientes;
+    const resultados = clientes.filter(
+      (cliente) =>
+        cliente.nome.toLowerCase().includes(termo.toLowerCase()) ||
+        cliente.documento?.includes(termo) ||
+        cliente.email?.toLowerCase().includes(termo.toLowerCase())
+    );
+
+    if (resultados.length === 0) {
+      window.alert("Nenhum cliente encontrado com o termo pesquisado.");
+      return;
+    }
+
+    if (resultados.length === 1) {
+      fields.cliente.value = resultados[0].id;
+      clienteSearchInput.value = "";
+      window.alert(`Cliente selecionado: ${resultados[0].nome}`);
+    } else {
+      const listaClientes = resultados
+        .map((c) => `${c.nome} (${c.documento || "N/A"})`)
+        .join("\n");
+      window.alert(
+        `Múltiplos clientes encontrados:\n\n${listaClientes}\n\nSelecione manualmente na lista.`
+      );
+    }
   });
 
   // Calcular totais ao mudar valores
@@ -4727,6 +6694,11 @@ const SectorManager = {
 /**
  * Initialize settings page
  */
+function initCrmPage() {
+  // Placeholder para página CRM
+  console.log("CRM page initialized");
+}
+
 function initConfiguracoesPage() {
   const statsContainer = document.querySelector("#dataStats");
   const exportJSONBtn = document.querySelector("#exportJSON");
@@ -4805,11 +6777,25 @@ function initConfiguracoesPage() {
       target.matches('[data-action="import"]') ||
       target.closest('[data-action="import"]')
     ) {
+      event.preventDefault();
+      event.stopPropagation();
+
       const button = target.matches('[data-action="import"]')
         ? target
         : target.closest('[data-action="import"]');
       const sector = button.dataset.sector;
+
+      console.log("Import button clicked for sector:", sector); // Debug
+
       if (sector) {
+        // Redirecionar para página específica de importação de produtos
+        if (sector === "produtos") {
+          console.log("Redirecting to importar-produtos.html"); // Debug
+          window.location.href = "importar-produtos.html";
+          return;
+        }
+
+        // Para outros setores, manter o comportamento original
         const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = ".csv,.xlsx,.xls";
@@ -5063,510 +7049,3 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-function initPedidosPage() {
-  const openBtn = document.querySelector("#pedidoCriar");
-  const editBtn = document.querySelector("#pedidoEditar");
-  const removeBtn = document.querySelector("#pedidoRemover");
-  const listContainer = document.querySelector("#pedidosLista");
-
-  let selectedId = "";
-
-  const updateActionsState = () => {
-    const hasSelection = Boolean(selectedId);
-    if (editBtn) editBtn.disabled = !hasSelection;
-    if (removeBtn) removeBtn.disabled = !hasSelection;
-    if (openBtn) {
-      const state = storage.load();
-      const enabled =
-        state.clientes.length > 0 && state.transportadoras.length > 0;
-      openBtn.disabled = !enabled;
-      openBtn.title = enabled
-        ? ""
-        : "Cadastre um cliente e uma transportadora antes de criar pedidos.";
-    }
-  };
-
-  openBtn?.addEventListener("click", () => {
-    window.location.href = "pedido-form.html";
-  });
-
-  editBtn?.addEventListener("click", () => {
-    if (!selectedId) {
-      window.alert("Selecione um pedido para editar.");
-      return;
-    }
-    window.sessionStorage.setItem("oursales:editPedido", selectedId);
-    window.location.href = "pedido-form.html";
-  });
-
-  removeBtn?.addEventListener("click", () => {
-    if (!selectedId) {
-      window.alert("Selecione um pedido para remover.");
-      return;
-    }
-    if (!window.confirm("Confirma remover este pedido?")) {
-      return;
-    }
-    storage.update((draft) => {
-      draft.pedidos = draft.pedidos.filter((item) => item.id !== selectedId);
-    });
-    selectedId = "";
-    render();
-  });
-
-  listContainer?.addEventListener("change", (event) => {
-    const input = event.target.closest(
-      'input[type="radio"][name="pedidoSelecionado"]'
-    );
-    if (!input) return;
-    selectedId = input.value;
-    syncSelection(listContainer, "pedidoSelecionado", selectedId);
-    updateActionsState();
-  });
-
-  listContainer?.addEventListener("click", (event) => {
-    const row = event.target.closest("tr[data-id]");
-    if (!row) return;
-    const input = row.querySelector(
-      'input[type="radio"][name="pedidoSelecionado"]'
-    );
-    if (input) {
-      // Toggle: se já está selecionado, desmarcar
-      if (selectedId === input.value) {
-        input.checked = false;
-        selectedId = "";
-      } else {
-        input.checked = true;
-        selectedId = input.value;
-      }
-      syncSelection(listContainer, "pedidoSelecionado", selectedId);
-      updateActionsState();
-    }
-  });
-
-  function render() {
-    const pedidos = storage.load().pedidos;
-    if (selectedId && !pedidos.some((item) => item.id === selectedId)) {
-      selectedId = "";
-    }
-
-    if (!pedidos.length) {
-      listContainer.innerHTML =
-        '<div class="empty-state">Nenhum pedido registrado.</div>';
-      updateActionsState();
-      return;
-    }
-
-    const linhas = pedidos
-      .map(
-        (pedido) => `
-          <tr class="table-row${
-            pedido.id === selectedId ? " is-selected" : ""
-          }" data-id="${pedido.id}">
-            <td class="select-cell">
-              <label class="select-radio">
-                <input type="radio" name="pedidoSelecionado" value="${
-                  pedido.id
-                }" ${pedido.id === selectedId ? "checked" : ""} />
-                <span class="bubble"></span>
-              </label>
-            </td>
-            <td>
-              <strong>${pedido.codigo}</strong>
-              <div class="muted">Cliente: ${pedido.clienteNome}</div>
-            </td>
-            <td>${formatCurrency(pedido.valor)}</td>
-            <td><span class="tag">${pedido.transportadoraNome}</span></td>
-            <td>${formatDate(pedido.entrega)}</td>
-            <td>${pedido.observacoes || "-"}</td>
-          </tr>
-        `
-      )
-      .join("");
-
-    listContainer.innerHTML = `
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th class="select-cell">Selecionar</th>
-              <th>Pedido</th>
-              <th>Valor</th>
-              <th>Transportadora</th>
-              <th>Entrega Prevista</th>
-              <th>Observações</th>
-            </tr>
-          </thead>
-          <tbody>${linhas}</tbody>
-        </table>
-      </div>
-    `;
-
-    syncSelection(listContainer, "pedidoSelecionado", selectedId);
-    updateActionsState();
-  }
-
-  render();
-}
-
-function initCrmPage() {
-  const form = document.querySelector("#crmForm");
-  if (!form) return;
-
-  const overlay = document.querySelector("#crmOverlay");
-  const drawer = document.querySelector("#crmDrawer");
-  const titleEl = document.querySelector("#crmDrawerTitulo");
-  const descEl = document.querySelector("#crmDrawerDescricao");
-  const listContainer = document.querySelector("#crmClientesLista");
-  const timelineContainer = document.querySelector("#crmTimeline");
-  const timelineDescription = document.querySelector("#crmTimelineDescricao");
-  const openBtn = document.querySelector("#crmRegistrar");
-  const closeBtn = document.querySelector("#crmDrawerFechar");
-  const cancelBtn = document.querySelector("#crmCancelar");
-  const submitBtn = form.querySelector('button[type="submit"]');
-
-  const fields = {
-    id: document.querySelector("#crmRegistroId"),
-    cliente: document.querySelector("#crmCliente"),
-    canal: document.querySelector("#crmCanal"),
-    data: document.querySelector("#crmData"),
-    resumo: document.querySelector("#crmResumo"),
-    detalhes: document.querySelector("#crmDetalhes"),
-  };
-
-  let selectedClienteId =
-    window.sessionStorage.getItem("oursales:crmTarget") || "";
-  window.sessionStorage.removeItem("oursales:crmTarget");
-  let editingRegistroId = "";
-
-  const refreshClienteSelect = (selectedId = "") => {
-    fillClientesSelect(fields.cliente, selectedId);
-    submitBtn.disabled = fields.cliente.disabled;
-  };
-
-  const updateRegisterButtonState = () => {
-    const hasClients = storage.load().clientes.length > 0;
-    openBtn.disabled = !hasClients || !selectedClienteId;
-    if (!hasClients) {
-      openBtn.title = "Cadastre um cliente antes de registrar interações.";
-    } else if (!selectedClienteId) {
-      openBtn.title = "Selecione um cliente na lista para registrar feedback.";
-    } else {
-      openBtn.title = "";
-    }
-  };
-
-  const clearForm = () => {
-    form.reset();
-    fields.id.value = "";
-    editingRegistroId = "";
-    if (!selectedClienteId) {
-      refreshClienteSelect();
-    }
-  };
-
-  const closeForm = () => {
-    clearForm();
-    hideDrawer(drawer, overlay);
-  };
-
-  overlay?.addEventListener("click", closeForm);
-  closeBtn?.addEventListener("click", closeForm);
-  cancelBtn?.addEventListener("click", closeForm);
-
-  openBtn?.addEventListener("click", () => {
-    if (!selectedClienteId) {
-      window.alert("Selecione um cliente para registrar o feedback.");
-      return;
-    }
-    editingRegistroId = "";
-    fields.id.value = "";
-    refreshClienteSelect(selectedClienteId);
-    fields.canal.selectedIndex = 0;
-    fields.canal.value = "";
-    fields.data.value = toInputDateTimeValue(new Date().toISOString());
-    fields.resumo.value = "";
-    fields.detalhes.value = "";
-    titleEl.textContent = "Registrar feedback";
-    descEl.textContent =
-      "Registre como foi o contato com o cliente para manter o time alinhado.";
-    submitBtn.textContent = "Salvar interação";
-    showDrawer(drawer, overlay);
-    focusFirstInput(fields.canal);
-  });
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    if (fields.cliente.disabled) {
-      window.alert("Cadastre um cliente antes de registrar interações.");
-      return;
-    }
-
-    const clienteId = fields.cliente.value;
-    const cliente = storage
-      .load()
-      .clientes.find((item) => item.id === clienteId);
-    if (!cliente) {
-      window.alert("Selecione um cliente válido.");
-      return;
-    }
-
-    if (!fields.canal.value) {
-      window.alert("Selecione o canal do contato.");
-      return;
-    }
-
-    if (!fields.resumo.value.trim()) {
-      window.alert("Informe um resumo do contato.");
-      return;
-    }
-
-    const data = {
-      clienteId,
-      clienteNome: cliente.nome,
-      canal: fields.canal.value,
-      data: fromInputDateTimeValue(fields.data.value),
-      resumo: fields.resumo.value.trim(),
-      detalhes: fields.detalhes.value.trim(),
-    };
-
-    const id = fields.id.value || editingRegistroId;
-    if (id) {
-      storage.update((draft) => {
-        const registro = draft.crm.find((item) => item.id === id);
-        if (!registro) return;
-        Object.assign(registro, { ...data, id });
-      });
-    } else {
-      storage.update((draft) => {
-        draft.crm.push({ id: generateId("crm"), ...data });
-      });
-    }
-
-    selectedClienteId = clienteId;
-    closeForm();
-    render();
-  });
-
-  listContainer?.addEventListener("change", (event) => {
-    const input = event.target.closest(
-      'input[type="radio"][name="crmClienteSelecionado"]'
-    );
-    if (!input) return;
-    selectedClienteId = input.value;
-    syncSelection(listContainer, "crmClienteSelecionado", selectedClienteId);
-    updateRegisterButtonState();
-    renderTimeline();
-  });
-
-  listContainer?.addEventListener("click", (event) => {
-    const row = event.target.closest("tr[data-id]");
-    if (!row) return;
-    const input = row.querySelector(
-      'input[type="radio"][name="crmClienteSelecionado"]'
-    );
-    if (input) {
-      // Toggle: se já está selecionado, desmarcar
-      if (selectedClienteId === input.value) {
-        input.checked = false;
-        selectedClienteId = "";
-      } else {
-        input.checked = true;
-        selectedClienteId = input.value;
-      }
-      syncSelection(listContainer, "crmClienteSelecionado", selectedClienteId);
-      updateRegisterButtonState();
-      renderTimeline();
-    }
-  });
-
-  timelineContainer?.addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-action]");
-    if (!button) return;
-    const registroId = button.dataset.id;
-    if (!registroId) return;
-
-    if (button.dataset.action === "edit") {
-      const registro = storage
-        .load()
-        .crm.find((item) => item.id === registroId);
-      if (!registro) {
-        window.alert("Não foi possível localizar o registro selecionado.");
-        renderClients();
-        return;
-      }
-      editingRegistroId = registro.id;
-      fields.id.value = registro.id;
-      refreshClienteSelect(registro.clienteId);
-      fields.canal.value = registro.canal;
-      fields.data.value = toInputDateTimeValue(registro.data);
-      fields.resumo.value = registro.resumo;
-      fields.detalhes.value = registro.detalhes || "";
-      titleEl.textContent = `Editar feedback`;
-      descEl.textContent = `Atualize os detalhes da interação registrada.`;
-      submitBtn.textContent = "Atualizar interação";
-      showDrawer(drawer, overlay);
-      focusFirstInput(fields.canal);
-      return;
-    }
-
-    if (button.dataset.action === "delete") {
-      if (!window.confirm("Deseja remover este registro do CRM?")) {
-        return;
-      }
-      storage.update((draft) => {
-        draft.crm = draft.crm.filter((item) => item.id !== registroId);
-      });
-      renderClients();
-    }
-  });
-
-  function renderClients() {
-    const state = storage.load();
-    const clientes = state.clientes;
-    const registros = state.crm;
-
-    if (
-      selectedClienteId &&
-      !clientes.some((item) => item.id === selectedClienteId)
-    ) {
-      selectedClienteId = "";
-    }
-
-    if (!clientes.length) {
-      listContainer.innerHTML =
-        '<div class="empty-state">Cadastre clientes para registrar interações.</div>';
-      timelineContainer.innerHTML =
-        '<div class="timeline-empty">Sem dados de CRM disponíveis.</div>';
-      timelineDescription.textContent =
-        "Cadastre clientes e registre interações para começar a acompanhar o CRM.";
-      updateRegisterButtonState();
-      return;
-    }
-
-    if (!selectedClienteId) {
-      selectedClienteId = clientes[0].id;
-    }
-
-    const linhas = clientes
-      .map((cliente) => {
-        const entradas = registros
-          .filter((item) => item.clienteId === cliente.id)
-          .sort((a, b) => new Date(b.data) - new Date(a.data));
-        const ultima = entradas[0];
-        const total = entradas.length;
-        const ultimoContato = ultima ? formatDateTime(ultima.data) : "-";
-        const ultimoCanal = ultima ? ultima.canal : "Sem registro";
-
-        return `
-          <tr class="table-row${
-            cliente.id === selectedClienteId ? " is-selected" : ""
-          }" data-id="${cliente.id}">
-            <td class="select-cell">
-              <label class="select-radio">
-                <input type="radio" name="crmClienteSelecionado" value="${
-                  cliente.id
-                }" ${cliente.id === selectedClienteId ? "checked" : ""} />
-                <span class="bubble"></span>
-              </label>
-            </td>
-            <td>
-              <strong>${cliente.nome}</strong>
-              <div class="muted">${cliente.email}</div>
-            </td>
-            <td>
-              <div class="muted">Último contato</div>
-              <div><strong>${ultimoContato}</strong></div>
-              <div class="muted">${ultimoCanal}</div>
-            </td>
-            <td>
-              <div class="muted">Interações</div>
-              <div><strong>${total}</strong></div>
-            </td>
-          </tr>
-        `;
-      })
-      .join("");
-
-    listContainer.innerHTML = `
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th class="select-cell">Selecionar</th>
-              <th>Cliente</th>
-              <th>Último contato</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>${linhas}</tbody>
-        </table>
-      </div>
-    `;
-
-    syncSelection(listContainer, "crmClienteSelecionado", selectedClienteId);
-    updateRegisterButtonState();
-    renderTimeline();
-  }
-
-  function renderTimeline() {
-    const state = storage.load();
-    const clientes = state.clientes;
-    const registros = state.crm;
-
-    const cliente = clientes.find((item) => item.id === selectedClienteId);
-    if (!cliente) {
-      timelineContainer.innerHTML =
-        '<div class="timeline-empty">Selecione um cliente para visualizar o histórico.</div>';
-      timelineDescription.textContent =
-        "Selecione um cliente para visualizar conversas recentes.";
-      updateRegisterButtonState();
-      return;
-    }
-
-    timelineDescription.textContent = `Histórico de interações para ${cliente.nome}`;
-
-    const entradas = registros
-      .filter((item) => item.clienteId === selectedClienteId)
-      .sort((a, b) => new Date(b.data) - new Date(a.data));
-
-    if (!entradas.length) {
-      timelineContainer.innerHTML =
-        '<div class="timeline-empty">Nenhum feedback registrado até o momento.</div>';
-      updateRegisterButtonState();
-      return;
-    }
-
-    timelineContainer.innerHTML = entradas
-      .map(
-        (registro) => `
-        <article class="timeline-item" data-id="${registro.id}">
-          <header class="timeline-header">
-            <div>
-              <span class="tag">${registro.canal}</span>
-              <h3>${registro.resumo}</h3>
-              <div class="timeline-meta">${formatDateTime(registro.data)}</div>
-            </div>
-            <div class="timeline-actions">
-              <button type="button" class="button-secondary" data-action="edit" data-id="${
-                registro.id
-              }">Editar</button>
-              <button type="button" class="button-danger" data-action="delete" data-id="${
-                registro.id
-              }">Remover</button>
-            </div>
-          </header>
-          <div class="timeline-body">${
-            registro.detalhes ? registro.detalhes : "Sem detalhes adicionais."
-          }</div>
-        </article>
-      `
-      )
-      .join("");
-
-    updateRegisterButtonState();
-  }
-
-  refreshClienteSelect(selectedClienteId);
-  renderClients();
-}

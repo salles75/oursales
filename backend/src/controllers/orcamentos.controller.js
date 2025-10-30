@@ -4,7 +4,8 @@
 
 import { prisma } from "../config/database.js";
 import { cache } from "../config/redis.js";
-import { AppError, asyncHandler } from "../middlewares/errorHandler.js";
+import { AppError } from "../utils/AppError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { logger } from "../config/logger.js";
 
 /**
@@ -35,8 +36,9 @@ export const getOrcamentos = asyncHandler(async (req, res) => {
     clienteId,
     vendedorId,
     search,
-    sortBy = "dataEmissao",
+    sortBy = "criadoEm",
     order = "desc",
+    columns,
   } = req.query;
 
   const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -84,6 +86,14 @@ export const getOrcamentos = asyncHandler(async (req, res) => {
             nomeCompleto: true,
             razaoSocial: true,
             nomeFantasia: true,
+            cnpj: true,
+            cpf: true,
+            cidade: true,
+            estado: true,
+            telefone: true,
+            email: true,
+            segmento: true,
+            status: true,
           },
         },
         vendedor: {
@@ -91,6 +101,7 @@ export const getOrcamentos = asyncHandler(async (req, res) => {
             id: true,
             nome: true,
             email: true,
+            telefone: true,
           },
         },
         transportadora: {
@@ -98,6 +109,14 @@ export const getOrcamentos = asyncHandler(async (req, res) => {
             id: true,
             razaoSocial: true,
             nomeFantasia: true,
+            cidade: true,
+            estado: true,
+          },
+        },
+        criadoPor: {
+          select: {
+            id: true,
+            nome: true,
           },
         },
         _count: {

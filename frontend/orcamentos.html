@@ -5,14 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Orçamentos</title>
     <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/fix-animations.css" />
+    <link rel="stylesheet" href="assets/css/table-improvements.css" />
   </head>
   <body data-page="orcamentos">
     <header>
-      <h1>Orçamentos</h1>
-      <p>
-        Registre propostas comerciais vinculando clientes, condições de
-        pagamento e tempo de validade.
-      </p>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>Orçamentos</h1>
+          <p>
+            Registre propostas comerciais vinculando clientes, condições de
+            pagamento e tempo de validade.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <nav>
@@ -29,36 +50,42 @@
     </nav>
 
     <main>
-      <section>
-        <div class="section-header">
-          <div>
-            <h2>Orçamentos registrados</h2>
-            <p>
-              Acompanhe propostas em aberto e atualize conforme negociações.
-            </p>
-          </div>
-          <div class="toolbar">
-            <button type="button" id="orcamentoCriar">Novo orçamento</button>
-            <button
-              type="button"
-              id="orcamentoEditar"
-              class="button-secondary"
-              disabled
-            >
-              Editar
-            </button>
-            <button
-              type="button"
-              id="orcamentoRemover"
-              class="button-danger"
-              disabled
-            >
-              Remover
-            </button>
-          </div>
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Orçamentos registrados</h2>
+          <p class="modern-list-description">
+            Acompanhe propostas em aberto e atualize conforme negociações.
+          </p>
         </div>
-        <div class="list" id="orcamentosLista"></div>
-      </section>
+        <div class="modern-list-toolbar">
+          <button
+            type="button"
+            id="orcamentoCriar"
+            class="square-card-button primary"
+          >
+            Novo orçamento
+          </button>
+          <button
+            type="button"
+            id="orcamentoEditar"
+            class="square-card-button secondary"
+            disabled
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            id="orcamentoRemover"
+            class="square-card-button secondary"
+            disabled
+          >
+            Remover
+          </button>
+        </div>
+        <div class="modern-list-content">
+          <div class="list" id="orcamentosLista"></div>
+        </div>
+      </div>
     </main>
 
     <footer>
@@ -66,6 +93,11 @@
       orçamentos.
     </footer>
 
+    <script src="assets/js/column-customizer.js" defer></script>
+    <script src="assets/js/disable-animations.js" defer></script>
+    <script src="assets/js/oursales-fixes.js" defer></script>
+    <script src="assets/js/column-manager.js" defer></script>
+    <script src="assets/js/input-masks.js"></script>
     <script src="assets/js/app.js" defer></script>
   </body>
 </html>

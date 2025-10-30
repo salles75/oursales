@@ -5,14 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Pedidos</title>
     <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/fix-animations.css" />
+    <link rel="stylesheet" href="assets/css/table-improvements.css" />
   </head>
   <body data-page="pedidos">
     <header>
-      <h1>Pedidos</h1>
-      <p>
-        Registre pedidos fechados vinculando cliente, transportadora e valor
-        faturado. Acompanhe datas previstas de entrega.
-      </p>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>Pedidos</h1>
+          <p>
+            Registre pedidos fechados vinculando cliente, transportadora e valor
+            faturado. Acompanhe datas previstas de entrega.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <nav>
@@ -29,38 +50,51 @@
     </nav>
 
     <main>
-      <section>
-        <div class="section-header">
-          <div>
-            <h2>Pedidos registrados</h2>
-            <p>Controle pedidos fechados, valores e entrega prevista.</p>
-          </div>
-          <div class="toolbar">
-            <button type="button" id="pedidoCriar">Novo pedido</button>
-            <button
-              type="button"
-              id="pedidoEditar"
-              class="button-secondary"
-              disabled
-            >
-              Editar
-            </button>
-            <button
-              type="button"
-              id="pedidoRemover"
-              class="button-danger"
-              disabled
-            >
-              Remover
-            </button>
-          </div>
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Pedidos registrados</h2>
+          <p class="modern-list-description">
+            Controle pedidos fechados, valores e entrega prevista.
+          </p>
         </div>
-        <div class="list" id="pedidosLista"></div>
-      </section>
+        <div class="modern-list-toolbar">
+          <button
+            type="button"
+            id="pedidoCriar"
+            class="square-card-button primary"
+          >
+            Novo pedido
+          </button>
+          <button
+            type="button"
+            id="pedidoEditar"
+            class="square-card-button secondary"
+            disabled
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            id="pedidoRemover"
+            class="square-card-button secondary"
+            disabled
+          >
+            Remover
+          </button>
+        </div>
+        <div class="modern-list-content">
+          <div class="list" id="pedidosLista"></div>
+        </div>
+      </div>
     </main>
 
     <footer>Dados mantidos localmente, ideais para um protótipo de CRM.</footer>
 
+    <script src="assets/js/column-customizer.js" defer></script>
+    <script src="assets/js/disable-animations.js" defer></script>
+    <script src="assets/js/oursales-fixes.js" defer></script>
+    <script src="assets/js/column-manager.js" defer></script>
+    <script src="assets/js/input-masks.js"></script>
     <script src="assets/js/app.js" defer></script>
   </body>
 </html>

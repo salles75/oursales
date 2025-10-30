@@ -27,6 +27,10 @@ import pedidosRoutes from "./routes/pedidos.routes.js";
 import crmRoutes from "./routes/crm.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import relatoriosRoutes from "./routes/relatorios.routes.js";
+import industriasRoutes from "./routes/industrias.routes.js";
+import tabelasPrecosRoutes from "./routes/tabelas-precos.routes.js";
+import configuracoesRoutes from "./routes/configuracoes.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -84,6 +88,36 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("combined", { stream: requestLogger }));
 }
 
+// =====================================================
+// Servir Arquivos Estáticos (Frontend)
+// =====================================================
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Servir arquivos estáticos do frontend
+app.use(express.static(path.join(__dirname, "../../frontend")));
+
+// Servir arquivos estáticos do admin
+app.use("/admin", express.static(path.join(__dirname, "../../frontend/admin")));
+
+// Rota para servir o index.html como página principal
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../frontend/index.html"));
+});
+
+// Rota para servir o painel admin
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../frontend/admin/index.html"));
+});
+
+// Rota para servir o painel admin com barra
+app.get("/admin/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../frontend/admin/index.html"));
+});
+
 // Rate limiting
 app.use("/api/", rateLimiter);
 
@@ -131,6 +165,10 @@ app.use("/api/pedidos", pedidosRoutes);
 app.use("/api/crm", crmRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/relatorios", relatoriosRoutes);
+app.use("/api/industrias", industriasRoutes);
+app.use("/api/tabelas-precos", tabelasPrecosRoutes);
+app.use("/api/configuracoes", configuracoesRoutes);
+app.use("/api/admin", adminRoutes);
 
 // =====================================================
 // Rota raiz

@@ -4,7 +4,8 @@
 
 import { prisma } from "../config/database.js";
 import { cache } from "../config/redis.js";
-import { AppError, asyncHandler } from "../middlewares/errorHandler.js";
+import { AppError } from "../utils/AppError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { logger } from "../config/logger.js";
 
 /**
@@ -487,6 +488,266 @@ export const getMovimentosEstoque = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Importar produtos de arquivo CSV/Excel
+ * @route   POST /api/produtos/importar
+ * @access  Private
+ */
+export const importarProdutos = asyncHandler(async (req, res) => {
+  const { industriaId, tabelaPrecoId, dados } = req.body;
+
+  if (!industriaId || !tabelaPrecoId || !dados || !Array.isArray(dados)) {
+    throw new AppError("Dados de importação inválidos", 400);
+  }
+
+  // Verificar se a indústria existe
+  const industria = await prisma.industria.findUnique({
+    where: { id: industriaId },
+  });
+
+  if (!industria) {
+    throw new AppError("Indústria não encontrada", 404);
+  }
+
+  // Verificar se a tabela de preços existe
+  const tabelaPreco = await prisma.tabelaPreco.findUnique({
+    where: { id: tabelaPrecoId },
+  });
+
+  if (!tabelaPreco) {
+    throw new AppError("Tabela de preços não encontrada", 404);
+  }
+
+  const produtosImportados = [];
+  const erros = [];
+
+  // Processar cada linha de dados
+  for (let i = 0; i < dados.length; i++) {
+    const linha = dados[i];
+
+    try {
+      // Validações obrigatórias
+      if (!linha.codigo || !linha.nome) {
+        erros.push({
+          linha: i + 1,
+          erro: "Código e nome são obrigatórios",
+          dados: linha,
+        });
+        continue;
+      }
+
+      // Verificar se produto já existe
+      const produtoExistente = await prisma.produto.findUnique({
+        where: { codigo: linha.codigo },
+      });
+
+      if (produtoExistente) {
+        erros.push({
+          linha: i + 1,
+          erro: "Produto com este código já existe",
+          dados: linha,
+        });
+        continue;
+      }
+
+      // Preparar dados do produto
+      const dadosProduto = {
+        codigo: linha.codigo,
+        nome: linha.nome,
+        precoVenda: parseFloat(linha.preco || 0),
+        unidade: linha.unidade || "UNID",
+        embalagem: linha.embalagem || "",
+        fatorEmbalagem: linha.fatorEmbalagem
+          ? parseFloat(linha.fatorEmbalagem)
+          : null,
+        dataLancamento: linha.dataLancamento
+          ? new Date(linha.dataLancamento)
+          : null,
+        ipi: linha.ipi ? parseFloat(linha.ipi) : 0,
+        icms: linha.icms ? parseFloat(linha.icms) : null,
+        cest: linha.cest || null,
+        cfop: linha.cfop || null,
+        observacoes: linha.observacoes || "",
+        comissaoProduto: linha.comissaoProduto
+          ? parseFloat(linha.comissaoProduto)
+          : null,
+        codigoBarras: linha.codigoBarras || null,
+        industriaId,
+        tabelaPrecoId,
+        criadoPorId: req.user.id,
+        ativo: true,
+        estoqueAtual: 0,
+        estoqueMinimo: 0,
+      };
+
+      // Criar produto
+      const produto = await prisma.produto.create({
+        data: dadosProduto,
+        include: {
+          industria: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+          tabelaPreco: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
+      });
+
+      produtosImportados.push(produto);
+    } catch (error) {
+      erros.push({
+        linha: i + 1,
+        erro: error.message,
+        dados: linha,
+      });
+    }
+  }
+
+  // Limpar cache
+  await cache.delPattern("produtos:list:*");
+  await cache.delPattern("produtos:stats");
+
+  logger.info(
+    `Importação de produtos: ${produtosImportados.length} importados, ${erros.length} erros por ${req.user.email}`
+  );
+
+  res.status(201).json({
+    success: true,
+    data: {
+      produtosImportados,
+      erros,
+      totalProcessados: dados.length,
+      totalImportados: produtosImportados.length,
+      totalErros: erros.length,
+    },
+  });
+});
+
+/**
+ * @desc    Obter template de importação
+ * @route   GET /api/produtos/template
+ * @access  Private
+ */
+export const getTemplateImportacao = asyncHandler(async (req, res) => {
+  const template = {
+    campos: [
+      {
+        nome: "codigo",
+        obrigatorio: true,
+        descricao: "Código do produto (obrigatório)",
+        exemplo: "PROD001",
+      },
+      {
+        nome: "nome",
+        obrigatorio: true,
+        descricao: "Nome do produto (obrigatório)",
+        exemplo: "Produto Exemplo",
+      },
+      {
+        nome: "preco",
+        obrigatorio: false,
+        descricao: "Preço de venda",
+        exemplo: "25.50",
+      },
+      {
+        nome: "unidade",
+        obrigatorio: false,
+        descricao: "Unidade de medida",
+        exemplo: "UNID",
+      },
+      {
+        nome: "embalagem",
+        obrigatorio: false,
+        descricao: "Tipo de embalagem",
+        exemplo: "Caixa",
+      },
+      {
+        nome: "fatorEmbalagem",
+        obrigatorio: false,
+        descricao: "Fator de conversão da embalagem",
+        exemplo: "12",
+      },
+      {
+        nome: "dataLancamento",
+        obrigatorio: false,
+        descricao: "Data de lançamento (YYYY-MM-DD)",
+        exemplo: "2024-01-15",
+      },
+      {
+        nome: "ipi",
+        obrigatorio: false,
+        descricao: "Alíquota de IPI (%)",
+        exemplo: "5",
+      },
+      {
+        nome: "icms",
+        obrigatorio: false,
+        descricao: "Alíquota de ICMS (%)",
+        exemplo: "18",
+      },
+      {
+        nome: "cest",
+        obrigatorio: false,
+        descricao: "Código CEST",
+        exemplo: "1234567",
+      },
+      {
+        nome: "cfop",
+        obrigatorio: false,
+        descricao: "Código CFOP",
+        exemplo: "5102",
+      },
+      {
+        nome: "observacoes",
+        obrigatorio: false,
+        descricao: "Observações adicionais",
+        exemplo: "Produto de exemplo",
+      },
+      {
+        nome: "comissaoProduto",
+        obrigatorio: false,
+        descricao: "Comissão por produto (%)",
+        exemplo: "5",
+      },
+      {
+        nome: "codigoBarras",
+        obrigatorio: false,
+        descricao: "Código de barras GTIN",
+        exemplo: "1234567890123",
+      },
+    ],
+    exemplo: [
+      {
+        codigo: "PROD001",
+        nome: "Produto Exemplo 1",
+        preco: "25.50",
+        unidade: "UNID",
+        embalagem: "Caixa",
+        fatorEmbalagem: "12",
+        dataLancamento: "2024-01-15",
+        ipi: "5",
+        icms: "18",
+        cest: "1234567",
+        cfop: "5102",
+        observacoes: "Produto de exemplo",
+        comissaoProduto: "5",
+        codigoBarras: "1234567890123",
+      },
+    ],
+  };
+
+  res.json({
+    success: true,
+    data: template,
+  });
+});
+
 export default {
   getProdutos,
   getProdutosStats,
@@ -496,4 +757,6 @@ export default {
   deleteProduto,
   ajustarEstoque,
   getMovimentosEstoque,
+  importarProdutos,
+  getTemplateImportacao,
 };
