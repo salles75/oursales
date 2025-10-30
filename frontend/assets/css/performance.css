@@ -1,0 +1,530 @@
+/**
+ * OurSales - Otimizações de Performance CSS
+ * Melhorias para scroll, animações e carregamento
+ */
+
+/* === OTIMIZAÇÕES DE PERFORMANCE === */
+
+/* Melhorar performance de scroll */
+.modern-list,
+.table-container,
+.list-container {
+  contain: layout style paint;
+  transform: translateZ(0); /* Força aceleração de hardware */
+}
+
+/* Otimizar animações */
+.header-logo,
+.square-card-button,
+.table-row,
+.list-item,
+.modern-card {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Reduzir animações em dispositivos com preferência por movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Preservar conteúdo de pseudo-elementos importantes */
+  input[type="checkbox"]:checked::after {
+    content: '✓' !important;
+  }
+}
+
+/* Otimizar hover states */
+.table-row:hover,
+.list-item:hover,
+.modern-card:hover {
+  transform: translateZ(0) scale(1.01);
+}
+
+/* Melhorar performance de formulários */
+.form-group,
+.field-group {
+  contain: layout;
+}
+
+/* Otimizar drawer e overlay */
+.drawer,
+.overlay {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+/* === OTIMIZAÇÕES DE PERFORMANCE === */
+
+/* Melhorar performance de scroll */
+.modern-list,
+.table-container,
+.list-container {
+  contain: layout style paint;
+  transform: translateZ(0); /* Força aceleração de hardware */
+}
+
+/* Otimizar animações - REMOVIDO will-change que causa problemas */
+.header-logo,
+.square-card-button,
+.table-row,
+.list-item,
+.modern-card {
+  transform: translateZ(0);
+}
+
+/* Reduzir animações em dispositivos com preferência por movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Preservar conteúdo de pseudo-elementos importantes */
+  input[type="checkbox"]:checked::after {
+    content: '✓' !important;
+  }
+}
+
+/* Otimizar hover states - REMOVIDO transform que causa problemas */
+.table-row:hover,
+.list-item:hover,
+.modern-card:hover {
+  transform: translateZ(0);
+}
+
+/* Melhorar performance de formulários */
+.form-group,
+.field-group {
+  contain: layout;
+}
+
+/* Otimizar drawer e overlay */
+.drawer,
+.overlay {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+/* === SCROLL SUAVE OTIMIZADO === */
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* === PERFORMANCE DE TABELAS === */
+
+.table-container {
+  contain: layout style paint;
+  overflow: auto;
+}
+
+.table-row {
+  contain: layout;
+}
+
+/* === PERFORMANCE DE BOTÕES === */
+
+.square-card-button,
+.button-primary,
+.button-secondary {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+.square-card-button:active,
+.button-primary:active,
+.button-secondary:active {
+  transform: translateZ(0) scale(0.98);
+}
+
+/* === OTIMIZAÇÕES DE FONTES === */
+
+body {
+  font-display: swap; /* Melhora carregamento de fontes */
+}
+
+/* === PERFORMANCE DE IMAGENS === */
+
+img {
+  image-rendering: optimizeSpeed;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* === CONTAINMENT PARA MELHOR PERFORMANCE === */
+
+main {
+  contain: layout style;
+}
+
+section {
+  contain: layout;
+}
+
+/* === OTIMIZAÇÕES ESPECÍFICAS PARA CLIENTES === */
+
+#clientesLista {
+  contain: layout style paint;
+}
+
+#clientesLista .table-row {
+  contain: layout;
+}
+
+/* === PERFORMANCE DE NAVEGAÇÃO === */
+
+nav {
+  contain: layout style;
+}
+
+nav a {
+  contain: layout;
+}
+
+/* === OTIMIZAÇÕES DE HEADER === */
+
+header {
+  contain: layout style paint;
+}
+
+.header-logo {
+  contain: layout style paint;
+}
+
+/* === PERFORMANCE DE FOOTER === */
+
+footer {
+  contain: layout style;
+}
+
+/* === OTIMIZAÇÕES DE FORMULÁRIOS === */
+
+form {
+  contain: layout;
+}
+
+.form-group {
+  contain: layout;
+}
+
+/* === PERFORMANCE DE MODAIS === */
+
+.modal,
+.drawer,
+.overlay {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+/* === OTIMIZAÇÕES DE LISTAS === */
+
+.modern-list {
+  contain: layout style paint;
+}
+
+.list-item {
+  contain: layout;
+}
+
+/* === PERFORMANCE DE CARDS === */
+
+.modern-card {
+  contain: layout style paint;
+}
+
+/* === PERFORMANCE DE SCROLL === */
+
+.scroll-container {
+  contain: layout style paint;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-300) transparent;
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: 3px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-400);
+}
+
+/* === OTIMIZAÇÕES DE PERFORMANCE GERAL === */
+
+* {
+  box-sizing: border-box;
+}
+
+/* Melhorar performance de seleção de texto */
+::selection {
+  background: var(--color-primary-100);
+  color: var(--color-primary-900);
+}
+
+/* Otimizar performance de focus */
+:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* === PERFORMANCE DE RESPONSIVIDADE === */
+
+@media (max-width: 768px) {
+  .table-container {
+    contain: layout style paint;
+  }
+  
+  .modern-list {
+    contain: layout style paint;
+  }
+}
+
+/* === OTIMIZAÇÕES DE PRINT === */
+
+@media print {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .header-logo,
+  .square-card-button,
+  .table-row,
+  .list-item {
+    will-change: auto;
+  }
+}
+
+/* === SCROLL SUAVE OTIMIZADO === */
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* === PERFORMANCE DE TABELAS === */
+
+.table-container {
+  contain: layout style paint;
+  overflow: auto;
+}
+
+.table-row {
+  contain: layout;
+}
+
+/* === PERFORMANCE DE BOTÕES === */
+
+.square-card-button,
+.button-primary,
+.button-secondary {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+.square-card-button:active,
+.button-primary:active,
+.button-secondary:active {
+  transform: translateZ(0) scale(0.98);
+}
+
+/* === OTIMIZAÇÕES DE FONTES === */
+
+body {
+  font-display: swap; /* Melhora carregamento de fontes */
+}
+
+/* === PERFORMANCE DE IMAGENS === */
+
+img {
+  image-rendering: optimizeSpeed;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* === CONTAINMENT PARA MELHOR PERFORMANCE === */
+
+main {
+  contain: layout style;
+}
+
+section {
+  contain: layout;
+}
+
+/* === OTIMIZAÇÕES ESPECÍFICAS PARA CLIENTES === */
+
+#clientesLista {
+  contain: layout style paint;
+}
+
+#clientesLista .table-row {
+  contain: layout;
+}
+
+/* === PERFORMANCE DE NAVEGAÇÃO === */
+
+nav {
+  contain: layout style;
+}
+
+nav a {
+  contain: layout;
+}
+
+/* === OTIMIZAÇÕES DE HEADER === */
+
+header {
+  contain: layout style paint;
+}
+
+.header-logo {
+  contain: layout style paint;
+}
+
+/* === PERFORMANCE DE FOOTER === */
+
+footer {
+  contain: layout style;
+}
+
+/* === OTIMIZAÇÕES DE FORMULÁRIOS === */
+
+form {
+  contain: layout;
+}
+
+.form-group {
+  contain: layout;
+}
+
+/* === PERFORMANCE DE MODAIS === */
+
+.modal,
+.drawer,
+.overlay {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+/* === OTIMIZAÇÕES DE LISTAS === */
+
+.modern-list {
+  contain: layout style paint;
+}
+
+.list-item {
+  contain: layout;
+}
+
+/* === PERFORMANCE DE CARDS === */
+
+.modern-card {
+  contain: layout style paint;
+}
+
+/* === OTIMIZAÇÕES DE ANIMAÇÕES === */
+
+/* REMOVIDO: Animações que causam problemas de carregamento */
+/* @keyframes fadeIn e .fade-in foram removidos */
+
+/* === PERFORMANCE DE SCROLL === */
+
+.scroll-container {
+  contain: layout style paint;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-300) transparent;
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: 3px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-400);
+}
+
+/* === OTIMIZAÇÕES DE PERFORMANCE GERAL === */
+
+* {
+  box-sizing: border-box;
+}
+
+/* Melhorar performance de seleção de texto */
+::selection {
+  background: var(--color-primary-100);
+  color: var(--color-primary-900);
+}
+
+/* Otimizar performance de focus */
+:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* === PERFORMANCE DE RESPONSIVIDADE === */
+
+@media (max-width: 768px) {
+  .table-container {
+    contain: layout style paint;
+  }
+  
+  .modern-list {
+    contain: layout style paint;
+  }
+}
+
+/* === OTIMIZAÇÕES DE PRINT === */
+
+@media print {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .header-logo,
+  .square-card-button,
+  .table-row,
+  .list-item {
+    will-change: auto;
+  }
+}

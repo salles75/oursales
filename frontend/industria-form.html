@@ -48,7 +48,7 @@
     </nav>
 
     <main>
-      <form id="industriaForm" class="modern-form">
+      <form id="industriaForm" class="modern-form" novalidate>
         <input type="hidden" id="industriaId" />
 
         <div class="modern-form-header">
@@ -410,181 +410,6 @@
                 id="industriaContatoAdicionar"
                 class="modern-form-button secondary"
               >
-<<<<<<< Updated upstream
-                Browse
-              </button>
-            </div>
-          </div>
-          <p style="font-size: 0.875rem; color: #666; margin-top: 0.5rem">
-            A imagem deve ser no formato JPEG, GIF, PNG ou BMP.
-          </p>
-        </section>
-
-        <!-- Tabelas de Preço -->
-        <section class="card">
-          <h3>Tabelas de Preço</h3>
-          <p style="color: #666; margin-bottom: 1rem">
-            Cadastre as Tabelas de Preço para esta Indústria.
-          </p>
-
-          <div class="grouped two" style="align-items: flex-end">
-            <label>
-              Nome da Tabela
-              <input
-                type="text"
-                id="tabelaPrecoNome"
-                placeholder="Ex: Tabela Padrão"
-              />
-            </label>
-            <button
-              type="button"
-              id="adicionarTabelaPreco"
-              class="button-secondary"
-              style="height: fit-content"
-            >
-              ➕ Adicionar
-            </button>
-          </div>
-
-          <div class="table-wrapper" style="margin-top: 1rem">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nome da Tabela</th>
-                  <th style="width: 80px">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="tabelasPrecosLista">
-                <tr>
-                  <td colspan="2" class="empty-state">
-                    Nenhuma tabela de preço cadastrada
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Condições de Pagamento -->
-        <section class="card">
-          <h3>Condições de Pagamento</h3>
-          <p style="color: #666; margin-bottom: 1rem">
-            Cadastre as Condições de Pagamento para este Fornecedor.
-          </p>
-
-          <div class="grouped five">
-            <label>
-              Descrição
-              <input
-                type="text"
-                id="condicaoPagamentoDescricao"
-                placeholder="Ex: À Vista"
-              />
-            </label>
-            <label>
-              Nº de Parcelas
-              <input
-                type="number"
-                id="condicaoPagamentoParcelas"
-                min="1"
-                placeholder="1"
-              />
-            </label>
-            <label>
-              Intervalo Dias
-              <input
-                type="number"
-                id="condicaoPagamentoIntervalo"
-                min="0"
-                placeholder="0"
-              />
-            </label>
-            <label>
-              Desconto ou Acréscimo (-)
-              <input
-                type="number"
-                id="condicaoPagamentoDesconto"
-                step="0.01"
-                placeholder="0"
-              />
-            </label>
-            <label>
-              Pedido Mínimo (R$)
-              <input
-                type="number"
-                id="condicaoPagamentoPedidoMinimo"
-                step="0.01"
-                placeholder="0,00"
-              />
-            </label>
-          </div>
-
-          <button
-            type="button"
-            id="adicionarCondicaoPagamento"
-            class="button-secondary"
-            style="margin-top: 1rem"
-          >
-            ➕ Adicionar
-          </button>
-
-          <div class="table-wrapper" style="margin-top: 1rem">
-            <table>
-              <thead>
-                <tr>
-                  <th>Descrição</th>
-                  <th>Nº de Parcelas</th>
-                  <th>Intervalo Dias</th>
-                  <th>Desconto ou Acréscimo (-)</th>
-                  <th>Pedido Mínimo (R$)</th>
-                  <th style="width: 80px">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="condicoesPagamentoLista">
-                <tr>
-                  <td colspan="6" class="empty-state">
-                    Nenhuma condição de pagamento cadastrada
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Contatos -->
-        <section class="card">
-          <h3>Contatos</h3>
-
-          <div class="grouped four">
-            <label>
-              Nome *
-              <input
-                type="text"
-                id="contatoNome"
-                placeholder="Nome do contato"
-              />
-            </label>
-            <label>
-              E-mail *
-              <input
-                type="email"
-                id="contatoEmail"
-                placeholder="email@exemplo.com"
-              />
-            </label>
-            <label>
-              Telefone *
-              <input
-                type="tel"
-                id="contatoTelefone"
-                placeholder="(11) 98888-8888"
-              />
-            </label>
-            <label>
-              Data Aniversário
-              <input type="date" id="contatoAniversario" />
-            </label>
-=======
                 <span>➕</span> Adicionar Contato
               </button>
             </div>
@@ -637,7 +462,6 @@
                 <span>➕</span> Adicionar Condição
               </button>
             </div>
->>>>>>> Stashed changes
           </div>
 
           <!-- Seção: Tabelas de Preços -->
@@ -753,6 +577,50 @@
       comercial e controle de produtos.
     </footer>
 
+    <script src="assets/js/input-masks.js"></script>
+    <script>
+      // Garantir que as máscaras sejam aplicadas corretamente após o DOM estar pronto
+      document.addEventListener('DOMContentLoaded', function() {
+        // Aguardar um pouco para garantir que todos os campos estejam renderizados
+        setTimeout(function() {
+          // Aplicar máscara diretamente ao campo CNPJ se existir
+          const cnpjField = document.querySelector('#industriaCNPJ');
+          if (cnpjField && window.maskCNPJ) {
+            console.log('Aplicando máscara CNPJ ao campo:', cnpjField.id);
+            
+            // Aplicar máscara no evento input (sem clonar para manter referência)
+            if (!cnpjField.hasAttribute('data-mask-applied')) {
+              cnpjField.setAttribute('data-mask-applied', 'true');
+              
+              cnpjField.addEventListener('input', function(e) {
+                window.maskCNPJ(e.target);
+              });
+              
+              // Aplicar máscara ao colar
+              cnpjField.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                  window.maskCNPJ(e.target);
+                }, 10);
+              });
+              
+              // Aplicar máscara se já tiver valor
+              if (cnpjField.value) {
+                window.maskCNPJ(cnpjField);
+              }
+            }
+            
+            console.log('Máscara CNPJ aplicada com sucesso');
+          } else {
+            console.warn('Campo CNPJ ou função maskCNPJ não encontrados');
+          }
+          
+          // Chamar inicialização geral também
+          if (window.initInputMasks) {
+            window.initInputMasks();
+          }
+        }, 200);
+      });
+    </script>
     <script src="assets/js/app.js" defer></script>
   </body>
 </html>

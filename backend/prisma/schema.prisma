@@ -31,6 +31,8 @@ model Usuario {
   ultimoAcesso  DateTime? @map("ultimo_acesso") @db.Timestamptz()
 
   // Relacionamentos
+  clienteId              String?               @db.Uuid // Para usuários de clientes específicos
+  cliente                ClienteOurSales?      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   clientes               Cliente[]             @relation("VendedorCliente")
   orcamentos             Orcamento[]           @relation("VendedorOrcamento")
   pedidos                Pedido[]              @relation("VendedorPedido")
@@ -48,6 +50,7 @@ model Usuario {
 
   @@index([email])
   @@index([perfil, ativo])
+  @@index([clienteId])
   @@map("usuarios")
 }
 
@@ -240,7 +243,9 @@ model Produto {
   destaque              Boolean           @default(false)
   tags                  String[]
   
-  // Fornecedor
+  // Fornecedor/Indústria
+  industriaId           String?           @map("industria_id") @db.Uuid
+  industria             Industria?        @relation(fields: [industriaId], references: [id])
   fornecedorNome        String?           @map("fornecedor_nome") @db.VarChar(255)
   fornecedorCodigo      String?           @map("fornecedor_codigo") @db.VarChar(100)
   
@@ -257,11 +262,13 @@ model Produto {
   orcamentosItens       OrcamentoItem[]
   pedidosItens          PedidoItem[]
   movimentosEstoque     MovimentoEstoque[]
+  tabelasPrecos         TabelaPrecoProduto[]
 
   @@index([codigo])
   @@index([sku])
   @@index([ean])
   @@index([categoriaId])
+  @@index([industriaId])
   @@index([ativo])
   @@index([precoVenda])
   @@map("produtos")
@@ -595,8 +602,6 @@ model Auditoria {
   @@map("auditoria")
 }
 
-<<<<<<< Updated upstream
-=======
 // =====================================================
 // INDÚSTRIAS E TABELAS DE PREÇOS
 // =====================================================
@@ -798,4 +803,3 @@ model FaturaOurSales {
   @@map("faturas_oursales")
 }
 
->>>>>>> Stashed changes

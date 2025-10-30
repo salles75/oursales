@@ -43,6 +43,7 @@ router.get("/me", authenticate, authController.getMe);
  * @access  Private
  */
 router.put("/update-password", authenticate, authController.updatePassword);
+router.put("/update-profile", authenticate, authController.updateProfile);
 
 /**
  * @route   POST /api/auth/refresh
@@ -50,5 +51,19 @@ router.put("/update-password", authenticate, authController.updatePassword);
  * @access  Private
  */
 router.post("/refresh", authenticate, authController.refreshToken);
+
+/**
+ * @route   GET /api/auth/verify
+ * @desc    Verificar se token é válido
+ * @access  Private
+ */
+router.get("/verify", authenticate, authController.verifyToken);
+
+/**
+ * @route   GET /api/auth/check-admin
+ * @desc    Verificar se já existe um admin no sistema
+ * @access  Public
+ */
+router.get("/check-admin", authController.checkAdminExists);
 
 export default router;
