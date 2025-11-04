@@ -10,6 +10,7 @@ function getCustomColumns(page) {
   }
 }
 
+<<<<<<< HEAD
 // === UTILITÁRIOS OTIMIZADOS (inline para performance) ===
 // Tornar debounce global para uso em outros scripts
 window.debounce = (func, wait = 300) => {
@@ -40,6 +41,8 @@ const $$ = (selector, useCache = false) => {
 // Limpar cache quando necessário
 const clearDomCache = () => domCache.clear();
 
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 function toggleSelectAll(checkbox) {
   const table = checkbox.closest("table");
   const rowCheckboxes = table.querySelectorAll('tbody input[type="checkbox"]');
@@ -935,6 +938,7 @@ function initClientePJPage() {
 
   const gerarCodigoBtn = document.querySelector("#pjGerarCodigo");
   const cancelarBtn = document.querySelector("#clientePJCancelar");
+<<<<<<< HEAD
   // Aplicar máscara no CNPJ explicitamente
   if (fields.cnpj && typeof window.maskCNPJ === "function") {
     fields.cnpj.addEventListener("input", () => window.maskCNPJ(fields.cnpj));
@@ -1007,6 +1011,8 @@ function initClientePJPage() {
 
     window.location.href = "clientes.html";
   });
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
   const vendedoresLista = [
     "Ana Souza",
@@ -1886,15 +1892,29 @@ function initClientePJPage() {
     event.preventDefault();
 
     const razaoSocial = fields.razaoSocial.value.trim();
+<<<<<<< HEAD
     const cnpjDigits = (fields.cnpj.value || "").replace(/\D/g, "");
     if (!razaoSocial || cnpjDigits.length !== 14) {
       window.alert("Informe Razão Social e CNPJ válido (14 dígitos).");
+=======
+    const nomeFantasia = fields.nomeFantasia.value.trim();
+    const cnpj = fields.cnpj.value.trim();
+
+    if (!razaoSocial || !nomeFantasia || !cnpj) {
+      window.alert("Informe Razão Social, Nome Fantasia e CNPJ.");
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
       return;
     }
 
     const contatos = Array.from(contatosBody.querySelectorAll("tr"))
       .map((tr) => {
         const nome = tr.querySelector('[name="contatoNome"]').value.trim();
+<<<<<<< HEAD
+=======
+        if (!nome) {
+          return null;
+        }
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
         const email = tr.querySelector('[name="contatoEmail"]').value.trim();
         const telefone = tr
           .querySelector('[name="contatoTelefone"]')
@@ -1904,11 +1924,22 @@ function initClientePJPage() {
         ).value;
         const cargo = tr.querySelector('[name="contatoCargo"]').value.trim();
         const comprador = tr.querySelector('[name="contatoComprador"]').checked;
+<<<<<<< HEAD
         if (!nome && !email && !telefone) return null;
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
         return { nome, email, telefone, aniversario, cargo, comprador };
       })
       .filter(Boolean);
 
+<<<<<<< HEAD
+=======
+    if (!contatos.length) {
+      window.alert("Cadastre ao menos um contato com nome informado.");
+      return;
+    }
+
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
     const pagamentos = Array.from(pagamentosBody.querySelectorAll("tr"))
       .map((tr) => {
         const descricao = tr
@@ -2169,6 +2200,7 @@ function initClientePFPage() {
 
   const gerarCodigoBtn = document.querySelector("#pfGerarCodigo");
   const cancelarBtn = document.querySelector("#clientePFCancelar");
+<<<<<<< HEAD
   // Aplicar máscaras no CPF e RG explicitamente
   if (fields.cpf && typeof window.maskCPF === "function") {
     fields.cpf.addEventListener("input", () => window.maskCPF(fields.cpf));
@@ -2178,6 +2210,8 @@ function initClientePFPage() {
     fields.rg.addEventListener("input", () => window.maskRG(fields.rg));
     if (fields.rg.value) window.maskRG(fields.rg);
   }
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
   const vendedoresLista = [
     "Ana Souza",
@@ -2705,7 +2739,14 @@ function initClientePFPage() {
       })
       .filter(Boolean);
 
+<<<<<<< HEAD
     // Contato passa a ser opcional: permitir salvar mesmo sem contatos
+=======
+    if (!contatos.length) {
+      window.alert("Cadastre ao menos um contato com nome informado.");
+      return;
+    }
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
     const pagamentos = Array.from(pagamentosBody.querySelectorAll("tr"))
       .map((tr) => {
@@ -3211,6 +3252,7 @@ function initIndustriasPage() {
     if (removeBtn) removeBtn.disabled = !hasSelection;
   };
 
+<<<<<<< HEAD
   if (openBtn) {
     console.log("✅ Botão industriaCriar encontrado, adicionando listener");
     openBtn.addEventListener("click", (e) => {
@@ -3222,6 +3264,11 @@ function initIndustriasPage() {
   } else {
     console.error("❌ Botão #industriaCriar não encontrado!");
   }
+=======
+  openBtn?.addEventListener("click", () => {
+    window.location.href = "industria-form.html";
+  });
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
   removeBtn?.addEventListener("click", () => {
     const checkedBoxes = listContainer?.querySelectorAll(
@@ -4002,8 +4049,12 @@ function initIndustriaFormPage() {
 
 function initProdutosPage() {
   const form = document.querySelector("#produtoForm");
+<<<<<<< HEAD
   // Não retornar cedo - a página de listagem não tem formulário
   // if (!form) return;
+=======
+  if (!form) return;
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
   const overlay = document.querySelector("#produtoOverlay");
   const drawer = document.querySelector("#produtoDrawer");
@@ -4054,6 +4105,7 @@ function initProdutosPage() {
     if (removeBtn) removeBtn.disabled = !hasSelection;
   };
 
+<<<<<<< HEAD
   // Event listener para botão criar - funciona mesmo sem formulário
   if (openBtn) {
     console.log("✅ Botão produtoCriar encontrado, adicionando listener");
@@ -4143,6 +4195,27 @@ function initProdutosPage() {
   }
 
   // Event listeners para importação (funcionam independente do formulário)
+=======
+  const clearForm = () => {
+    form.reset();
+    fields.id.value = "";
+  };
+
+  const closeForm = () => {
+    clearForm();
+    hideDrawer(drawer, overlay);
+  };
+
+  overlay?.addEventListener("click", closeForm);
+  closeBtn?.addEventListener("click", closeForm);
+  cancelBtn?.addEventListener("click", closeForm);
+
+  openBtn?.addEventListener("click", () => {
+    window.location.href = "produto-form.html";
+  });
+
+  // Event listeners para importação
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
   importBtn?.addEventListener("click", () => {
     window.location.href = "importar-produtos.html";
   });
@@ -4264,6 +4337,66 @@ function initProdutosPage() {
     render();
   });
 
+<<<<<<< HEAD
+=======
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const id = fields.id.value;
+    const preco = Number.parseFloat(fields.preco.value);
+    const estoque = Number.parseInt(fields.estoque.value, 10);
+
+    if (!Number.isFinite(preco) || preco < 0) {
+      window.alert("Informe um preço válido.");
+      return;
+    }
+
+    if (!Number.isFinite(estoque) || estoque < 0) {
+      window.alert("Informe o estoque disponível.");
+      return;
+    }
+
+    const data = {
+      nome: fields.nome.value.trim(),
+      sku: fields.sku.value.trim(),
+      categoria: fields.categoria.value.trim(),
+      preco,
+      estoque,
+      descricao: fields.descricao.value.trim(),
+    };
+
+    if (!data.nome || !data.sku) {
+      window.alert("Preencha nome e SKU do produto.");
+      return;
+    }
+
+    if (id) {
+      storage.update((draft) => {
+        const produto = draft.produtos.find((item) => item.id === id);
+        if (!produto) return;
+        Object.assign(produto, data);
+        draft.produtos.sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+        );
+      });
+      selectedId = id;
+    } else {
+      let createdId = "";
+      storage.update((draft) => {
+        const novo = { id: generateId("pro"), ...data };
+        draft.produtos.push(novo);
+        draft.produtos.sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+        );
+        createdId = novo.id;
+      });
+      selectedId = createdId;
+    }
+
+    closeForm();
+    render();
+  });
+
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
   listContainer?.addEventListener("change", (event) => {
     const input = event.target.closest(
       'input[type="radio"][name="produtoSelecionado"]'
@@ -4558,6 +4691,7 @@ function initProdutoFormPage() {
   // Carregar indústrias ao inicializar
   carregarIndustrias();
 
+<<<<<<< HEAD
   // Carregar tabelas de preços conforme a indústria
   function carregarTabelasPrecos(industriaId, selectedTabelaId = "") {
     try {
@@ -4595,6 +4729,8 @@ function initProdutoFormPage() {
     carregarTabelasPrecos(e.target.value);
   });
 
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
   // Funções auxiliares
   const calcularPrecoVenda = () => {
     const precoCompra = Number.parseFloat(fields.precoCompra.value) || 0;
@@ -4808,9 +4944,13 @@ function initProdutoFormPage() {
       .produtos.find((item) => item.id === editingProdutoId);
     if (produto) {
       formTitle.textContent = `📦 Produto - Editando ${produto.nome}`;
+<<<<<<< HEAD
       fields.industria.value = produto.industria || produto.industriaId || "";
       // Carregar tabelas de preço da indústria e selecionar a do produto, se houver
       carregarTabelasPrecos(fields.industria.value, produto.tabelaPreco || produto.tabelaPrecoId || "");
+=======
+      fields.industria.value = produto.industria || "";
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
       fields.sku.value = produto.sku || "";
       fields.nome.value = produto.nome || "";
       fields.precoVenda.value = produto.precoVenda || produto.preco || 0;
@@ -4828,12 +4968,16 @@ function initProdutoFormPage() {
       fields.unidadeMedida.value = produto.unidadeMedida || "";
       fields.embalagem.value = produto.embalagem || "";
       fields.observacoes.value = produto.observacoes || produto.descricao || "";
+<<<<<<< HEAD
       if (!fields.tabelaPreco.value && produto.tabelaPreco) {
         // fallback caso tenha sido salvo nome ao invés de id
         const ind = getIndustrias().find((i) => i.id === fields.industria.value);
         const byName = ind?.tabelasPrecos?.find((t) => t.nome === produto.tabelaPreco);
         if (byName) fields.tabelaPreco.value = byName.id;
       }
+=======
+      fields.tabelaPreco.value = produto.tabelaPreco || "";
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
       fields.categoria.value = produto.categoria || "";
       fields.status.value = produto.status || "ativo";
       fields.altura.value = produto.altura || 0;
@@ -4871,6 +5015,7 @@ function initOrcamentosPage() {
   };
 
   // Event Listeners
+<<<<<<< HEAD
   if (openBtn) {
     console.log("✅ Botão orcamentoCriar encontrado, adicionando listener");
     openBtn.addEventListener("click", (e) => {
@@ -4882,6 +5027,11 @@ function initOrcamentosPage() {
   } else {
     console.error("❌ Botão #orcamentoCriar não encontrado!");
   }
+=======
+  openBtn?.addEventListener("click", () => {
+    window.location.href = "orcamento-form.html";
+  });
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
   editBtn?.addEventListener("click", () => {
     if (!validateSingleSelection("edit")) {
@@ -5149,12 +5299,15 @@ function initOrcamentosPage() {
  * Orçamento Form Page - Página separada para criar/editar orçamentos
  */
 function initOrcamentoFormPage() {
+<<<<<<< HEAD
   // Garantir que o scroll não esteja bloqueado (limpeza de resquícios do modal)
   document.body.style.overflow = '';
   document.documentElement.style.overflow = '';
   document.body.style.position = '';
   document.body.style.top = '';
   document.body.style.width = '';
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
   const form = document.querySelector("#orcamentoForm");
   if (!form) return;
 
@@ -5372,6 +5525,7 @@ function initOrcamentoFormPage() {
   fields.valorAcrescimo?.addEventListener("input", calculateTotals);
   fields.valorDesconto?.addEventListener("input", calculateTotals);
 
+<<<<<<< HEAD
   // Busca de Produtos
   const filtroIndustria = document.querySelector("#filtroIndustria");
   const filtroTabelaPreco = document.querySelector("#filtroTabelaPreco");
@@ -6094,6 +6248,11 @@ function initOrcamentoFormPage() {
   carregarTabelasPrecoFiltro();
   fields.data.value = new Date().toISOString().split("T")[0];
   renderOrcamentoItens();
+=======
+  // Inicialização
+  refreshSelects();
+  fields.data.value = new Date().toISOString().split("T")[0];
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
   // Carregar dados se for edição
   if (editingOrcamentoId) {
@@ -6109,8 +6268,11 @@ function initOrcamentoFormPage() {
       fields.observacoes.value = orcamento.observacoes || "";
       fields.condicaoPagamento.value = orcamento.condicaoPagamento || "";
       fields.status.value = orcamento.status || "pendente";
+<<<<<<< HEAD
       orcamentoItens = orcamento.itens || [];
       renderOrcamentoItens();
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
     }
   }
 
@@ -6318,6 +6480,7 @@ function initPedidosPage() {
   };
 
   // Event listeners
+<<<<<<< HEAD
   if (openBtn) {
     console.log("✅ Botão pedidoCriar encontrado, adicionando listener");
     openBtn.addEventListener("click", (e) => {
@@ -6329,6 +6492,11 @@ function initPedidosPage() {
   } else {
     console.error("❌ Botão #pedidoCriar não encontrado!");
   }
+=======
+  openBtn?.addEventListener("click", () => {
+    window.location.href = "pedido-form.html";
+  });
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
   editBtn?.addEventListener("click", () => {
     if (!validateSingleSelection("edit")) {
@@ -6424,6 +6592,7 @@ function initPedidosPage() {
 }
 
 function initPedidoFormPage() {
+<<<<<<< HEAD
   // Garantir que o scroll não esteja bloqueado (limpeza de resquícios do modal)
   document.body.style.overflow = '';
   document.documentElement.style.overflow = '';
@@ -6431,6 +6600,8 @@ function initPedidoFormPage() {
   document.body.style.top = '';
   document.body.style.width = '';
   
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
   const form = document.querySelector("#pedidoForm");
   if (!form) return;
 
@@ -6727,6 +6898,7 @@ function initPedidoFormPage() {
   fields.valorAcrescimo?.addEventListener("input", calculateTotals);
   fields.valorDesconto?.addEventListener("input", calculateTotals);
 
+<<<<<<< HEAD
   // === BUSCA DE PRODUTOS (similar ao orçamento) ===
   const filtroIndustria = document.querySelector("#filtroIndustria");
   const filtroTabelaPreco = document.querySelector("#filtroTabelaPreco");
@@ -6892,6 +7064,8 @@ function initPedidoFormPage() {
   carregarIndustriasFiltro();
   carregarTabelasPrecoFiltro();
 
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
   // Inicialização
   refreshSelects();
   fields.dataVenda.value = new Date().toISOString().split("T")[0];

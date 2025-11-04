@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+version: '3.8'
+
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 services:
   # PostgreSQL - Banco de dados principal
   postgres:

@@ -133,11 +133,17 @@ function applyMasks() {
     'input[name*="CNPJ"]',
     'input[id*="cnpj"]',
     'input[id*="CNPJ"]',
+<<<<<<< HEAD
     'input[id*="Cnpj"]',
     'input[placeholder*="CNPJ"]',
     'input[placeholder*="cnpj"]',
     '#industriaCNPJ', // ID específico do formulário de indústria
     '#pjCnpj' // ID específico do formulário de cliente PJ
+=======
+    'input[placeholder*="CNPJ"]',
+    'input[placeholder*="cnpj"]',
+    '#industriaCNPJ' // ID específico do formulário de indústria
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
   ];
   
   const cnpjFields = document.querySelectorAll(cnpjSelectors.join(', '));

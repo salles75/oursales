@@ -816,8 +816,12 @@ function fixClientButtons() {
 // === OTIMIZAÇÕES DE PERFORMANCE ===
 
 // Debounce para eventos de scroll e resize
+<<<<<<< HEAD
 // Usar função local com nome diferente para evitar conflito com app.js
 const debounceLocal = function(func, wait) {
+=======
+function debounce(func, wait) {
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
   let timeout;
   return function executedFunction(...args) {
     const later = () => {
@@ -825,9 +829,15 @@ const debounceLocal = function(func, wait) {
       func(...args);
     };
     clearTimeout(timeout);
+<<<<<<< HEAD
     timeout = setTimeout(later, wait || 300);
   };
 };
+=======
+    timeout = setTimeout(later, wait);
+  };
+}
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
 // Throttle para eventos frequentes
 function throttle(func, limit) {
@@ -919,7 +929,11 @@ function initOurSalesFixes() {
   window.addEventListener("scroll", optimizedScrollHandler, { passive: true });
 
   // Otimizar resize
+<<<<<<< HEAD
   const optimizedResizeHandler = debounceLocal(() => {
+=======
+  const optimizedResizeHandler = debounce(() => {
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
     // Recalcular layouts se necessário
     if (typeof applyLazyLoading === "function") {
       applyLazyLoading();

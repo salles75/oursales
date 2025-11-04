@@ -31,7 +31,10 @@ import industriasRoutes from "./routes/industrias.routes.js";
 import tabelasPrecosRoutes from "./routes/tabelas-precos.routes.js";
 import configuracoesRoutes from "./routes/configuracoes.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+<<<<<<< HEAD
 import versionRoutes from "./routes/version.routes.js";
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -170,7 +173,10 @@ app.use("/api/industrias", industriasRoutes);
 app.use("/api/tabelas-precos", tabelasPrecosRoutes);
 app.use("/api/configuracoes", configuracoesRoutes);
 app.use("/api/admin", adminRoutes);
+<<<<<<< HEAD
 app.use("/api/version", versionRoutes);
+=======
+>>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 
 // =====================================================
 // Rota raiz
