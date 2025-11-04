@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Mais</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- SheetJS para exportar/importar Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  </head>
+  <body data-page="configuracoes">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>⚙️ Mais</h1>
+          <p>
+            Gerencie importações por setor, configure preferências e realize
+            backups do sistema.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes" class="is-active"
+          >⚙️ Mais</a
+        >
+      </div>
+    </nav>
+
+    <main>
+      <!-- Gerenciar Setores -->
+      <section>
+        <h2>📊 Gerenciar Setores</h2>
+        <p>Acesse cada módulo, importe ou exporte dados em Excel/CSV.</p>
+        <div class="square-grid">
+          <!-- Setor: Clientes -->
+          <div
+            class="square-card"
+            onclick="window.location.href='clientes.html'"
+            style="cursor: pointer"
+          >
+            <div class="square-card-header">
+              <div
+                class="square-card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                👥
+              </div>
+              <div>
+                <h3 class="square-card-title">Clientes</h3>
+              </div>
+            </div>
+            <p class="square-card-description">
+              Gerencie clientes PF/PJ, importe ou exporte dados.
+            </p>
+            <div class="square-card-stats">
+              <span class="square-card-number" id="clientesCount">0</span>
+              <span class="square-card-label">CADASTRADOS</span>
+            </div>
+            <div class="square-card-actions">
+              <button
+                class="square-card-button primary"
+                onclick="event.stopPropagation(); importarDados('clientes')"
+              >
+                Importar
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarExcel('clientes')"
+              >
+                📊
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarCSV('clientes')"
+              >
+                📄
+              </button>
+            </div>
+          </div>
+
+          <!-- Setor: Produtos -->
+          <div
+            class="square-card"
+            onclick="window.location.href='produtos.html'"
+            style="cursor: pointer"
+          >
+            <div class="square-card-header">
+              <div
+                class="square-card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                📦
+              </div>
+              <div>
+                <h3 class="square-card-title">Produtos</h3>
+              </div>
+            </div>
+            <p class="square-card-description">
+              Gerencie catálogo de produtos, importe ou exporte dados.
+            </p>
+            <div class="square-card-stats">
+              <span class="square-card-number" id="produtosCount">0</span>
+              <span class="square-card-label">NO CATÁLOGO</span>
+            </div>
+            <div class="square-card-actions">
+              <button
+                class="square-card-button primary"
+                onclick="event.stopPropagation(); importarDados('produtos')"
+              >
+                Importar
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarExcel('produtos')"
+              >
+                📊
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarCSV('produtos')"
+              >
+                📄
+              </button>
+            </div>
+          </div>
+
+          <!-- Setor: Indústrias -->
+          <div
+            class="square-card"
+            onclick="window.location.href='industrias.html'"
+            style="cursor: pointer"
+          >
+            <div class="square-card-header">
+              <div
+                class="square-card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--amber-500),
+                    var(--amber-600)
+                  );
+                "
+              >
+                🏭
+              </div>
+              <div>
+                <h3 class="square-card-title">Indústrias</h3>
+              </div>
+            </div>
+            <p class="square-card-description">
+              Gerencie fornecedores e parceiros industriais, importe ou exporte
+              dados.
+            </p>
+            <div class="square-card-stats">
+              <span class="square-card-number" id="industriasCount">0</span>
+              <span class="square-card-label">CADASTRADAS</span>
+            </div>
+            <div class="square-card-actions">
+              <button
+                class="square-card-button primary"
+                onclick="event.stopPropagation(); importarDados('industrias')"
+              >
+                Importar
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarExcel('industrias')"
+              >
+                📊
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarCSV('industrias')"
+              >
+                📄
+              </button>
+            </div>
+          </div>
+
+          <!-- Setor: Transportadoras -->
+          <div
+            class="square-card"
+            onclick="window.location.href='transportadoras.html'"
+            style="cursor: pointer"
+          >
+            <div class="square-card-header">
+              <div
+                class="square-card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--secondary-500),
+                    var(--secondary-600)
+                  );
+                "
+              >
+                🚚
+              </div>
+              <div>
+                <h3 class="square-card-title">Transportadoras</h3>
+              </div>
+            </div>
+            <p class="square-card-description">
+              Gerencie transportadoras parceiras, importe ou exporte dados.
+            </p>
+            <div class="square-card-stats">
+              <span class="square-card-number" id="transportadorasCount"
+                >0</span
+              >
+              <span class="square-card-label">PARCEIRAS</span>
+            </div>
+            <div class="square-card-actions">
+              <button
+                class="square-card-button primary"
+                onclick="event.stopPropagation(); importarDados('transportadoras')"
+              >
+                Importar
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarExcel('transportadoras')"
+              >
+                📊
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarCSV('transportadoras')"
+              >
+                📄
+              </button>
+            </div>
+          </div>
+
+          <!-- Setor: Orçamentos -->
+          <div
+            class="square-card"
+            onclick="window.location.href='orcamentos.html'"
+            style="cursor: pointer"
+          >
+            <div class="square-card-header">
+              <div
+                class="square-card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                💰
+              </div>
+              <div>
+                <h3 class="square-card-title">Orçamentos</h3>
+              </div>
+            </div>
+            <p class="square-card-description">
+              Gerencie propostas comerciais e cotações, importe ou exporte
+              dados.
+            </p>
+            <div class="square-card-stats">
+              <span class="square-card-number" id="orcamentosCount">0</span>
+              <span class="square-card-label">REGISTRADOS</span>
+            </div>
+            <div class="square-card-actions">
+              <button
+                class="square-card-button primary"
+                onclick="event.stopPropagation(); importarDados('orcamentos')"
+              >
+                Importar
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarExcel('orcamentos')"
+              >
+                📊
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarCSV('orcamentos')"
+              >
+                📄
+              </button>
+            </div>
+          </div>
+
+          <!-- Setor: Pedidos -->
+          <div
+            class="square-card"
+            onclick="window.location.href='pedidos.html'"
+            style="cursor: pointer"
+          >
+            <div class="square-card-header">
+              <div
+                class="square-card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                📋
+              </div>
+              <div>
+                <h3 class="square-card-title">Pedidos</h3>
+              </div>
+            </div>
+            <p class="square-card-description">
+              Gerencie pedidos fechados e entregas, importe ou exporte dados.
+            </p>
+            <div class="square-card-stats">
+              <span class="square-card-number" id="pedidosCount">0</span>
+              <span class="square-card-label">FECHADOS</span>
+            </div>
+            <div class="square-card-actions">
+              <button
+                class="square-card-button primary"
+                onclick="event.stopPropagation(); importarDados('pedidos')"
+              >
+                Importar
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarExcel('pedidos')"
+              >
+                📊
+              </button>
+              <button
+                class="square-card-button secondary"
+                onclick="event.stopPropagation(); exportarCSV('pedidos')"
+              >
+                📄
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Backup Geral do Sistema -->
+      <section>
+        <h2>💾 Backup Geral do Sistema</h2>
+        <p>
+          Exporte ou importe todos os dados do sistema de uma vez. Use para
+          backups completos ou migração.
+        </p>
+        <div class="hero-actions">
+          <button
+            class="square-card-button primary"
+            onclick="exportarBackupJSON()"
+          >
+            Exportar JSON
+          </button>
+          <button
+            class="square-card-button secondary"
+            onclick="exportarBackupCSV()"
+          >
+            Exportar CSV
+          </button>
+          <button
+            class="square-card-button secondary"
+            onclick="importarBackup()"
+          >
+            Importar Backup
+          </button>
+          <button
+            class="square-card-button secondary"
+            onclick="limparTodosDados()"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--danger-500),
+                var(--danger-600)
+              );
+              color: white;
+            "
+          >
+            Limpar Tudo
+          </button>
+        </div>
+      </section>
+
+      <!-- Informações do Sistema -->
+      <section>
+        <h2>ℹ️ Informações do Sistema</h2>
+        <div class="square-grid">
+          <div class="square-card">
+            <div class="square-card-header">
+              <div
+                class="square-card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                📊
+              </div>
+              <div>
+                <h3 class="square-card-title">Versão</h3>
+              </div>
+            </div>
+            <p class="square-card-description">Versão atual do sistema</p>
+            <div class="square-card-stats">
+              <span class="square-card-number">1.0.0</span>
+              <span class="square-card-label">ATUAL</span>
+            </div>
+          </div>
+
+          <div class="square-card">
+            <div class="square-card-header">
+              <div
+                class="square-card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                💾
+              </div>
+              <div>
+                <h3 class="square-card-title">Armazenamento</h3>
+              </div>
+            </div>
+            <p class="square-card-description">Espaço utilizado no navegador</p>
+            <div class="square-card-stats">
+              <span class="square-card-number" id="storageUsed">0 KB</span>
+              <span class="square-card-label">UTILIZADO</span>
+            </div>
+          </div>
+
+          <div class="square-card">
+            <div class="square-card-header">
+              <div
+                class="square-card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--amber-500),
+                    var(--amber-600)
+                  );
+                "
+              >
+                📈
+              </div>
+              <div>
+                <h3 class="square-card-title">Total de Registros</h3>
+              </div>
+            </div>
+            <p class="square-card-description">Quantidade total de dados</p>
+            <div class="square-card-stats">
+              <span class="square-card-number" id="totalRecords">0</span>
+              <span class="square-card-label">REGISTROS</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      OurSales • Sistema de Gestão Comercial • Desenvolvido para otimizar sua
+      operação
+    </footer>
+
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Clientes</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/fix-animations.css" />
+    <link rel="stylesheet" href="assets/css/table-improvements.css" />
+  </head>
+  <body data-page="clientes">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>Clientes</h1>
+          <p>
+            Cadastre clientes potenciais e ativos, mantenha contatos atualizados
+            e registre observações importantes para negociações.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Clientes cadastrados</h2>
+          <p class="modern-list-description">
+            Selecione um cliente para editar ou remover quando necessário.
+          </p>
+        </div>
+        <div class="modern-list-toolbar">
+          <button
+            type="button"
+            id="clienteCriarPJ"
+            class="square-card-button primary"
+          >
+            Novo PJ
+          </button>
+          <button
+            type="button"
+            id="clienteCriarPF"
+            class="square-card-button primary"
+          >
+            Novo PF
+          </button>
+          <button
+            type="button"
+            id="clienteEditar"
+            class="square-card-button secondary"
+            disabled
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            id="clienteCRM"
+            class="square-card-button secondary"
+            disabled
+          >
+            Abrir CRM
+          </button>
+          <button
+            type="button"
+            id="clienteRemover"
+            class="square-card-button secondary"
+            disabled
+          >
+            Remover
+          </button>
+        </div>
+        <div class="modern-list-content">
+          <div class="list" id="clientesLista"></div>
+        </div>
+      </div>
+    </main>
+
+    <div class="overlay" id="clienteOverlay" hidden></div>
+
+    <section class="drawer" id="clienteDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2 id="clienteDrawerTitulo">Novo cliente</h2>
+          <p id="clienteDrawerDescricao">
+            Cadastre os dados do cliente para utilizar nos orçamentos e pedidos.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="clienteDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="clienteForm" autocomplete="off">
+        <input type="hidden" id="clienteId" />
+        <div class="grouped two">
+          <label>
+            Razão Social / Nome
+            <input
+              type="text"
+              id="clienteNome"
+              required
+              placeholder="Distribuidora Horizonte LTDA"
+            />
+          </label>
+          <label>
+            CNPJ / CPF
+            <input
+              type="text"
+              id="clienteDocumento"
+              required
+              placeholder="00.000.000/0001-00"
+            />
+          </label>
+        </div>
+        <div class="grouped two">
+          <label>
+            E-mail
+            <input
+              type="email"
+              id="clienteEmail"
+              required
+              placeholder="contato@empresa.com"
+            />
+          </label>
+          <label>
+            Telefone
+            <input
+              type="tel"
+              id="clienteTelefone"
+              required
+              placeholder="(11) 90000-0000"
+            />
+          </label>
+        </div>
+        <label>
+          Observações
+          <textarea
+            id="clienteObservacoes"
+            placeholder="Forma de pagamento, horários de contato, preferências..."
+          ></textarea>
+        </label>
+        <div class="hero-actions">
+          <button type="submit">Salvar cliente</button>
+          <button type="button" id="clienteCancelar" class="button-secondary">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <footer>
+      Dados armazenados localmente no navegador. Exporte periodicamente se
+      necessário.
+    </footer>
+
+    <script src="assets/js/input-masks.js"></script>
+    <script src="assets/js/scroll-optimization.js" defer></script>
+    <script src="assets/js/column-customizer.js" defer></script>
+    <script src="assets/js/disable-animations.js" defer></script>
+    <script src="assets/js/oursales-fixes.js" defer></script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
+  </body>
+</html>

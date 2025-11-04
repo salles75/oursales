@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Cliente Pessoa Física</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body data-page="cliente-pf">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>Cliente • Pessoa Física</h1>
+          <p>
+            Cadastre clientes pessoa física com dados completos de contato,
+            documentação e condições comerciais para personalizar o
+            relacionamento comercial.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <form id="clientePFForm" class="modern-form">
+        <input type="hidden" id="pfClienteId" />
+
+        <div class="modern-form-header">
+          <h2 class="modern-form-title" id="pfFormTitle">
+            Informações sobre o Cliente (Pessoa Física)
+          </h2>
+          <p class="modern-form-description">
+            Preencha os dados pessoais e de contato do cliente pessoa física.
+          </p>
+        </div>
+
+        <div class="modern-form-actions" style="position: sticky; top: 0; z-index: 5; background: var(--bg); padding-top: var(--space-3);">
+          <a href="clientes.html" class="modern-form-button secondary">
+            <span>↩️</span> Cancelar
+          </a>
+          <button
+            type="submit"
+            id="pfSalvarTop"
+            class="modern-form-button primary"
+          >
+            <span>💾</span> Salvar Cliente
+          </button>
+        </div>
+
+        <div class="modern-form-content">
+          <!-- Seção: Informações Básicas -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                👤
+              </div>
+              <h3 class="modern-form-section-title">Informações Básicas</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pfNome" class="modern-form-label required"
+                  >Nome Completo</label
+                >
+                <input
+                  type="text"
+                  id="pfNome"
+                  class="modern-form-input"
+                  required
+                  placeholder="Digite o nome completo"
+                />
+                <div class="modern-form-help">
+                  Nome completo conforme documento de identidade
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfCodigo" class="modern-form-label">Código</label>
+                <div style="display: flex; gap: var(--space-2)">
+                  <input
+                    type="text"
+                    id="pfCodigo"
+                    class="modern-form-input"
+                    placeholder="Código do cliente"
+                    style="flex: 1"
+                  />
+                  <button
+                    type="button"
+                    id="pfGerarCodigo"
+                    class="modern-form-button secondary"
+                  >
+                    Gerar
+                  </button>
+                </div>
+                <div class="modern-form-help">Código único do cliente</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfCpf" class="modern-form-label required"
+                  >CPF</label
+                >
+                <input
+                  type="text"
+                  id="pfCpf"
+                  class="modern-form-input"
+                  required
+                  placeholder="000.000.000-00"
+                />
+                <div class="modern-form-help">CPF válido com formatação</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfInscricaoEstadual" class="modern-form-label"
+                  >Inscrição Estadual</label
+                >
+                <input
+                  type="text"
+                  id="pfInscricaoEstadual"
+                  class="modern-form-input"
+                  placeholder="Digite a IE"
+                />
+                <div class="modern-form-help">
+                  Inscrição estadual (opcional)
+                </div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pfRg" class="modern-form-label">RG</label>
+                <input
+                  type="text"
+                  id="pfRg"
+                  class="modern-form-input"
+                  placeholder="Digite o RG"
+                />
+                <div class="modern-form-help">Número do RG (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfEstadoCivil" class="modern-form-label"
+                  >Estado Civil</label
+                >
+                <select id="pfEstadoCivil" class="modern-form-select">
+                  <option value="">Selecione</option>
+                  <option value="solteiro">Solteiro(a)</option>
+                  <option value="casado">Casado(a)</option>
+                  <option value="divorciado">Divorciado(a)</option>
+                  <option value="viuvo">Viúvo(a)</option>
+                  <option value="uniao">União Estável</option>
+                </select>
+                <div class="modern-form-help">Estado civil (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfSexo" class="modern-form-label">Sexo</label>
+                <select id="pfSexo" class="modern-form-select">
+                  <option value="">Selecione</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="feminino">Feminino</option>
+                  <option value="outro">Outro</option>
+                </select>
+                <div class="modern-form-help">Sexo (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfSuframa" class="modern-form-label">SUFRAMA</label>
+                <input
+                  type="text"
+                  id="pfSuframa"
+                  class="modern-form-input"
+                  placeholder="Digite o SUFRAMA"
+                />
+                <div class="modern-form-help">Código SUFRAMA (opcional)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Endereço -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                🏠
+              </div>
+              <h3 class="modern-form-section-title">Endereço</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pfEndereco" class="modern-form-label"
+                  >Endereço</label
+                >
+                <input
+                  type="text"
+                  id="pfEndereco"
+                  class="modern-form-input"
+                  placeholder="Rua, Avenida, etc."
+                />
+                <div class="modern-form-help">Endereço completo</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfBairro" class="modern-form-label">Bairro</label>
+                <input
+                  type="text"
+                  id="pfBairro"
+                  class="modern-form-input"
+                  placeholder="Nome do bairro"
+                />
+                <div class="modern-form-help">Bairro</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfNumero" class="modern-form-label">Número</label>
+                <input
+                  type="text"
+                  id="pfNumero"
+                  class="modern-form-input"
+                  placeholder="Número"
+                />
+                <div class="modern-form-help">Número do endereço</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfCep" class="modern-form-label">CEP</label>
+                <input
+                  type="text"
+                  id="pfCep"
+                  class="modern-form-input"
+                  placeholder="00000-000"
+                />
+                <div class="modern-form-help">CEP com formatação</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pfCidade" class="modern-form-label">Cidade</label>
+                <input
+                  type="text"
+                  id="pfCidade"
+                  class="modern-form-input"
+                  placeholder="Nome da cidade"
+                />
+                <div class="modern-form-help">Cidade</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfEstado" class="modern-form-label">Estado</label>
+                <select id="pfEstado" class="modern-form-select">
+                  <option value="">Selecione</option>
+                  <option value="AC">Acre</option>
+                  <option value="AL">Alagoas</option>
+                  <option value="AP">Amapá</option>
+                  <option value="AM">Amazonas</option>
+                  <option value="BA">Bahia</option>
+                  <option value="CE">Ceará</option>
+                  <option value="DF">Distrito Federal</option>
+                  <option value="ES">Espírito Santo</option>
+                  <option value="GO">Goiás</option>
+                  <option value="MA">Maranhão</option>
+                  <option value="MT">Mato Grosso</option>
+                  <option value="MS">Mato Grosso do Sul</option>
+                  <option value="MG">Minas Gerais</option>
+                  <option value="PA">Pará</option>
+                  <option value="PB">Paraíba</option>
+                  <option value="PR">Paraná</option>
+                  <option value="PE">Pernambuco</option>
+                  <option value="PI">Piauí</option>
+                  <option value="RJ">Rio de Janeiro</option>
+                  <option value="RN">Rio Grande do Norte</option>
+                  <option value="RS">Rio Grande do Sul</option>
+                  <option value="RO">Rondônia</option>
+                  <option value="RR">Roraima</option>
+                  <option value="SC">Santa Catarina</option>
+                  <option value="SP">São Paulo</option>
+                  <option value="SE">Sergipe</option>
+                  <option value="TO">Tocantins</option>
+                </select>
+                <div class="modern-form-help">Estado</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Comunicação -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--amber-500),
+                    var(--amber-600)
+                  );
+                "
+              >
+                📞
+              </div>
+              <h3 class="modern-form-section-title">Comunicação</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pfTelefone" class="modern-form-label"
+                  >Telefone</label
+                >
+                <input
+                  type="tel"
+                  id="pfTelefone"
+                  class="modern-form-input"
+                  placeholder="(00) 00000-0000"
+                />
+                <div class="modern-form-help">Telefone principal</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfFax" class="modern-form-label">Fax</label>
+                <input
+                  type="tel"
+                  id="pfFax"
+                  class="modern-form-input"
+                  placeholder="(00) 0000-0000"
+                />
+                <div class="modern-form-help">Fax (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfTelefoneAdicional" class="modern-form-label"
+                  >Telefone Adicional</label
+                >
+                <input
+                  type="tel"
+                  id="pfTelefoneAdicional"
+                  class="modern-form-input"
+                  placeholder="(00) 00000-0000"
+                />
+                <div class="modern-form-help">
+                  Telefone adicional (opcional)
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfWebsite" class="modern-form-label">Website</label>
+                <input
+                  type="url"
+                  id="pfWebsite"
+                  class="modern-form-input"
+                  placeholder="https://www.exemplo.com"
+                />
+                <div class="modern-form-help">Site pessoal (opcional)</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pfEmail" class="modern-form-label">E-mail</label>
+                <input
+                  type="email"
+                  id="pfEmail"
+                  class="modern-form-input"
+                  placeholder="email@exemplo.com"
+                />
+                <div class="modern-form-help">E-mail principal</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfEmailNfe" class="modern-form-label"
+                  >E-mail NFe</label
+                >
+                <input
+                  type="email"
+                  id="pfEmailNfe"
+                  class="modern-form-input"
+                  placeholder="nfe@exemplo.com"
+                />
+                <div class="modern-form-help">
+                  E-mail para recebimento de NFe
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Contatos -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--secondary-500),
+                    var(--secondary-600)
+                  );
+                "
+              >
+                👥
+              </div>
+              <h3 class="modern-form-section-title">Contatos</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Telefone</th>
+                    <th>Aniversário</th>
+                    <th>Cargo</th>
+                    <th>Comprador</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pfContatosTbody">
+                  <tr>
+                    <td colspan="7" class="empty-state">
+                      Nenhum contato adicionado!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pfContatoAdicionar"
+                class="modern-form-button secondary"
+              >
+                <span>➕</span> Adicionar Contato
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Condições de Pagamento -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--purple-500),
+                    var(--purple-600)
+                  );
+                "
+              >
+                💳
+              </div>
+              <h3 class="modern-form-section-title">Condições de Pagamento</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Descrição</th>
+                    <th>Parcelas</th>
+                    <th>Intervalo (dias)</th>
+                    <th>Desconto/Acréscimo (%)</th>
+                    <th>Pedido Mínimo (R$)</th>
+                    <th>Indústria</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pfPagamentosTbody">
+                  <tr>
+                    <td colspan="7" class="empty-state">
+                      Nenhuma condição de pagamento adicionada!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pfPagamentoAdicionar"
+                class="modern-form-button secondary"
+              >
+                <span>➕</span> Adicionar Condição
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Vendedores -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--blue-500),
+                    var(--blue-600)
+                  );
+                "
+              >
+                👨‍💼
+              </div>
+              <h3 class="modern-form-section-title">Vendedores</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Vendedor</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pfVendedoresTbody">
+                  <tr>
+                    <td colspan="2" class="empty-state">
+                      Nenhum vendedor adicionado!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pfVendedorAdicionar"
+                class="modern-form-button secondary"
+              >
+                <span>➕</span> Adicionar Vendedor
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Indústrias -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--orange-500),
+                    var(--orange-600)
+                  );
+                "
+              >
+                🏭
+              </div>
+              <h3 class="modern-form-section-title">Indústrias</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Indústria</th>
+                    <th>Desconto (%)</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pfIndustriasTbody">
+                  <tr>
+                    <td colspan="3" class="empty-state">
+                      Nenhuma indústria adicionada!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pfIndustriaAdicionar"
+                class="modern-form-button secondary"
+              >
+                <span>➕</span> Adicionar Indústria
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Transportadoras -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--teal-500),
+                    var(--teal-600)
+                  );
+                "
+              >
+                🚚
+              </div>
+              <h3 class="modern-form-section-title">Transportadoras</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Transportadora</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pfTransportadorasTbody">
+                  <tr>
+                    <td colspan="2" class="empty-state">
+                      Nenhuma transportadora adicionada!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pfTransportadoraAdicionar"
+                class="modern-form-button secondary"
+              >
+                <span>➕</span> Adicionar Transportadora
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Status e Observações -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--gray-500),
+                    var(--gray-600)
+                  );
+                "
+              >
+                📝
+              </div>
+              <h3 class="modern-form-section-title">Status e Observações</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pfStatus" class="modern-form-label">Status</label>
+                <select id="pfStatus" class="modern-form-select">
+                  <option value="Ativo">Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                  <option value="Bloqueado">Bloqueado</option>
+                </select>
+                <div class="modern-form-help">Status do cliente</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfDataCadastro" class="modern-form-label"
+                  >Data de Cadastro</label
+                >
+                <input
+                  type="date"
+                  id="pfDataCadastro"
+                  class="modern-form-input"
+                />
+                <div class="modern-form-help">Data de cadastro do cliente</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pfRegiao" class="modern-form-label">Região</label>
+                <input
+                  type="text"
+                  id="pfRegiao"
+                  class="modern-form-input"
+                  placeholder="Região do cliente"
+                />
+                <div class="modern-form-help">Região geográfica</div>
+              </div>
+            </div>
+            <div class="modern-form-field">
+              <label for="pfObservacoes" class="modern-form-label"
+                >Observações</label
+              >
+              <textarea
+                id="pfObservacoes"
+                class="modern-form-textarea"
+                rows="4"
+                placeholder="Observações gerais sobre o cliente..."
+              ></textarea>
+              <div class="modern-form-help">
+                Observações importantes sobre o cliente
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modern-form-actions">
+          <a href="clientes.html" class="modern-form-button secondary">
+            <span>↩️</span> Cancelar
+          </a>
+          <button
+            type="submit"
+            id="pfSalvar"
+            class="modern-form-button primary"
+          >
+            <span>💾</span> Salvar Cliente
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <footer>
+      Cadastre clientes pessoa física com informações completas para melhor
+      atendimento e relacionamento comercial.
+    </footer>
+
+    <script src="assets/js/input-masks.js"></script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
+  </body>
+</html>
