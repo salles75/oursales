@@ -1244,6 +1244,23 @@ function initClientePJPage() {
   carregarIndustrias();
   carregarVendedores();
 
+  const vendedoresLista = [
+    "Ana Souza",
+    "Bruno Oliveira",
+    "Carla Ribeiro",
+    "Diego Martins",
+    "Fernanda Costa",
+  ];
+
+  const industriasLista = [
+    "Todas as Indústrias",
+    "Alimentos",
+    "Bebidas",
+    "Higiene",
+    "Limpeza",
+    "Cosméticos",
+  ];
+
   const buildStaticOptions = (
     values,
     selected = "",
@@ -2108,12 +2125,14 @@ function initClientePJPage() {
     const cnpjDigits = (fields.cnpj.value || "").replace(/\D/g, "");
     if (!razaoSocial || cnpjDigits.length !== 14) {
       window.alert("Informe Razão Social e CNPJ válido (14 dígitos).");
+
       return;
     }
 
     const contatos = Array.from(contatosBody.querySelectorAll("tr"))
       .map((tr) => {
         const nome = tr.querySelector('[name="contatoNome"]').value.trim();
+
         const email = tr.querySelector('[name="contatoEmail"]').value.trim();
         const telefone = tr
           .querySelector('[name="contatoTelefone"]')
@@ -2124,6 +2143,7 @@ function initClientePJPage() {
         const cargo = tr.querySelector('[name="contatoCargo"]').value.trim();
         const comprador = tr.querySelector('[name="contatoComprador"]').checked;
         if (!nome && !email && !telefone) return null;
+
         return { nome, email, telefone, aniversario, cargo, comprador };
       })
       .filter(Boolean);
@@ -2438,6 +2458,23 @@ function initClientePFPage() {
   // Carregar dados ao inicializar
   carregarIndustrias();
   carregarVendedores();
+
+  const vendedoresLista = [
+    "Ana Souza",
+    "Bruno Oliveira",
+    "Carla Ribeiro",
+    "Diego Martins",
+    "Fernanda Costa",
+  ];
+
+  const industriasLista = [
+    "Todas as Indústrias",
+    "Alimentos",
+    "Bebidas",
+    "Higiene",
+    "Limpeza",
+    "Cosméticos",
+  ];
 
   const buildStaticOptions = (
     values,
@@ -3509,6 +3546,12 @@ function initIndustriasPage() {
         'input[type="checkbox"][name="industriaSelecionada"]:checked'
       ) || [];
 
+  removeBtn?.addEventListener("click", () => {
+    const checkedBoxes = listContainer?.querySelectorAll(
+      'input[type="checkbox"][name="industriaSelecionada"]:checked'
+    ) || [];
+    
+
     if (checkedBoxes.length === 0) {
       window.alert("Selecione uma ou mais indústrias para remover.");
       return;
@@ -4517,6 +4560,9 @@ function initProdutosPage() {
   // importBtn?.addEventListener("click", () => {
   //   window.location.href = "configuracoes.html#importar-produtos";
   // });
+  importBtn?.addEventListener("click", () => {
+    window.location.href = "importar-produtos.html";
+  });
 
   importProdutosOverlay?.addEventListener("click", () => {
     hideDrawer(importProdutosDrawer, importProdutosOverlay);
@@ -5246,6 +5292,7 @@ function initProdutoFormPage() {
         fields.industria.value,
         produto.tabelaPreco || produto.tabelaPrecoId || ""
       );
+
       fields.sku.value = produto.sku || "";
       fields.nome.value = produto.nome || "";
       fields.precoVenda.value = produto.precoVenda || produto.preco || 0;
@@ -5273,6 +5320,7 @@ function initProdutoFormPage() {
         );
         if (byName) fields.tabelaPreco.value = byName.id;
       }
+
       fields.categoria.value = produto.categoria || "";
       fields.status.value = produto.status || "ativo";
       fields.altura.value = produto.altura || 0;
@@ -7639,6 +7687,28 @@ window.abrirProdutoModal = function (
   }
 };
 
+  // Carregar dados se for edição
+  if (editingOrcamentoId) {
+    const orcamento = storage
+      .load()
+      .orcamentos.find((item) => item.id === editingOrcamentoId);
+    if (orcamento) {
+      formTitle.textContent = `🛒 Orçamento - Editando Nº ${orcamento.id.toUpperCase()}`;
+      fields.cliente.value = orcamento.clienteId || "";
+      fields.data.value = orcamento.data || fields.data.value;
+      fields.validade.value = orcamento.validade || "";
+      fields.descricao.value = orcamento.descricao || "";
+      fields.observacoes.value = orcamento.observacoes || "";
+      fields.condicaoPagamento.value = orcamento.condicaoPagamento || "";
+      fields.status.value = orcamento.status || "pendente";
+      orcamentoItens = orcamento.itens || [];
+      renderOrcamentoItens();
+    }
+  }
+
+  calculateTotals();
+}
+
 /**
  * Pedido Form Page - Página separada para criar/editar pedidos
  */
@@ -9037,6 +9107,9 @@ function initPedidoFormPage() {
     renderPedidoItens();
     calculateTotals();
   });
+  // Inicialização
+  refreshSelects();
+  fields.dataVenda.value = new Date().toISOString().split("T")[0];
 
   // Carregar dados se for edição
   if (editingPedidoId) {

@@ -138,6 +138,7 @@ function applyMasks() {
     'input[placeholder*="cnpj"]',
     '#industriaCNPJ', // ID específico do formulário de indústria
     '#pjCnpj' // ID específico do formulário de cliente PJ
+
   ];
   
   const cnpjFields = document.querySelectorAll(cnpjSelectors.join(', '));

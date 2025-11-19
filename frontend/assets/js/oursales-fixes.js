@@ -818,6 +818,7 @@ function fixClientButtons() {
 // Debounce para eventos de scroll e resize
 // Usar função local com nome diferente para evitar conflito com app.js
 const debounceLocal = function(func, wait) {
+
   let timeout;
   return function executedFunction(...args) {
     const later = () => {
@@ -922,6 +923,7 @@ function initOurSalesFixes() {
 
   // Otimizar resize
   const optimizedResizeHandler = debounceLocal(() => {
+
     // Recalcular layouts se necessário
     if (typeof applyLazyLoading === "function") {
       applyLazyLoading();

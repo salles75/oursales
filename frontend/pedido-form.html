@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
     <!-- Performance Optimizer -->
     <script src="assets/js/performance-optimizer.js"></script>
+
   </head>
   <body data-page="pedido-form">
     <header>
@@ -191,6 +192,20 @@
                     class="modern-form-input"
                     style="flex: 1"
                   />
+
+                  <a
+                    href="#"
+                    id="adicionarAgendaSV"
+                    style="
+                      font-size: var(--font-size-sm);
+                      color: var(--primary-500);
+                      text-decoration: none;
+                      white-space: nowrap;
+                    "
+                  >
+                    📅 Adicionar na Agenda SV
+                  </a>
+
                 </div>
                 <div class="modern-form-help">Data prevista para entrega</div>
               </div>
@@ -267,6 +282,7 @@
             <!-- Campo de Busca -->
             <div class="modern-form-grid">
               <div class="modern-form-field" style="grid-column: 1 / -1;">
+
                 <label for="produtoSearch" class="modern-form-label"
                   >Buscar Produto</label
                 >
@@ -287,6 +303,7 @@
                 <div id="produtosResultsList" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: white;">
                   <!-- Os resultados serão inseridos aqui via JavaScript -->
                 </div>
+
               </div>
             </div>
 
@@ -894,5 +911,6 @@
 
     <script src="assets/js/app.js" defer></script>
     <script src="assets/js/version-check.js" defer></script>
+
   </body>
 </html>
