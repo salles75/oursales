@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • CRM</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
+  </head>
+  <body data-page="crm">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>CRM e Relacionamento</h1>
+          <p>
+            Centralize os feedbacks dos vendedores, organize por canal de
+            contato e acompanhe o histórico de cada cliente.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Clientes</h2>
+          <p class="modern-list-description">
+            Selecione um cliente para visualizar ou registrar novos feedbacks.
+          </p>
+        </div>
+        <div class="modern-list-toolbar">
+          <button
+            type="button"
+            id="crmRegistrar"
+            class="square-card-button primary"
+            disabled
+          >
+            Registrar feedback
+          </button>
+        </div>
+        <div class="modern-list-content">
+          <div class="list" id="crmClientesLista"></div>
+        </div>
+      </div>
+
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Histórico de interações</h2>
+          <p class="modern-list-description" id="crmTimelineDescricao">
+            Selecione um cliente para visualizar conversas recentes.
+          </p>
+        </div>
+        <div class="modern-list-content">
+          <div id="crmTimeline" class="timeline"></div>
+        </div>
+      </div>
+    </main>
+
+    <div class="overlay" id="crmOverlay" hidden></div>
+
+    <section class="drawer" id="crmDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2 id="crmDrawerTitulo">Registrar feedback</h2>
+          <p id="crmDrawerDescricao">
+            Registre como foi o contato com o cliente para manter o time
+            alinhado.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="crmDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="crmForm" autocomplete="off">
+        <input type="hidden" id="crmRegistroId" />
+        <div class="grouped two">
+          <label>
+            Cliente
+            <select id="crmCliente" required></select>
+          </label>
+          <label>
+            Canal
+            <select id="crmCanal" required>
+              <option value="" disabled selected>Selecione</option>
+              <option value="Ligação">Ligação</option>
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="E-mail">E-mail</option>
+              <option value="Visita">Visita</option>
+              <option value="Reunião Online">Reunião Online</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </label>
+        </div>
+        <div class="grouped two">
+          <label>
+            Data do contato
+            <input type="datetime-local" id="crmData" />
+          </label>
+          <label>
+            Resumo
+            <input
+              type="text"
+              id="crmResumo"
+              required
+              placeholder="Ex.: Apresentação da nova linha Evolution"
+            />
+          </label>
+        </div>
+        <label>
+          Detalhes da conversa
+          <textarea
+            id="crmDetalhes"
+            placeholder="Contexto do contato, próximos passos combinados e necessidades do cliente."
+          ></textarea>
+        </label>
+        <div class="hero-actions">
+          <button type="submit">Salvar interação</button>
+          <button type="button" id="crmCancelar" class="button-secondary">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <footer>
+      Todas as interações ficam visíveis para que o time comercial atue em
+      conjunto.
+    </footer>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
+  </body>
+</html>

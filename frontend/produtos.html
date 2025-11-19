@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Produtos</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/fix-animations.css" />
+    <link rel="stylesheet" href="assets/css/table-improvements.css" />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
+  </head>
+  <body data-page="produtos">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>Produtos</h1>
+          <p>
+            Organize o catálogo de produtos com informações de preço, estoque e
+            descrição para apoiar o time comercial.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="modern-list">
+        <div class="modern-list-header">
+          <h2 class="modern-list-title">Produtos cadastrados</h2>
+          <p class="modern-list-description">
+            Selecione um item para atualizar dados ou remover do catálogo.
+          </p>
+        </div>
+        <div class="modern-list-toolbar">
+          <button
+            type="button"
+            id="produtoCriar"
+            class="square-card-button primary"
+          >
+            Novo produto
+          </button>
+          <button
+            type="button"
+            id="produtoEditar"
+            class="square-card-button secondary"
+            disabled
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            id="produtoImportar"
+            class="square-card-button secondary"
+            onclick="window.location.href='configuracoes.html#importar-produtos'"
+          >
+            <i class="ti ti-upload"></i> Importar
+          </button>
+          <button
+            type="button"
+            id="produtoRemover"
+            class="square-card-button secondary"
+            disabled
+          >
+            Remover
+          </button>
+        </div>
+        <div class="modern-list-content">
+          <div class="list" id="produtosLista"></div>
+        </div>
+      </div>
+    </main>
+
+    <div class="overlay" id="produtoOverlay" hidden></div>
+
+    <section class="drawer" id="produtoDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2 id="produtoDrawerTitulo">Novo produto</h2>
+          <p id="produtoDrawerDescricao">
+            Informe os dados do produto para mantê-lo disponível em cotações e
+            pedidos.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="produtoDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="produtoForm" autocomplete="off">
+        <input type="hidden" id="produtoId" />
+        <div class="grouped two">
+          <label>
+            Nome do Produto
+            <input
+              type="text"
+              id="produtoNome"
+              required
+              placeholder="Linha Evolution 500ml"
+            />
+          </label>
+          <label>
+            SKU / Código
+            <input
+              type="text"
+              id="produtoSKU"
+              required
+              placeholder="EV-500-01"
+            />
+          </label>
+        </div>
+        <div class="grouped two">
+          <label>
+            Categoria
+            <input
+              type="text"
+              id="produtoCategoria"
+              placeholder="Bebidas, Kits, Suplementos..."
+            />
+          </label>
+          <label>
+            Preço (R$)
+            <input
+              type="number"
+              id="produtoPreco"
+              min="0"
+              step="0.01"
+              required
+              placeholder="154,90"
+            />
+          </label>
+        </div>
+        <label>
+          Estoque
+          <input
+            type="number"
+            id="produtoEstoque"
+            min="0"
+            step="1"
+            required
+            placeholder="120"
+          />
+        </label>
+        <label>
+          Descrição
+          <textarea
+            id="produtoDescricao"
+            placeholder="Detalhes técnicos, diferenciais e observações para o time comercial."
+          ></textarea>
+        </label>
+        <div class="hero-actions">
+          <button type="submit">Salvar produto</button>
+          <button type="button" id="produtoCancelar" class="button-secondary">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Drawer para Importar Produtos -->
+    <div class="overlay" id="importProdutosOverlay" hidden></div>
+    <section class="drawer" id="importProdutosDrawer" hidden>
+      <div class="drawer-header">
+        <div>
+          <h2>Importar Produtos</h2>
+          <p>
+            Selecione uma indústria e tabela de preços para importar produtos.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button-icon"
+          id="importProdutosDrawerFechar"
+          aria-label="Fechar formulário"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+      <form id="importProdutosForm" autocomplete="off">
+        <div class="grouped two">
+          <label>
+            Indústria *
+            <select id="importIndustria" required>
+              <option value="">Selecione uma indústria</option>
+            </select>
+          </label>
+          <label>
+            Tabela de Preços *
+            <select id="importTabelaPreco" required disabled>
+              <option value="">Selecione uma tabela</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grouped two">
+          <label>
+            <input type="checkbox" id="importarTodosProdutos" />
+            Importar todos os produtos da tabela
+          </label>
+          <label>
+            Preço Padrão (% sobre preço de venda)
+            <input
+              type="number"
+              id="precoPadraoImportacao"
+              min="0"
+              max="1000"
+              step="0.01"
+              placeholder="100.00"
+              value="100"
+            />
+          </label>
+        </div>
+
+        <div
+          class="list"
+          id="produtosImportacaoLista"
+          style="max-height: 300px; overflow-y: auto; margin-top: 1rem"
+        >
+          <div class="empty-state">
+            <p>Selecione uma tabela para ver os produtos disponíveis.</p>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button type="submit">Importar Produtos Selecionados</button>
+          <button
+            type="button"
+            id="importProdutosCancelar"
+            class="button-secondary"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <footer>
+      Mantenha o catálogo sempre atualizado para garantir propostas
+      consistentes.
+    </footer>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/scroll-optimization.js" defer></script>
+    <script src="assets/js/column-customizer.js" defer></script>
+    <script src="assets/js/disable-animations.js" defer></script>
+    <script src="assets/js/oursales-fixes.js" defer></script>
+    <script src="assets/js/input-masks.js"></script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
+  </body>
+</html>

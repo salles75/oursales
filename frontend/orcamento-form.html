@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Novo Orçamento</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/produto-modal.css" />
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
+  </head>
+  <body data-page="orcamento-form">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1 id="orcamentoFormTitle"><i class="ti ti-shopping-cart"></i> Orçamento - Novo</h1>
+          <p>
+            Preencha as informações do orçamento, adicione produtos e calcule os
+            totais.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <form id="orcamentoForm" class="modern-form" autocomplete="off">
+        <input type="hidden" id="orcamentoId" />
+
+        <div class="modern-form-header">
+          <h2 class="modern-form-title" id="orcamentoFormTitle">
+            Informações do Orçamento
+          </h2>
+          <p class="modern-form-description">
+            Preencha as informações básicas do orçamento e adicione os produtos.
+          </p>
+        </div>
+
+        <div class="modern-form-content">
+          <!-- Seção: Informações Básicas -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                <i class="ti ti-clipboard-list"></i>
+              </div>
+              <h3 class="modern-form-section-title">Informações Básicas</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="orcamentoCliente" class="modern-form-label required"
+                  >Cliente</label
+                >
+                <select
+                  id="orcamentoCliente"
+                  class="modern-form-select"
+                  required
+                ></select>
+                <div class="modern-form-help">
+                  Selecione o cliente para o orçamento
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="orcamentoComprador" class="modern-form-label"
+                  >Comprador</label
+                >
+                <select id="orcamentoComprador" class="modern-form-select">
+                  <option value="">Selecione</option>
+                </select>
+                <div class="modern-form-help">
+                  Comprador responsável (opcional)
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="orcamentoTransportadora" class="modern-form-label"
+                  >Transportadora</label
+                >
+                <select
+                  id="orcamentoTransportadora"
+                  class="modern-form-select"
+                ></select>
+                <div class="modern-form-help">
+                  Transportadora para entrega (opcional)
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="orcamentoTipoFrete" class="modern-form-label"
+                  >Frete</label
+                >
+                <select id="orcamentoTipoFrete" class="modern-form-select">
+                  <option value="">Selecione</option>
+                  <option value="cif">CIF</option>
+                  <option value="fob">FOB</option>
+                  <option value="sem">Sem Frete</option>
+                </select>
+                <div class="modern-form-help">Tipo de frete</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="orcamentoData" class="modern-form-label required"
+                  >Data do Orçamento</label
+                >
+                <input
+                  type="date"
+                  id="orcamentoData"
+                  class="modern-form-input"
+                  required
+                />
+                <div class="modern-form-help">Data de criação do orçamento</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="orcamentoValidade" class="modern-form-label"
+                  >Data de Validade</label
+                >
+                <input
+                  type="date"
+                  id="orcamentoValidade"
+                  class="modern-form-input"
+                />
+                <div class="modern-form-help">
+                  Data de validade do orçamento
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="orcamentoPrevisaoEntrega" class="modern-form-label"
+                  >Previsão de Entrega</label
+                >
+                <input
+                  type="date"
+                  id="orcamentoPrevisaoEntrega"
+                  class="modern-form-input"
+                />
+                <div class="modern-form-help">Data prevista para entrega</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="orcamentoNotaFiscal" class="modern-form-label"
+                  >Nota Fiscal</label
+                >
+                <input
+                  type="text"
+                  id="orcamentoNotaFiscal"
+                  class="modern-form-input"
+                  placeholder="Número da NF"
+                />
+                <div class="modern-form-help">
+                  Número da nota fiscal (opcional)
+                </div>
+              </div>
+            </div>
+            <div class="modern-form-field">
+              <label for="orcamentoDescricao" class="modern-form-label"
+                >Descrição do Orçamento</label
+              >
+              <input
+                type="text"
+                id="orcamentoDescricao"
+                class="modern-form-input"
+                placeholder="Ex: 120 unidades linha Evolution"
+              />
+              <div class="modern-form-help">Descrição geral do orçamento</div>
+            </div>
+          </div>
+
+          <!-- Seção: Itens do Orçamento -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                <i class="ti ti-package"></i>
+              </div>
+              <h3 class="modern-form-section-title">Itens do Orçamento</h3>
+            </div>
+
+            <!-- Filtros de Busca -->
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="filtroIndustria" class="modern-form-label"
+                  >Indústria</label
+                >
+                <select id="filtroIndustria" class="modern-form-select">
+                  <option value="">Todas as indústrias</option>
+                </select>
+                <div class="modern-form-help">Filtre por indústria</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="filtroTabelaPreco" class="modern-form-label"
+                  >Tabela de Preço</label
+                >
+                <select id="filtroTabelaPreco" class="modern-form-select">
+                  <option value="">Todas as tabelas</option>
+                </select>
+                <div class="modern-form-help">Filtre por tabela de preço</div>
+              </div>
+            </div>
+
+            <!-- Campo de Busca -->
+            <div class="modern-form-grid">
+              <div class="modern-form-field" style="grid-column: 1 / -1;">
+                <label for="produtoSearch" class="modern-form-label"
+                  >Buscar Produto</label
+                >
+                <input
+                  type="text"
+                  id="produtoSearch"
+                  class="modern-form-input"
+                  placeholder="Nome do produto, código ou código original"
+                />
+                <div class="modern-form-help">Digite para buscar produtos</div>
+              </div>
+            </div>
+
+            <!-- Resultados da Busca -->
+            <div id="produtosSearchResults" style="display: none; margin-top: var(--space-4);">
+              <div class="modern-form-field">
+                <label class="modern-form-label">Resultados da Busca</label>
+                <div id="produtosResultsList" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: white;">
+                  <!-- Os resultados serão inseridos aqui via JavaScript -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Filtros de quantidade (Descontos Adicionais) -->
+            <div
+              style="
+                display: flex;
+                gap: var(--space-2);
+                margin: var(--space-4) 0;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro1"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro2"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro3"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro4"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro5"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro6"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro7"
+              />
+              <button
+                type="button"
+                id="aplicarFiltros"
+                class="modern-form-button secondary"
+              >
+                Aplicar
+              </button>
+              <button
+                type="button"
+                id="limparFiltros"
+                class="modern-form-button secondary"
+              >
+                Limpar %
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40px"></th>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>R$ Tabela</th>
+                    <th>Preço Final</th>
+                    <th>Qtde</th>
+                    <th>Total R$</th>
+                    <th style="width: 60px">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="orcamentoItensList">
+                  <tr>
+                    <td colspan="8" class="empty-state">
+                      Nenhum produto adicionado neste orçamento!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Seção: Totais -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--amber-500),
+                    var(--amber-600)
+                  );
+                "
+              >
+                <i class="ti ti-currency-dollar"></i>
+              </div>
+              <h3 class="modern-form-section-title">Totais do Orçamento</h3>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-label">Qtde. Itens</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalItens">0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Qtde Produtos</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalProdutos">0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total Peso Líquido</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalPesoLiquido">0,000 Kg</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total IPI</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalIPI">R$ 0,00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-label">Acréscimo</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalAcrescimo">R$ 0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total Peso Bruto</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalPesoBruto">0,000 Kg</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total S/ Impostos</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalSemImpostos">R$ 0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Frete</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalFrete">R$ 0,00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-label">Desconto</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalDesconto">R$ 0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label">Total ST</label>
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: rgba(255, 255, 255, 0.9);
+                    font-weight: var(--font-weight-semibold);
+                  "
+                >
+                  <span id="totalST">R$ 0,00</span>
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label class="modern-form-label"
+                  ><strong>Total Final</strong></label
+                >
+                <div
+                  class="modern-form-input"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      var(--primary-500),
+                      var(--primary-600)
+                    );
+                    color: white;
+                    font-weight: var(--font-weight-bold);
+                    font-size: var(--font-size-lg);
+                  "
+                >
+                  <span id="totalFinal">R$ 0,00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Calculadora de Frete -->
+            <div
+              style="
+                margin-top: var(--space-6);
+                padding-top: var(--space-4);
+                border-top: 1px solid rgba(226, 232, 240, 0.3);
+              "
+            >
+              <h4
+                style="
+                  margin-bottom: var(--space-4);
+                  color: var(--text-primary);
+                "
+              >
+                Calcular Frete
+              </h4>
+              <div class="modern-form-grid">
+                <div class="modern-form-field">
+                  <label for="valorFrete" class="modern-form-label"
+                    >Valor do Frete (R$)</label
+                  >
+                  <input
+                    type="number"
+                    id="valorFrete"
+                    class="modern-form-input"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+                <div class="modern-form-field">
+                  <label for="valorAcrescimo" class="modern-form-label"
+                    >Acréscimo (R$)</label
+                  >
+                  <input
+                    type="number"
+                    id="valorAcrescimo"
+                    class="modern-form-input"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+                <div class="modern-form-field">
+                  <label for="valorDesconto" class="modern-form-label"
+                    >Desconto (R$)</label
+                  >
+                  <input
+                    type="number"
+                    id="valorDesconto"
+                    class="modern-form-input"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Informações Complementares -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--secondary-500),
+                    var(--secondary-600)
+                  );
+                "
+              >
+                <i class="ti ti-file-text"></i>
+              </div>
+              <h3 class="modern-form-section-title">
+                Informações Complementares
+              </h3>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-label">
+                  <input
+                    type="checkbox"
+                    id="orcamentoCancelado"
+                    style="margin-right: var(--space-2)"
+                  />
+                  Orçamento Cancelado
+                </label>
+              </div>
+              <div class="modern-form-field">
+                <label for="orcamentoOrdemCompra" class="modern-form-label"
+                  >Nº Ordem de Compra</label
+                >
+                <input
+                  type="text"
+                  id="orcamentoOrdemCompra"
+                  class="modern-form-input"
+                  placeholder="Número da OC"
+                />
+                <div class="modern-form-help">
+                  Número da ordem de compra (opcional)
+                </div>
+              </div>
+            </div>
+
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="orcamentoStatus" class="modern-form-label"
+                  >Status</label
+                >
+                <select id="orcamentoStatus" class="modern-form-select">
+                  <option value="pendente">Pendente</option>
+                  <option value="aprovado">Aprovado</option>
+                  <option value="negociacao">Em Negociação</option>
+                  <option value="cancelado">Cancelado</option>
+                  <option value="convertido">Convertido em Pedido</option>
+                </select>
+                <div class="modern-form-help">Status atual do orçamento</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="orcamentoVendedor" class="modern-form-label"
+                  >Vendedor</label
+                >
+                <select id="orcamentoVendedor" class="modern-form-select">
+                  <option value="">Selecione</option>
+                  <option value="vendedor1">Vendedor 1</option>
+                  <option value="vendedor2">Vendedor 2</option>
+                </select>
+                <div class="modern-form-help">Vendedor responsável</div>
+              </div>
+            </div>
+
+            <div class="modern-form-field">
+              <label for="orcamentoObservacoes" class="modern-form-label"
+                >Observações</label
+              >
+              <textarea
+                id="orcamentoObservacoes"
+                class="modern-form-textarea"
+                rows="3"
+                placeholder="Condições comerciais, detalhes da proposta..."
+              ></textarea>
+              <div class="modern-form-help">
+                Observações gerais do orçamento
+              </div>
+            </div>
+
+            <div class="modern-form-field">
+              <label for="orcamentoCondicaoPagamento" class="modern-form-label"
+                >Condição de Pagamento</label
+              >
+              <textarea
+                id="orcamentoCondicaoPagamento"
+                class="modern-form-textarea"
+                rows="2"
+                placeholder="Ex: 30% entrada, 70% em 3x"
+              ></textarea>
+              <div class="modern-form-help">Condições de pagamento</div>
+            </div>
+
+            <div class="modern-form-field">
+              <label for="orcamentoObservacaoPrivada" class="modern-form-label"
+                >Observação Privada</label
+              >
+              <textarea
+                id="orcamentoObservacaoPrivada"
+                class="modern-form-textarea"
+                rows="2"
+                placeholder="Anotações internas (não aparece no orçamento)"
+              ></textarea>
+              <div class="modern-form-help">
+                Anotações internas (não aparecem no orçamento)
+              </div>
+            </div>
+
+            <div class="modern-form-field">
+              <label class="modern-form-label">
+                <input
+                  type="checkbox"
+                  id="considerarCondicaoCliente"
+                  style="margin-right: var(--space-2)"
+                />
+                Considerar condição de pagamento do Cliente no orçamento
+              </label>
+            </div>
+          </div>
+
+          <!-- Seção: Anexos -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--gray-500),
+                    var(--gray-600)
+                  );
+                "
+              >
+                📎
+              </div>
+              <h3 class="modern-form-section-title">Anexos do Orçamento</h3>
+            </div>
+
+            <div
+              style="
+                text-align: center;
+                padding: var(--space-8);
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: var(--radius-lg);
+                border: 2px dashed rgba(226, 232, 240, 0.5);
+              "
+            >
+              <p
+                style="
+                  color: var(--text-tertiary);
+                  margin-bottom: var(--space-2);
+                "
+              >
+                Ainda não há arquivos anexados!
+              </p>
+              <p
+                style="
+                  color: var(--text-tertiary);
+                  font-size: var(--font-size-sm);
+                  margin-bottom: var(--space-4);
+                "
+              >
+                Selecione arquivos do seu computador para anexar ao orçamento.
+              </p>
+              <div
+                style="
+                  display: flex;
+                  gap: var(--space-3);
+                  justify-content: center;
+                "
+              >
+                <button
+                  type="button"
+                  id="selecionarArquivos"
+                  class="modern-form-button secondary"
+                >
+                  <i class="ti ti-folder"></i> Selecionar Arquivos
+                </button>
+                <button
+                  type="button"
+                  id="vincularArquivo"
+                  class="modern-form-button secondary"
+                >
+                  <span>🔗</span> Vincular arquivo existente
+                </button>
+              </div>
+            </div>
+            <div id="arquivosAnexados" style="margin-top: var(--space-4)"></div>
+          </div>
+        </div>
+
+        <div class="modern-form-actions">
+          <button
+            type="button"
+            id="orcamentoVisualizar"
+            class="modern-form-button secondary"
+          >
+            <i class="ti ti-eye"></i> Visualizar
+          </button>
+          <button
+            type="button"
+            id="orcamentoSalvarEnviar"
+            class="modern-form-button secondary"
+          >
+            <i class="ti ti-send"></i> Salvar e Enviar
+          </button>
+          <a href="orcamentos.html" class="modern-form-button secondary">
+            <i class="ti ti-arrow-back"></i> Voltar
+          </a>
+          <button
+            type="submit"
+            id="orcamentoSalvar"
+            class="modern-form-button primary"
+          >
+            <i class="ti ti-device-floppy"></i> Salvar Orçamento
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <footer>
+      Garanta que os clientes e produtos estejam cadastrados para criar
+      orçamentos completos.
+    </footer>
+
+    <script src="assets/js/scroll-optimization.js" defer></script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
+  </body>
+</html>

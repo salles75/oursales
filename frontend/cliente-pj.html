@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Cliente Pessoa Jurídica</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/fix-animations.css" />
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
+  </head>
+  <body data-page="cliente-pj">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1>Cliente • Pessoa Jurídica</h1>
+          <p>
+            Cadastre clientes pessoa jurídica com dados completos da empresa,
+            contato e condições comerciais para personalizar o relacionamento
+            comercial.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <form id="clientePJForm" class="modern-form">
+        <input type="hidden" id="pjClienteId" />
+
+        <div class="modern-form-header">
+          <h2 class="modern-form-title" id="pjFormTitle">
+            Informações do Cliente (Pessoa Jurídica)
+          </h2>
+          <p class="modern-form-description">
+            Preencha os dados da empresa e informações de contato.
+          </p>
+        </div>
+
+        <div class="modern-form-actions" style="position: sticky; top: 0; z-index: 5; background: var(--bg); padding-top: var(--space-3);">
+          <a href="clientes.html" class="modern-form-button secondary">
+            <i class="ti ti-arrow-back"></i> Cancelar
+          </a>
+          <button
+            type="submit"
+            id="pjSalvarTop"
+            class="modern-form-button primary"
+          >
+            <i class="ti ti-device-floppy"></i> Salvar Cliente
+          </button>
+        </div>
+
+        <div class="modern-form-content">
+          <!-- Seção: Dados da Empresa -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                <i class="ti ti-building"></i>
+              </div>
+              <h3 class="modern-form-section-title">Dados da Empresa</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pjRazaoSocial" class="modern-form-label required"
+                  >Razão Social</label
+                >
+                <input
+                  type="text"
+                  id="pjRazaoSocial"
+                  class="modern-form-input"
+                  required
+                  placeholder="Nome da empresa conforme registro"
+                />
+                <div class="modern-form-help">
+                  Razão social conforme registro
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjNomeFantasia" class="modern-form-label"
+                  >Nome Fantasia</label
+                >
+                <input
+                  type="text"
+                  id="pjNomeFantasia"
+                  class="modern-form-input"
+                  placeholder="Nome comercial da empresa"
+                />
+                <div class="modern-form-help">Nome fantasia (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjRede" class="modern-form-label">Rede</label>
+                <input
+                  type="text"
+                  id="pjRede"
+                  class="modern-form-input"
+                  placeholder="Nome da rede"
+                />
+                <div class="modern-form-help">Rede da empresa (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjCnpj" class="modern-form-label required"
+                  >CNPJ</label
+                >
+                <input
+                  type="text"
+                  id="pjCnpj"
+                  class="modern-form-input"
+                  required
+                  placeholder="00.000.000/0001-00"
+                />
+                <div class="modern-form-help">CNPJ válido com formatação</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pjInscricaoEstadual" class="modern-form-label"
+                  >Inscrição Estadual</label
+                >
+                <input
+                  type="text"
+                  id="pjInscricaoEstadual"
+                  class="modern-form-input"
+                  placeholder="Digite a IE"
+                />
+                <div class="modern-form-help">
+                  Inscrição estadual (opcional)
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjCodigo" class="modern-form-label">Código</label>
+                <div style="display: flex; gap: var(--space-2)">
+                  <input
+                    type="text"
+                    id="pjCodigo"
+                    class="modern-form-input"
+                    placeholder="Código do cliente"
+                    style="flex: 1"
+                  />
+                  <button
+                    type="button"
+                    id="pjGerarCodigo"
+                    class="modern-form-button secondary"
+                  >
+                    Gerar
+                  </button>
+                </div>
+                <div class="modern-form-help">Código único do cliente</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjMatriz" class="modern-form-label">Matriz</label>
+                <input
+                  type="text"
+                  id="pjMatriz"
+                  class="modern-form-input"
+                  placeholder="Nome da matriz"
+                />
+                <div class="modern-form-help">Matriz da empresa (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjSegmento" class="modern-form-label"
+                  >Segmento</label
+                >
+                <input
+                  type="text"
+                  id="pjSegmento"
+                  class="modern-form-input"
+                  placeholder="Segmento de atuação"
+                />
+                <div class="modern-form-help">
+                  Segmento de atuação (opcional)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Endereço -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                <i class="ti ti-home"></i>
+              </div>
+              <h3 class="modern-form-section-title">Endereço</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pjEndereco" class="modern-form-label"
+                  >Endereço</label
+                >
+                <input
+                  type="text"
+                  id="pjEndereco"
+                  class="modern-form-input"
+                  placeholder="Rua, Avenida, etc."
+                />
+                <div class="modern-form-help">Endereço completo</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjBairro" class="modern-form-label">Bairro</label>
+                <input
+                  type="text"
+                  id="pjBairro"
+                  class="modern-form-input"
+                  placeholder="Nome do bairro"
+                />
+                <div class="modern-form-help">Bairro</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjNumero" class="modern-form-label">Número</label>
+                <input
+                  type="text"
+                  id="pjNumero"
+                  class="modern-form-input"
+                  placeholder="Número"
+                />
+                <div class="modern-form-help">Número do endereço</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjCep" class="modern-form-label">CEP</label>
+                <input
+                  type="text"
+                  id="pjCep"
+                  class="modern-form-input"
+                  placeholder="00000-000"
+                />
+                <div class="modern-form-help">CEP com formatação</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pjCidade" class="modern-form-label">Cidade</label>
+                <input
+                  type="text"
+                  id="pjCidade"
+                  class="modern-form-input"
+                  placeholder="Nome da cidade"
+                />
+                <div class="modern-form-help">Cidade</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjEstado" class="modern-form-label">Estado</label>
+                <select id="pjEstado" class="modern-form-select">
+                  <option value="">Selecione</option>
+                  <option value="AC">Acre</option>
+                  <option value="AL">Alagoas</option>
+                  <option value="AP">Amapá</option>
+                  <option value="AM">Amazonas</option>
+                  <option value="BA">Bahia</option>
+                  <option value="CE">Ceará</option>
+                  <option value="DF">Distrito Federal</option>
+                  <option value="ES">Espírito Santo</option>
+                  <option value="GO">Goiás</option>
+                  <option value="MA">Maranhão</option>
+                  <option value="MT">Mato Grosso</option>
+                  <option value="MS">Mato Grosso do Sul</option>
+                  <option value="MG">Minas Gerais</option>
+                  <option value="PA">Pará</option>
+                  <option value="PB">Paraíba</option>
+                  <option value="PR">Paraná</option>
+                  <option value="PE">Pernambuco</option>
+                  <option value="PI">Piauí</option>
+                  <option value="RJ">Rio de Janeiro</option>
+                  <option value="RN">Rio Grande do Norte</option>
+                  <option value="RS">Rio Grande do Sul</option>
+                  <option value="RO">Rondônia</option>
+                  <option value="RR">Roraima</option>
+                  <option value="SC">Santa Catarina</option>
+                  <option value="SP">São Paulo</option>
+                  <option value="SE">Sergipe</option>
+                  <option value="TO">Tocantins</option>
+                </select>
+                <div class="modern-form-help">Estado</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Comunicação -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--amber-500),
+                    var(--amber-600)
+                  );
+                "
+              >
+                <i class="ti ti-phone"></i>
+              </div>
+              <h3 class="modern-form-section-title">Comunicação</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pjTelefone" class="modern-form-label"
+                  >Telefone</label
+                >
+                <input
+                  type="tel"
+                  id="pjTelefone"
+                  class="modern-form-input"
+                  placeholder="(00) 00000-0000"
+                />
+                <div class="modern-form-help">Telefone principal</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjFax" class="modern-form-label">Fax</label>
+                <input
+                  type="tel"
+                  id="pjFax"
+                  class="modern-form-input"
+                  placeholder="(00) 0000-0000"
+                />
+                <div class="modern-form-help">Fax (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjTelefoneAdicional" class="modern-form-label"
+                  >Telefone Adicional</label
+                >
+                <input
+                  type="tel"
+                  id="pjTelefoneAdicional"
+                  class="modern-form-input"
+                  placeholder="(00) 00000-0000"
+                />
+                <div class="modern-form-help">
+                  Telefone adicional (opcional)
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjWebsite" class="modern-form-label">Website</label>
+                <input
+                  type="url"
+                  id="pjWebsite"
+                  class="modern-form-input"
+                  placeholder="https://www.exemplo.com"
+                />
+                <div class="modern-form-help">Site da empresa (opcional)</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pjEmail" class="modern-form-label">E-mail</label>
+                <input
+                  type="email"
+                  id="pjEmail"
+                  class="modern-form-input"
+                  placeholder="email@exemplo.com"
+                />
+                <div class="modern-form-help">E-mail principal</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjEmailNfe" class="modern-form-label"
+                  >E-mail NFe</label
+                >
+                <input
+                  type="email"
+                  id="pjEmailNfe"
+                  class="modern-form-input"
+                  placeholder="nfe@exemplo.com"
+                />
+                <div class="modern-form-help">
+                  E-mail para recebimento de NFe
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Contatos -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--secondary-500),
+                    var(--secondary-600)
+                  );
+                "
+              >
+                <i class="ti ti-users"></i>
+              </div>
+              <h3 class="modern-form-section-title">Contatos</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Telefone</th>
+                    <th>Aniversário</th>
+                    <th>Cargo</th>
+                    <th>Comprador</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pjContatosTbody">
+                  <tr>
+                    <td colspan="7" class="empty-state">
+                      Nenhum contato adicionado!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pjContatoAdicionar"
+                class="modern-form-button secondary"
+              >
+                <i class="ti ti-plus"></i> Adicionar Contato
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Condições de Pagamento -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--purple-500),
+                    var(--purple-600)
+                  );
+                "
+              >
+                <i class="ti ti-credit-card"></i>
+              </div>
+              <h3 class="modern-form-section-title">Condições de Pagamento</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Descrição</th>
+                    <th>Parcelas</th>
+                    <th>Intervalo (dias)</th>
+                    <th>Desconto/Acréscimo (%)</th>
+                    <th>Pedido Mínimo (R$)</th>
+                    <th>Indústria</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pjPagamentosTbody">
+                  <tr>
+                    <td colspan="7" class="empty-state">
+                      Nenhuma condição de pagamento adicionada!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pjPagamentoAdicionar"
+                class="modern-form-button secondary"
+              >
+                <i class="ti ti-plus"></i> Adicionar Condição
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Vendedores -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--blue-500),
+                    var(--blue-600)
+                  );
+                "
+              >
+                <i class="ti ti-user-check"></i>
+              </div>
+              <h3 class="modern-form-section-title">Vendedores</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Vendedor</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pjVendedoresTbody">
+                  <tr>
+                    <td colspan="2" class="empty-state">
+                      Nenhum vendedor adicionado!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pjVendedorAdicionar"
+                class="modern-form-button secondary"
+              >
+                <i class="ti ti-plus"></i> Adicionar Vendedor
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Indústrias -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--orange-500),
+                    var(--orange-600)
+                  );
+                "
+              >
+                <i class="ti ti-building-factory"></i>
+              </div>
+              <h3 class="modern-form-section-title">Indústrias</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Indústria</th>
+                    <th>Desconto (%)</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pjIndustriasTbody">
+                  <tr>
+                    <td colspan="3" class="empty-state">
+                      Nenhuma indústria adicionada!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pjIndustriaAdicionar"
+                class="modern-form-button secondary"
+              >
+                <i class="ti ti-plus"></i> Adicionar Indústria
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Transportadoras -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--teal-500),
+                    var(--teal-600)
+                  );
+                "
+              >
+                <i class="ti ti-truck"></i>
+              </div>
+              <h3 class="modern-form-section-title">Transportadoras</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Transportadora</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pjTransportadorasTbody">
+                  <tr>
+                    <td colspan="2" class="empty-state">
+                      Nenhuma transportadora adicionada!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="pjTransportadoraAdicionar"
+                class="modern-form-button secondary"
+              >
+                <i class="ti ti-plus"></i> Adicionar Transportadora
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Status e Observações -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--gray-500),
+                    var(--gray-600)
+                  );
+                "
+              >
+                <i class="ti ti-file-text"></i>
+              </div>
+              <h3 class="modern-form-section-title">Status e Observações</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="pjStatus" class="modern-form-label">Status</label>
+                <select id="pjStatus" class="modern-form-select">
+                  <option value="Ativo">Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                  <option value="Bloqueado">Bloqueado</option>
+                </select>
+                <div class="modern-form-help">Status do cliente</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjDataAbertura" class="modern-form-label"
+                  >Data de Abertura</label
+                >
+                <input
+                  type="date"
+                  id="pjDataAbertura"
+                  class="modern-form-input"
+                />
+                <div class="modern-form-help">Data de abertura da empresa</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="pjRegiao" class="modern-form-label">Região</label>
+                <input
+                  type="text"
+                  id="pjRegiao"
+                  class="modern-form-input"
+                  placeholder="Região do cliente"
+                />
+                <div class="modern-form-help">Região geográfica</div>
+              </div>
+            </div>
+            <div class="modern-form-field">
+              <label for="pjObservacoes" class="modern-form-label"
+                >Observações</label
+              >
+              <textarea
+                id="pjObservacoes"
+                class="modern-form-textarea"
+                rows="4"
+                placeholder="Observações gerais sobre o cliente..."
+              ></textarea>
+              <div class="modern-form-help">
+                Observações importantes sobre o cliente
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modern-form-actions">
+          <a href="clientes.html" class="modern-form-button secondary">
+            <i class="ti ti-arrow-back"></i> Cancelar
+          </a>
+          <button
+            type="submit"
+            id="pjSalvar"
+            class="modern-form-button primary"
+          >
+            <i class="ti ti-device-floppy"></i> Salvar Cliente
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <footer>
+      Cadastre clientes pessoa jurídica com informações completas para melhor
+      atendimento e relacionamento comercial.
+    </footer>
+
+    <script src="assets/js/input-masks.js"></script>
+    <script src="assets/js/scroll-optimization.js" defer></script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
+  </body>
+</html>

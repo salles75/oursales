@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Dados Cadastrais</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/fix-animations.css" />
+    <!-- Defer non-critical CSS -->
+    <!-- Tabler Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
+      data-defer
+    />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
+    <style>
+      /* Aumentar largura máxima do formulário */
+      .modern-form {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .modern-form-content {
+        padding: var(--space-4) var(--space-6);
+      }
+
+      /* Reduzir espaçamento entre seções */
+      .modern-form-section {
+        margin-bottom: var(--space-4);
+        padding: var(--space-4);
+      }
+
+      .modern-form-section-header {
+        margin-bottom: var(--space-3);
+        padding-bottom: var(--space-2);
+      }
+
+      /* Grid mais compacto - 3 colunas */
+      .modern-form-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-3) var(--space-4);
+      }
+
+      /* Reduzir espaçamento entre campos */
+      .modern-form-field {
+        margin-bottom: var(--space-2);
+      }
+
+      /* Reduzir padding do header */
+      .modern-form-header {
+        padding: var(--space-4) var(--space-6) var(--space-3);
+      }
+
+      /* Ajustar labels */
+      .modern-form-label {
+        margin-bottom: var(--space-1);
+        font-size: var(--text-sm);
+      }
+
+      /* Help text mais compacto */
+      .modern-form-help {
+        margin-top: var(--space-1);
+        font-size: var(--text-xs);
+      }
+
+      /* Campos que devem ocupar largura completa */
+      .modern-form-field[style*="grid-column: 1 / -1"] {
+        grid-column: 1 / -1;
+      }
+
+      /* Responsividade */
+      @media (max-width: 1200px) {
+        .modern-form-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .modern-form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .modern-form-content {
+          padding: var(--space-3) var(--space-4);
+        }
+      }
+    </style>
+  </head>
+  <body data-page="dados-cadastrais">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1><i class="ti ti-file-text"></i> Dados Cadastrais</h1>
+          <p>Gerencie os dados cadastrais da empresa.</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <a
+            href="configuracoes.html"
+            class="modern-form-button secondary"
+            style="text-decoration: none"
+          >
+            ← Voltar
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes"
+          ><i class="ti ti-settings"></i> Mais</a
+        >
+      </div>
+    </nav>
+
+    <main>
+      <form id="formDadosCadastrais" class="modern-form">
+        <div class="modern-form-header">
+          <h2 class="modern-form-title">Meus Dados</h2>
+          <p class="modern-form-description">
+            Atualize as informações cadastrais da empresa e configure seu
+            subdomínio personalizado.
+          </p>
+        </div>
+
+        <div class="modern-form-content">
+          <!-- Seção: Informações Principais -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                <i class="ti ti-building"></i>
+              </div>
+              <h3 class="modern-form-section-title">Informações Principais</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="subdominio" class="modern-form-label">
+                  Seu Site no OurSales
+                </label>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: var(--space-2);
+                  "
+                >
+                  <input
+                    type="text"
+                    id="subdominio"
+                    name="subdominio"
+                    class="modern-form-input"
+                    placeholder="seu-subdominio"
+                    pattern="[a-z0-9-]+"
+                    style="flex: 1"
+                  />
+                  <span
+                    style="
+                      color: var(--gray-600);
+                      font-weight: 500;
+                      font-size: var(--text-sm);
+                    "
+                    >.oursales.com</span
+                  >
+                </div>
+                <div class="modern-form-help">
+                  Escolha um subdomínio personalizado. Será verificado se está
+                  disponível.
+                </div>
+                <div
+                  id="subdominioStatus"
+                  style="margin-top: var(--space-1); font-size: var(--text-xs)"
+                ></div>
+              </div>
+
+              <div class="modern-form-field">
+                <label for="nomeFantasia" class="modern-form-label required">
+                  Nome Fantasia
+                </label>
+                <input
+                  type="text"
+                  id="nomeFantasia"
+                  name="nomeFantasia"
+                  class="modern-form-input"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="razaoSocial" class="modern-form-label required">
+                  Razão Social
+                </label>
+                <input
+                  type="text"
+                  id="razaoSocial"
+                  name="razaoSocial"
+                  class="modern-form-input"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="cnpj" class="modern-form-label required">
+                  CNPJ
+                </label>
+                <input
+                  type="text"
+                  id="cnpj"
+                  name="cnpj"
+                  class="modern-form-input"
+                  placeholder="00.000.000/0000-00"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="inscricaoEstadual" class="modern-form-label">
+                  Inscrição Estadual
+                </label>
+                <input
+                  type="text"
+                  id="inscricaoEstadual"
+                  name="inscricaoEstadual"
+                  class="modern-form-input"
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="inscricaoMunicipal" class="modern-form-label">
+                  Inscrição Municipal
+                </label>
+                <input
+                  type="text"
+                  id="inscricaoMunicipal"
+                  name="inscricaoMunicipal"
+                  class="modern-form-input"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Endereço -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                <i class="ti ti-map-pin"></i>
+              </div>
+              <h3 class="modern-form-section-title">Endereço</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field" style="grid-column: 1 / -1">
+                <label for="endereco" class="modern-form-label required">
+                  Endereço
+                </label>
+                <input
+                  type="text"
+                  id="endereco"
+                  name="endereco"
+                  class="modern-form-input"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="numero" class="modern-form-label required">
+                  Número
+                </label>
+                <input
+                  type="text"
+                  id="numero"
+                  name="numero"
+                  class="modern-form-input"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="bairro" class="modern-form-label required">
+                  Bairro
+                </label>
+                <input
+                  type="text"
+                  id="bairro"
+                  name="bairro"
+                  class="modern-form-input"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="cep" class="modern-form-label required">
+                  CEP
+                </label>
+                <input
+                  type="text"
+                  id="cep"
+                  name="cep"
+                  class="modern-form-input"
+                  placeholder="00000-000"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="cidade" class="modern-form-label required">
+                  Cidade
+                </label>
+                <input
+                  type="text"
+                  id="cidade"
+                  name="cidade"
+                  class="modern-form-input"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="estado" class="modern-form-label required">
+                  Estado
+                </label>
+                <select
+                  id="estado"
+                  name="estado"
+                  class="modern-form-select"
+                  required
+                >
+                  <option value="">Selecione</option>
+                  <option value="AC">AC - Acre</option>
+                  <option value="AL">AL - Alagoas</option>
+                  <option value="AP">AP - Amapá</option>
+                  <option value="AM">AM - Amazonas</option>
+                  <option value="BA">BA - Bahia</option>
+                  <option value="CE">CE - Ceará</option>
+                  <option value="DF">DF - Distrito Federal</option>
+                  <option value="ES">ES - Espírito Santo</option>
+                  <option value="GO">GO - Goiás</option>
+                  <option value="MA">MA - Maranhão</option>
+                  <option value="MT">MT - Mato Grosso</option>
+                  <option value="MS">MS - Mato Grosso do Sul</option>
+                  <option value="MG">MG - Minas Gerais</option>
+                  <option value="PA">PA - Pará</option>
+                  <option value="PB">PB - Paraíba</option>
+                  <option value="PR">PR - Paraná</option>
+                  <option value="PE">PE - Pernambuco</option>
+                  <option value="PI">PI - Piauí</option>
+                  <option value="RJ">RJ - Rio de Janeiro</option>
+                  <option value="RN">RN - Rio Grande do Norte</option>
+                  <option value="RS">RS - Rio Grande do Sul</option>
+                  <option value="RO">RO - Rondônia</option>
+                  <option value="RR">RR - Roraima</option>
+                  <option value="SC">SC - Santa Catarina</option>
+                  <option value="SP">SP - São Paulo</option>
+                  <option value="SE">SE - Sergipe</option>
+                  <option value="TO">TO - Tocantins</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Outras Informações -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--secondary-500),
+                    var(--secondary-600)
+                  );
+                "
+              >
+                📧
+              </div>
+              <h3 class="modern-form-section-title">Outras Informações</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field" style="grid-column: 1 / -1">
+                <label for="emailCobranca" class="modern-form-label required">
+                  E-mail para Cobrança e Notificações
+                  <span
+                    style="
+                      color: var(--gray-400);
+                      cursor: help;
+                      margin-left: var(--space-1);
+                    "
+                    title="E-mail utilizado para envio de notificações e cobranças"
+                    ><i class="ti ti-info-circle"></i
+                  ></span>
+                </label>
+                <input
+                  type="email"
+                  id="emailCobranca"
+                  name="emailCobranca"
+                  class="modern-form-input"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="website" class="modern-form-label"> Website </label>
+                <input
+                  type="url"
+                  id="website"
+                  name="website"
+                  class="modern-form-input"
+                  placeholder="https://www.exemplo.com.br"
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="telefone" class="modern-form-label required">
+                  Telefone
+                </label>
+                <input
+                  type="tel"
+                  id="telefone"
+                  name="telefone"
+                  class="modern-form-input"
+                  placeholder="(00) 0000-0000"
+                  required
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="fax" class="modern-form-label"> FAX </label>
+                <input
+                  type="tel"
+                  id="fax"
+                  name="fax"
+                  class="modern-form-input"
+                  placeholder="(00) 0000-0000"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="modern-form-actions">
+          <a
+            href="configuracoes.html"
+            class="modern-form-button secondary"
+            style="text-decoration: none"
+          >
+            <i class="ti ti-arrow-back"></i> Cancelar
+          </a>
+          <button type="submit" class="modern-form-button primary">
+            <i class="ti ti-device-floppy"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <script src="assets/js/api.js"></script>
+    <script>
+      // Função para inicializar dados cadastrais
+      function initDadosCadastrais() {
+        const form = document.getElementById("formDadosCadastrais");
+        const subdominioInput = document.getElementById("subdominio");
+        const subdominioStatus = document.getElementById("subdominioStatus");
+        const cnpjInput = document.getElementById("cnpj");
+        const cepInput = document.getElementById("cep");
+        const telefoneInput = document.getElementById("telefone");
+        const faxInput = document.getElementById("fax");
+
+        if (!form) {
+          return;
+        }
+
+        // Máscaras de input
+        if (cnpjInput) {
+          cnpjInput.addEventListener("input", function (e) {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length <= 14) {
+              value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+              value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+              value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+              value = value.replace(/(\d{4})(\d)/, "$1-$2");
+              e.target.value = value;
+            }
+          });
+        }
+
+        if (cepInput) {
+          cepInput.addEventListener("input", function (e) {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length <= 8) {
+              value = value.replace(/^(\d{5})(\d)/, "$1-$2");
+              e.target.value = value;
+            }
+          });
+        }
+
+        if (telefoneInput) {
+          telefoneInput.addEventListener("input", function (e) {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length <= 11) {
+              if (value.length <= 10) {
+                value = value.replace(/^(\d{2})(\d)/, "($1) $2");
+                value = value.replace(/(\d{4})(\d)/, "$1-$2");
+              } else {
+                value = value.replace(/^(\d{2})(\d)/, "($1) $2");
+                value = value.replace(/(\d{5})(\d)/, "$1-$2");
+              }
+              e.target.value = value;
+            }
+          });
+        }
+
+        if (faxInput) {
+          faxInput.addEventListener("input", function (e) {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length <= 11) {
+              if (value.length <= 10) {
+                value = value.replace(/^(\d{2})(\d)/, "($1) $2");
+                value = value.replace(/(\d{4})(\d)/, "$1-$2");
+              } else {
+                value = value.replace(/^(\d{2})(\d)/, "($1) $2");
+                value = value.replace(/(\d{5})(\d)/, "$1-$2");
+              }
+              e.target.value = value;
+            }
+          });
+        }
+
+        // Validação de subdomínio
+        let subdominioTimeout;
+        if (subdominioInput && subdominioStatus) {
+          subdominioInput.addEventListener("input", function (e) {
+            const subdominio = e.target.value.trim().toLowerCase();
+
+            // Limpar timeout anterior
+            clearTimeout(subdominioTimeout);
+
+            // Validar formato
+            if (subdominio && !/^[a-z0-9-]+$/.test(subdominio)) {
+              subdominioStatus.innerHTML =
+                '<span style="color: #ef4444;"><i class="ti ti-alert-triangle"></i> Apenas letras minúsculas, números e hífens são permitidos</span>';
+              return;
+            }
+
+            if (subdominio.length < 3) {
+              subdominioStatus.innerHTML =
+                '<span style="color: #f59e0b;"><i class="ti ti-hourglass"></i> Mínimo de 3 caracteres</span>';
+              return;
+            }
+
+            // Verificar disponibilidade após 500ms sem digitação
+            subdominioTimeout = setTimeout(async () => {
+              subdominioStatus.innerHTML =
+                '<span style="color: var(--gray-600);"><i class="ti ti-hourglass"></i> Verificando disponibilidade...</span>';
+
+              try {
+                const API = window.oursalesAPI;
+                if (API) {
+                  const result = await API.verificarSubdominio(subdominio);
+                  if (result.disponivel) {
+                    subdominioStatus.innerHTML =
+                      '<span style="color: #10b981;"><i class="ti ti-check"></i> Subdomínio disponível</span>';
+                  } else {
+                    subdominioStatus.innerHTML =
+                      '<span style="color: #ef4444;"><i class="ti ti-x"></i> Este subdomínio já está em uso</span>';
+                  }
+                } else {
+                  // Modo local - verificar no localStorage
+                  const data = localStorage.getItem("oursales:data");
+                  if (data) {
+                    const parsed = JSON.parse(data);
+                    const subdominiosUsados = parsed.subdominiosUsados || [];
+                    if (subdominiosUsados.includes(subdominio)) {
+                      subdominioStatus.innerHTML =
+                        '<span style="color: #ef4444;"><i class="ti ti-x"></i> Este subdomínio já está em uso</span>';
+                    } else {
+                      subdominioStatus.innerHTML =
+                        '<span style="color: #10b981;"><i class="ti ti-check"></i> Subdomínio disponível</span>';
+                    }
+                  } else {
+                    subdominioStatus.innerHTML =
+                      '<span style="color: #10b981;"><i class="ti ti-check"></i> Subdomínio disponível</span>';
+                  }
+                }
+              } catch (error) {
+                console.error("Erro ao verificar subdomínio:", error);
+                subdominioStatus.innerHTML =
+                  '<span style="color: #f59e0b;"><i class="ti ti-alert-triangle"></i> Erro ao verificar disponibilidade</span>';
+              }
+            }, 500);
+          });
+        }
+
+        // Carregar dados existentes
+        async function carregarDados() {
+          try {
+            const API = window.oursalesAPI;
+            if (API) {
+              const dados = await API.getDadosCadastrais();
+              if (dados) {
+                preencherFormulario(dados);
+              }
+            } else {
+              // Modo local
+              const data = localStorage.getItem("oursales:data");
+              if (data) {
+                const parsed = JSON.parse(data);
+                if (parsed.dadosCadastrais) {
+                  preencherFormulario(parsed.dadosCadastrais);
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+            // Fallback para localStorage
+            const data = localStorage.getItem("oursales:data");
+            if (data) {
+              const parsed = JSON.parse(data);
+              if (parsed.dadosCadastrais) {
+                preencherFormulario(parsed.dadosCadastrais);
+              }
+            }
+          }
+        }
+
+        // Preencher formulário
+        function preencherFormulario(dados) {
+          if (dados.subdominio && subdominioInput) {
+            subdominioInput.value = dados.subdominio;
+          }
+          if (dados.nomeFantasia) {
+            document.getElementById("nomeFantasia").value = dados.nomeFantasia;
+          }
+          if (dados.razaoSocial) {
+            document.getElementById("razaoSocial").value = dados.razaoSocial;
+          }
+          if (dados.cnpj) {
+            cnpjInput.value = dados.cnpj;
+          }
+          if (dados.inscricaoEstadual) {
+            document.getElementById("inscricaoEstadual").value =
+              dados.inscricaoEstadual;
+          }
+          if (dados.inscricaoMunicipal) {
+            document.getElementById("inscricaoMunicipal").value =
+              dados.inscricaoMunicipal;
+          }
+          if (dados.endereco) {
+            document.getElementById("endereco").value = dados.endereco;
+          }
+          if (dados.numero) {
+            document.getElementById("numero").value = dados.numero;
+          }
+          if (dados.bairro) {
+            document.getElementById("bairro").value = dados.bairro;
+          }
+          if (dados.cep) {
+            cepInput.value = dados.cep;
+          }
+          if (dados.cidade) {
+            document.getElementById("cidade").value = dados.cidade;
+          }
+          if (dados.estado) {
+            document.getElementById("estado").value = dados.estado;
+          }
+          if (dados.emailCobranca) {
+            document.getElementById("emailCobranca").value =
+              dados.emailCobranca;
+          }
+          if (dados.website) {
+            document.getElementById("website").value = dados.website;
+          }
+          if (dados.telefone) {
+            telefoneInput.value = dados.telefone;
+          }
+          if (dados.fax) {
+            faxInput.value = dados.fax;
+          }
+        }
+
+        // Submissão do formulário
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const formData = {
+            subdominio: subdominioInput?.value.trim().toLowerCase() || "",
+            nomeFantasia: document.getElementById("nomeFantasia").value.trim(),
+            razaoSocial: document.getElementById("razaoSocial").value.trim(),
+            cnpj: cnpjInput.value.replace(/\D/g, ""),
+            inscricaoEstadual: document
+              .getElementById("inscricaoEstadual")
+              .value.trim(),
+            inscricaoMunicipal: document
+              .getElementById("inscricaoMunicipal")
+              .value.trim(),
+            endereco: document.getElementById("endereco").value.trim(),
+            numero: document.getElementById("numero").value.trim(),
+            bairro: document.getElementById("bairro").value.trim(),
+            cep: cepInput.value.replace(/\D/g, ""),
+            cidade: document.getElementById("cidade").value.trim(),
+            estado: document.getElementById("estado").value,
+            emailCobranca: document
+              .getElementById("emailCobranca")
+              .value.trim(),
+            website: document.getElementById("website").value.trim(),
+            telefone: telefoneInput.value.replace(/\D/g, ""),
+            fax: faxInput.value.replace(/\D/g, ""),
+          };
+
+          try {
+            const API = window.oursalesAPI;
+            if (API) {
+              await API.saveDadosCadastrais(formData);
+              alert("Dados cadastrais salvos com sucesso!");
+              window.location.href = "configuracoes.html";
+            } else {
+              // Salvar localmente
+              const storage = {
+                load: () => {
+                  const data = localStorage.getItem("oursales:data");
+                  return data ? JSON.parse(data) : {};
+                },
+                save: (data) => {
+                  localStorage.setItem("oursales:data", JSON.stringify(data));
+                },
+              };
+
+              const data = storage.load();
+              data.dadosCadastrais = {
+                ...formData,
+                atualizadoEm: new Date().toISOString(),
+              };
+
+              // Atualizar lista de subdomínios usados
+              if (!data.subdominiosUsados) {
+                data.subdominiosUsados = [];
+              }
+              if (
+                formData.subdominio &&
+                !data.subdominiosUsados.includes(formData.subdominio)
+              ) {
+                data.subdominiosUsados.push(formData.subdominio);
+              }
+
+              storage.save(data);
+              alert("Dados cadastrais salvos com sucesso!");
+              window.location.href = "configuracoes.html";
+            }
+          } catch (error) {
+            console.error("Erro ao salvar dados:", error);
+            alert(
+              `Erro ao salvar dados: ${error.message || "Erro desconhecido"}`
+            );
+          }
+        });
+
+        // Carregar dados ao inicializar
+        carregarDados();
+      }
+
+      // Inicializar quando a página carregar
+      document.addEventListener("DOMContentLoaded", () => {
+        initDadosCadastrais();
+      });
+    </script>
+  </body>
+</html>

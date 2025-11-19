@@ -1,0 +1,56 @@
+/* === CORREÇÃO ULTRA AGRESSIVA DE ANIMAÇÕES === */
+/* Este arquivo remove TODAS as animações que causam problemas de carregamento */
+
+/* Desabilitar TODAS as animações e transições */
+*,
+*::before,
+*::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  animation-fill-mode: none !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+  animation-name: none !important;
+  transition-property: none !important;
+}
+
+/* Garantir que elementos apareçam imediatamente */
+body,
+main,
+section,
+article,
+header,
+nav,
+footer,
+.card,
+.list-item,
+.table-row,
+.modal-overlay,
+.modal-content {
+  opacity: 1 !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Garantir que scroll seja instantâneo */
+html {
+  scroll-behavior: auto !important;
+}
+
+/* Desabilitar animações específicas do sistema */
+@keyframes fadeIn {
+  from { opacity: 1 !important; }
+  to { opacity: 1 !important; }
+}
+
+@keyframes slideUp {
+  from { opacity: 1 !important; transform: none !important; }
+  to { opacity: 1 !important; transform: none !important; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1 !important; }
+  50% { opacity: 1 !important; }
+}

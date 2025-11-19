@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Importador Produtos</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <style>
+      .import-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .import-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .import-header h1 {
+        margin: 0;
+        color: #2c3e50;
+      }
+
+      .verify-imports-btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+
+      .verify-imports-btn:hover {
+        background: #2980b9;
+      }
+
+      .import-steps {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .step-card {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e1e8ed;
+      }
+
+      .step-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .step-number {
+        background: #3498db;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+
+      .step-description {
+        color: #7f8c8d;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+      }
+
+      .download-template-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        transition: background-color 0.2s;
+      }
+
+      .download-template-btn:hover {
+        background: #229954;
+      }
+
+      .download-options {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .download-options .download-template-btn {
+        flex: 1;
+        margin-bottom: 0;
+      }
+
+      .fields-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+      }
+
+      .fields-table th,
+      .fields-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e1e8ed;
+      }
+
+      .fields-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      .fields-table td {
+        color: #5a6c7d;
+      }
+
+      .field-checkbox {
+        margin-right: 0.5rem;
+      }
+
+      .field-checkbox:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      .field-name {
+        font-weight: 500;
+        color: #2c3e50;
+      }
+
+      .field-observation {
+        font-size: 0.875rem;
+        color: #7f8c8d;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-group select,
+      .form-group input[type="file"] {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        background: white;
+      }
+
+      .form-group select:focus,
+      .form-group input[type="file"]:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+
+      .file-input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .file-input {
+        flex: 1;
+      }
+
+      .browse-btn {
+        background: #95a5a6;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+
+      .browse-btn:hover {
+        background: #7f8c8d;
+      }
+
+      .import-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s;
+      }
+
+      .import-btn:hover {
+        background: #229954;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #3498db;
+        text-decoration: none;
+        margin-bottom: 2rem;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .back-link:hover {
+        color: #2980b9;
+      }
+
+      @media (max-width: 768px) {
+        .import-steps {
+          grid-template-columns: 1fr;
+        }
+
+        .import-container {
+          padding: 1rem;
+        }
+
+        .file-input-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .download-options {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body data-page="importar-produtos">
+    <div class="import-container">
+      <a href="produtos.html" class="back-link"> ← Voltar para Produtos </a>
+
+      <div class="import-header">
+        <h1>Importador Produtos</h1>
+        <button
+          type="button"
+          class="verify-imports-btn"
+          id="verificarImportacoes"
+        >
+          Verificar Importações
+        </button>
+      </div>
+
+      <div class="import-steps">
+        <!-- 1º Passo -->
+        <div class="step-card">
+          <h2 class="step-title">
+            <span class="step-number">1</span>
+            Primeiro Passo - Prepare sua planilha Excel
+          </h2>
+          <p class="step-description">
+            O sistema permite escolher quais informações deseja incluir na importação.
+            Selecione apenas os campos que você precisa:
+          </p>
+
+          <div class="download-options">
+            <button
+              type="button"
+              class="download-template-btn"
+              id="downloadTemplateExcel"
+            >
+              <i class="ti ti-download"></i> Download do meu modelo de planilha
+            </button>
+          </div>
+
+          <div class="fields-table-wrapper">
+            <table class="fields-table">
+            <thead>
+              <tr>
+                <th>Coluna no Excel</th>
+                <th>Observação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" id="checkboxCodigo" checked disabled />
+                    <span class="field-name">Código</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Campo obrigatório. Aceita letras, números e caracteres especiais
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">Nome do produto</span>
+                  </label>
+                </td>
+                <td class="field-observation">Necessário ao cadastrar novos itens no sistema.</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Preço</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Caso não seja informado, o valor padrão será R$ 0,00
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Unidade</span>
+                  </label>
+                </td>
+                <td class="field-observation">Exemplos: UN, UNID, PCT, CX, FARDO, KG, L</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Embalagem</span>
+                  </label>
+                </td>
+                <td class="field-observation">Tipo de embalagem utilizada para o item</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">Fator de Embalagem</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Multiplicador usado para converter preço da embalagem em preço unitário
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">Data de Lançamento</span>
+                  </label>
+                </td>
+                <td class="field-observation">Data em que o item foi disponibilizado no mercado</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">IPI</span>
+                  </label>
+                </td>
+                <td class="field-observation">Valor padrão será 0% caso não seja informado</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">ICMS %</span>
+                  </label>
+                </td>
+                <td class="field-observation">Percentual de ICMS aplicado ao produto</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">CEST</span>
+                  </label>
+                </td>
+                <td class="field-observation">Código CEST para classificação fiscal</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">CFOP</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Código CFOP padrão utilizado na emissão de notas fiscais
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Observações</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Notas e informações complementares sobre o item
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" checked />
+                    <span class="field-name">Comissão por produto</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Utilize apenas se a comissão for calculada por produto. Ignore se for por pedido
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">Código de barras</span>
+                  </label>
+                </td>
+                <td class="field-observation">Código de barras padrão GTIN/EAN</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" class="field-checkbox" />
+                    <span class="field-name">ST-UF</span>
+                  </label>
+                </td>
+                <td class="field-observation">
+                  Substituição Tributária por estado. Informe no formato ST-XX onde XX é a sigla do estado. Exemplos: ST-RJ, ST-SP, ST-MG
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+
+          <div class="download-options">
+            <button
+              type="button"
+              class="download-template-btn"
+              id="downloadTemplateExcelBottom"
+            >
+              <i class="ti ti-download"></i> Download do meu modelo de planilha
+            </button>
+          </div>
+        </div>
+
+        <!-- 2º Passo -->
+        <div class="step-card">
+          <h2 class="step-title">
+            <span class="step-number">2</span>
+            Segundo Passo - Faça o upload do arquivo
+          </h2>
+          <p class="step-description">
+            Após preencher a planilha conforme o modelo, selecione o arquivo e envie para importar os dados:
+          </p>
+
+          <form id="importForm">
+            <div class="form-group">
+              <label for="industriaSelect"
+                >Selecione a Indústria ou Fornecedor:</label
+              >
+              <select id="industriaSelect" required>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="tabelaPrecoSelect"
+                >Selecione a Tabela de Preços:</label
+              >
+              <select id="tabelaPrecoSelect" required disabled>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="arquivoInput"
+                >Selecione o arquivo Excel com os produtos:</label
+              >
+              <div class="file-input-container">
+                <input
+                  type="file"
+                  id="arquivoInput"
+                  class="file-input"
+                  accept=".xlsx,.xls"
+                  required
+                />
+                <button
+                  type="button"
+                  class="browse-btn"
+                  onclick="document.getElementById('arquivoInput').click()"
+                >
+                  <i class="ti ti-folder"></i> Selecionar Arquivo
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="import-btn">
+              <i class="ti ti-upload"></i> Importar Produtos
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- SheetJS para gerar arquivos Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script>
+      // Aguardar carregamento completo da API
+      if (typeof window.oursalesAPI === 'undefined') {
+        console.warn('Aguardando carregamento da API...');
+      }
+    </script>
+    <script>
+      // Script específico para a página de importação
+      document.addEventListener("DOMContentLoaded", function () {
+        // Verificar se a API está disponível
+        if (!window.oursalesAPI) {
+          console.error("API não carregada. Recarregue a página.");
+          alert("Erro ao carregar o sistema. Por favor, recarregue a página.");
+          return;
+        }
+        const industriaSelect = document.getElementById("industriaSelect");
+        const tabelaPrecoSelect = document.getElementById("tabelaPrecoSelect");
+        const arquivoInput = document.getElementById("arquivoInput");
+        const importForm = document.getElementById("importForm");
+        const downloadTemplateExcelBtn = document.getElementById(
+          "downloadTemplateExcel"
+        );
+        const downloadTemplateExcelBottomBtn = document.getElementById(
+          "downloadTemplateExcelBottom"
+        );
+        const verificarImportacoesBtn = document.getElementById(
+          "verificarImportacoes"
+        );
+
+        // Carregar indústrias
+        async function carregarIndustrias() {
+          try {
+            const response = await window.oursalesAPI.getIndustrias();
+            const industrias = response.data || response || [];
+
+            industriaSelect.innerHTML = '<option value="">Selecione...</option>';
+
+            if (industrias.length === 0) {
+              const option = document.createElement("option");
+              option.value = "";
+              option.textContent = "Nenhuma indústria cadastrada";
+              option.disabled = true;
+              industriaSelect.appendChild(option);
+              return;
+            }
+
+            industrias.forEach((industria) => {
+              const option = document.createElement("option");
+              option.value = industria.id;
+              option.textContent =
+                industria.nomeFantasia || industria.nome || industria.razaoSocial;
+              industriaSelect.appendChild(option);
+            });
+          } catch (error) {
+            console.error("Erro ao carregar indústrias:", error);
+            industriaSelect.innerHTML = '<option value="">Erro ao carregar indústrias</option>';
+          }
+        }
+
+        // Carregar tabelas de preços quando indústria for selecionada
+        industriaSelect.addEventListener("change", async function () {
+          const industriaId = this.value;
+          tabelaPrecoSelect.innerHTML =
+            '<option value="">Selecione...</option>';
+
+          if (industriaId) {
+            tabelaPrecoSelect.disabled = false;
+
+            try {
+              // Carregar tabelas de preços da indústria
+              const response = await window.oursalesAPI.getTabelasPrecos(industriaId);
+              const tabelas = response.data || response || [];
+
+              if (tabelas.length === 0) {
+                const option = document.createElement("option");
+                option.value = "";
+                option.textContent = "Nenhuma tabela cadastrada";
+                option.disabled = true;
+                tabelaPrecoSelect.appendChild(option);
+              } else {
+                tabelas.forEach((tabela) => {
+                  const option = document.createElement("option");
+                  option.value = tabela.id;
+                  option.textContent = tabela.nome;
+                  tabelaPrecoSelect.appendChild(option);
+                });
+              }
+            } catch (error) {
+              console.error("Erro ao carregar tabelas de preços:", error);
+              const option = document.createElement("option");
+              option.value = "";
+              option.textContent = "Erro ao carregar tabelas";
+              option.disabled = true;
+              tabelaPrecoSelect.appendChild(option);
+            }
+          } else {
+            tabelaPrecoSelect.disabled = true;
+          }
+        });
+
+        // Mapeamento de campos (nome do campo -> [header Excel, checkbox ID, valor exemplo])
+        const camposMap = {
+          codigo: {
+            header: "Código",
+            checkboxId: "checkboxCodigo",
+            exemplo: "PROD001",
+            obrigatorio: true,
+          },
+          nome: {
+            header: "Nome do produto",
+            checkboxId: null, // Será encontrado pelo texto
+            exemplo: "Produto Exemplo 1",
+            obrigatorio: false,
+          },
+          preco: {
+            header: "Preço",
+            checkboxId: null,
+            exemplo: "25.50",
+            obrigatorio: false,
+          },
+          unidade: {
+            header: "Unidade",
+            checkboxId: null,
+            exemplo: "UNID",
+            obrigatorio: false,
+          },
+          embalagem: {
+            header: "Embalagem",
+            checkboxId: null,
+            exemplo: "Caixa",
+            obrigatorio: false,
+          },
+          fatorEmbalagem: {
+            header: "Fator de Embalagem",
+            checkboxId: null,
+            exemplo: "12",
+            obrigatorio: false,
+          },
+          dataLancamento: {
+            header: "Data de Lançamento",
+            checkboxId: null,
+            exemplo: "2024-01-15",
+            obrigatorio: false,
+          },
+          ipi: {
+            header: "IPI",
+            checkboxId: null,
+            exemplo: "5",
+            obrigatorio: false,
+          },
+          icms: {
+            header: "ICMS %",
+            checkboxId: null,
+            exemplo: "18",
+            obrigatorio: false,
+          },
+          cest: {
+            header: "CEST",
+            checkboxId: null,
+            exemplo: "1234567",
+            obrigatorio: false,
+          },
+          cfop: {
+            header: "CFOP",
+            checkboxId: null,
+            exemplo: "5102",
+            obrigatorio: false,
+          },
+          observacoes: {
+            header: "Observações",
+            checkboxId: null,
+            exemplo: "Produto de exemplo",
+            obrigatorio: false,
+          },
+          comissaoProduto: {
+            header: "Comissão por produto",
+            checkboxId: null,
+            exemplo: "5",
+            obrigatorio: false,
+          },
+          codigoBarras: {
+            header: "Código de barras",
+            checkboxId: null,
+            exemplo: "1234567890123",
+            obrigatorio: false,
+          },
+          stUf: {
+            header: "ST-UF",
+            checkboxId: null,
+            exemplo: "ST-BA",
+            obrigatorio: false,
+          },
+        };
+
+        // Função para obter campos selecionados
+        function obterCamposSelecionados() {
+          const camposSelecionados = [];
+          const checkboxes = document.querySelectorAll(
+            ".fields-table .field-checkbox"
+          );
+          const fieldNames = document.querySelectorAll(
+            ".fields-table .field-name"
+          );
+
+          checkboxes.forEach((checkbox, index) => {
+            if (checkbox.checked && !checkbox.disabled) {
+              const fieldName = fieldNames[index]?.textContent.trim();
+              if (fieldName) {
+                // Encontrar o campo no mapa
+                const campoKey = Object.keys(camposMap).find(
+                  (key) => camposMap[key].header === fieldName
+                );
+                if (campoKey) {
+                  camposSelecionados.push(campoKey);
+                }
+              }
+            }
+          });
+
+          // Código sempre deve estar incluído (obrigatório)
+          if (!camposSelecionados.includes("codigo")) {
+            camposSelecionados.unshift("codigo");
+          }
+
+          return camposSelecionados;
+        }
+
+        // Download do template CSV
+        function downloadTemplateCSV() {
+          const camposSelecionados = obterCamposSelecionados();
+          const headers = camposSelecionados.map(
+            (key) => camposMap[key].header
+          );
+
+          // Apenas headers, sem linha de exemplo
+          const csvContent = headers.join(",");
+
+          const blob = new Blob([csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
+          const link = document.createElement("a");
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", "modelo_importacao_produtos.csv");
+          link.style.visibility = "hidden";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+
+        // Download do template Excel usando SheetJS
+        function downloadTemplateExcel() {
+          // Verificar se SheetJS está disponível
+          if (typeof XLSX === "undefined") {
+            alert(
+              "Biblioteca XLSX não carregada. Por favor, recarregue a página."
+            );
+            return;
+          }
+
+          // Obter apenas campos selecionados
+          const camposSelecionados = obterCamposSelecionados();
+          const headers = camposSelecionados.map(
+            (key) => camposMap[key].header
+          );
+
+          // Apenas headers, sem linha de exemplo
+          const dados = [headers];
+
+          // Criar worksheet
+          const worksheet = XLSX.utils.aoa_to_sheet(dados);
+
+          // Ajustar largura das colunas
+          const colWidths = headers.map(() => ({ wch: 20 }));
+          worksheet["!cols"] = colWidths;
+
+          // Criar workbook
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Produtos");
+
+          // Fazer download
+          XLSX.writeFile(workbook, "modelo_importacao_produtos.xlsx");
+        }
+
+        // Processar arquivo (CSV ou Excel)
+        function processarArquivo(arquivo) {
+          return new Promise((resolve, reject) => {
+            const fileName = arquivo.name.toLowerCase();
+            const isExcel =
+              fileName.endsWith(".xlsx") ||
+              fileName.endsWith(".xls") ||
+              fileName.endsWith(".xlsm");
+
+            if (isExcel) {
+              // Processar arquivo Excel usando SheetJS
+              if (typeof XLSX === "undefined") {
+                reject(
+                  new Error(
+                    "Biblioteca XLSX não carregada. Por favor, recarregue a página."
+                  )
+                );
+                return;
+              }
+
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                try {
+                  const arrayBuffer = e.target.result;
+                  const workbook = XLSX.read(arrayBuffer, { type: "array" });
+                  const firstSheetName = workbook.SheetNames[0];
+                  const worksheet = workbook.Sheets[firstSheetName];
+
+                  // Converter para JSON
+                  const dados = XLSX.utils.sheet_to_json(worksheet, {
+                    header: 1,
+                    defval: "",
+                  });
+
+                  if (dados.length < 2) {
+                    reject(new Error("Arquivo Excel não contém dados válidos"));
+                    return;
+                  }
+
+                  // Primeira linha são os headers
+                  const headers = dados[0].map((h) =>
+                    String(h).trim().toLowerCase()
+                  );
+
+                  // Converter para array de objetos
+                  const resultado = [];
+                  for (let i = 1; i < dados.length; i++) {
+                    const linha = dados[i];
+                    if (linha.some((cell) => cell !== "")) {
+                      // Só adiciona se a linha não estiver vazia
+                      const linhaObj = {};
+                      headers.forEach((header, index) => {
+                        linhaObj[header] = linha[index]
+                          ? String(linha[index]).trim()
+                          : "";
+                      });
+                      resultado.push(linhaObj);
+                    }
+                  }
+
+                  resolve(resultado);
+                } catch (error) {
+                  reject(error);
+                }
+              };
+
+              reader.onerror = function () {
+                reject(new Error("Erro ao ler arquivo Excel"));
+              };
+
+              reader.readAsArrayBuffer(arquivo);
+            } else {
+              // Processar arquivo CSV
+              const reader = new FileReader();
+
+              reader.onload = function (e) {
+                try {
+                  const csv = e.target.result;
+                  const linhas = csv.split("\n");
+                  const headers = linhas[0]
+                    .split(",")
+                    .map((h) => h.trim().toLowerCase());
+
+                  const dados = [];
+                  for (let i = 1; i < linhas.length; i++) {
+                    if (linhas[i].trim()) {
+                      const valores = linhas[i].split(",");
+                      const linha = {};
+
+                      headers.forEach((header, index) => {
+                        linha[header] = valores[index]
+                          ? valores[index].trim()
+                          : "";
+                      });
+
+                      dados.push(linha);
+                    }
+                  }
+
+                  resolve(dados);
+                } catch (error) {
+                  reject(error);
+                }
+              };
+
+              reader.onerror = function () {
+                reject(new Error("Erro ao ler arquivo"));
+              };
+
+              reader.readAsText(arquivo);
+            }
+          });
+        }
+
+        // Event listeners
+        downloadTemplateExcelBtn?.addEventListener(
+          "click",
+          downloadTemplateExcel
+        );
+        downloadTemplateExcelBottomBtn?.addEventListener(
+          "click",
+          downloadTemplateExcel
+        );
+
+        verificarImportacoesBtn.addEventListener("click", function () {
+          alert(
+            "Funcionalidade de verificação de importações será implementada em breve!"
+          );
+        });
+
+        // Submissão do formulário
+        importForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const industriaId = industriaSelect.value;
+          const tabelaPrecoId = tabelaPrecoSelect.value;
+          const arquivo = arquivoInput.files[0];
+
+          if (!industriaId || !tabelaPrecoId || !arquivo) {
+            alert("Por favor, preencha todos os campos obrigatórios.");
+            return;
+          }
+
+          try {
+            // Processar arquivo (CSV ou Excel)
+            const dados = await processarArquivo(arquivo);
+
+            if (dados.length === 0) {
+              alert("Arquivo não contém dados válidos.");
+              return;
+            }
+
+            // Mostrar loading
+            const submitBtn = importForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "Processando...";
+            submitBtn.disabled = true;
+
+            // Normalizar dados antes de enviar
+            const dadosNormalizados = dados.map((linha) => {
+              // Normalizar campo código
+              const codigo =
+                linha.codigo ||
+                linha.código ||
+                linha.Codigo ||
+                linha.Código ||
+                null;
+
+              // Normalizar campo nome
+              const nome =
+                linha.nome ||
+                linha["nome do produto"] ||
+                linha["Nome do produto"] ||
+                linha.Nome ||
+                null;
+
+              // Processar ST-UF (pode estar como "st-uf", "stuf", "st_uf")
+              const stUf =
+                linha["st-uf"] ||
+                linha.stuf ||
+                linha.st_uf ||
+                linha["ST-UF"] ||
+                linha.STUF ||
+                linha.ST_UF ||
+                null;
+
+              // Adicionar ST-UF às observações se existir
+              let observacoes = linha.observacoes || "";
+              if (stUf) {
+                observacoes = observacoes
+                  ? `${observacoes}\nST-UF: ${stUf}`
+                  : `ST-UF: ${stUf}`;
+              }
+
+              return {
+                codigo,
+                nome,
+                preco: linha.preco || linha.preço || linha.Preço || "0",
+                unidade: linha.unidade || "UNID",
+                embalagem: linha.embalagem || "",
+                fatorEmbalagem: linha.fatorEmbalagem || linha["fator de embalagem"] || null,
+                dataLancamento: linha.dataLancamento || linha["data de lançamento"] || null,
+                ipi: linha.ipi || linha.IPI || "0",
+                icms: linha.icms || linha["icms %"] || linha["ICMS %"] || null,
+                cest: linha.cest || linha.CEST || null,
+                cfop: linha.cfop || linha.CFOP || null,
+                observacoes: observacoes,
+                comissaoProduto: linha.comissaoProduto || linha["comissão por produto"] || null,
+                codigoBarras: linha.codigoBarras || linha["código de barras"] || null,
+                stUf: stUf, // Campo específico para ST-UF
+              };
+            });
+
+            // Usar API unificada para importar produtos
+            const result = await window.oursalesAPI.importarProdutos(
+              industriaId,
+              tabelaPrecoId,
+              dadosNormalizados
+            );
+
+            // Mostrar resultado
+            let mensagem = `Importação concluída!\n\n`;
+            mensagem += `Produtos importados: ${result.data?.totalImportados || result.data?.importados || 0}\n`;
+            mensagem += `Erros: ${result.data?.totalErros || result.data?.erros?.length || 0}\n`;
+
+            if (result.data?.erros && result.data.erros.length > 0) {
+              mensagem += `\nErros encontrados:\n`;
+              result.data.erros.slice(0, 5).forEach((erro) => {
+                mensagem += `• Linha ${erro.linha}: ${erro.erro}\n`;
+              });
+              if (result.data.erros.length > 5) {
+                mensagem += `... e mais ${result.data.erros.length - 5} erros`;
+              }
+            }
+
+            alert(mensagem);
+
+            // Limpar formulário
+            importForm.reset();
+            tabelaPrecoSelect.disabled = true;
+          } catch (error) {
+            console.error("Erro na importação:", error);
+            let errorMessage = "Erro ao processar arquivo. ";
+            if (error.message) {
+              errorMessage += error.message;
+            } else {
+              errorMessage += "Verifique o formato e tente novamente.";
+            }
+            alert(errorMessage);
+          } finally {
+            // Restaurar botão
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+          }
+        });
+
+        // Inicializar
+        carregarIndustrias();
+      });
+    </script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
+  </body>
+</html>

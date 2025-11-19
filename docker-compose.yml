@@ -1,0 +1,158 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - Banco de dados principal
+  postgres:
+    image: postgres:16-alpine
+    container_name: oursales-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: oursales
+      POSTGRES_USER: oursales_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-oursales_strong_password_2025}
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=pt_BR.UTF-8"
+      TZ: America/Sao_Paulo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oursales_user -d oursales"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oursales-network
+
+  # Redis - Cache e sessões
+  redis:
+    image: redis:7-alpine
+    container_name: oursales-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oursales-network
+
+  # Backend API (Node.js + Express)
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: oursales-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://oursales_user:${DB_PASSWORD:-oursales_strong_password_2025}@postgres:5432/oursales
+      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-change_this_jwt_secret_in_production}
+      JWT_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: 10
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      MAX_FILE_SIZE: 10485760
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 100
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - oursales-network
+
+  # Nginx - Reverse proxy e servidor de arquivos estáticos
+  nginx:
+    image: nginx:alpine
+    container_name: oursales-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./frontend:/usr/share/nginx/html:ro
+      - uploads_data:/uploads:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - api
+    networks:
+      - oursales-network
+
+  # PgAdmin - Interface web para gerenciamento do PostgreSQL
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: oursales-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@oursales.com
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - oursales-network
+    profiles:
+      - dev # Só inicia com: docker-compose --profile dev up
+
+  # Redis Commander - Interface web para Redis
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: oursales-redis-commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - oursales-network
+    profiles:
+      - dev # Só inicia com: docker-compose --profile dev up
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  uploads_data:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  oursales-network:
+    driver: bridge
+

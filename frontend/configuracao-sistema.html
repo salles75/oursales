@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Configuração do Sistema</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/fix-animations.css" />
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
+    <style>
+      /* Aumentar largura máxima do formulário */
+      .modern-form {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .modern-form-content {
+        padding: var(--space-4) var(--space-6);
+      }
+
+      /* Reduzir espaçamento entre seções */
+      .modern-form-section {
+        margin-bottom: var(--space-4);
+        padding: var(--space-4);
+      }
+
+      .modern-form-section-header {
+        margin-bottom: var(--space-3);
+        padding-bottom: var(--space-2);
+      }
+
+      /* Grid mais compacto - 3 colunas para checkboxes */
+      .modern-form-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-3) var(--space-4);
+      }
+
+      /* Reduzir espaçamento entre campos */
+      .modern-form-field {
+        margin-bottom: var(--space-2);
+      }
+
+      /* Checkboxes mais compactos */
+      .modern-form-checkbox-label {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-2);
+        cursor: pointer;
+        padding: var(--space-1) var(--space-2);
+        border-radius: var(--radius-md);
+        transition: background-color var(--transition-fast);
+        margin-bottom: 0;
+      }
+
+      .modern-form-checkbox-label:hover {
+        background-color: var(--gray-50);
+      }
+
+      .modern-form-checkbox {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        cursor: pointer;
+        accent-color: var(--primary-500);
+        flex-shrink: 0;
+      }
+
+      .modern-form-checkbox-label span {
+        flex: 1;
+        color: var(--text-primary);
+        font-size: var(--text-sm);
+        line-height: 1.4;
+      }
+
+      /* Campos de texto e select ocupam 1 ou 2 colunas conforme necessário */
+      .modern-form-field:has(input[type="text"]),
+      .modern-form-field:has(select),
+      .modern-form-field:has(textarea) {
+        grid-column: span 1;
+      }
+
+      /* Campos que devem ocupar 2 colunas */
+      .modern-form-field.full-width {
+        grid-column: 1 / -1;
+      }
+
+      /* Responsividade */
+      @media (max-width: 1200px) {
+        .modern-form-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .modern-form-grid {
+          grid-template-columns: 1fr;
+        }
+        
+        .modern-form-content {
+          padding: var(--space-3) var(--space-4);
+        }
+      }
+
+      /* Reduzir padding do header */
+      .modern-form-header {
+        padding: var(--space-4) var(--space-6) var(--space-3);
+      }
+
+      /* Ajustar labels */
+      .modern-form-label {
+        margin-bottom: var(--space-1);
+        font-size: var(--text-sm);
+      }
+
+      /* Help text mais compacto */
+      .modern-form-help {
+        margin-top: var(--space-1);
+        font-size: var(--text-xs);
+      }
+    </style>
+  </head>
+  <body data-page="configuracao-sistema">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1><i class="ti ti-settings"></i> Configuração do Sistema</h1>
+          <p>
+            Configure as preferências gerais do sistema.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <a href="configuracoes.html" class="modern-form-button secondary" style="text-decoration: none;">
+            ← Voltar
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <form id="formConfiguracaoSistema" class="modern-form">
+        <div class="modern-form-header">
+          <h2 class="modern-form-title">Configurações do Sistema</h2>
+          <p class="modern-form-description">
+            Personalize o comportamento do sistema conforme suas necessidades de negócio.
+          </p>
+        </div>
+
+        <div class="modern-form-content">
+          <!-- Seção: Configurações Gerais -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                <i class="ti ti-settings"></i>
+              </div>
+              <h3 class="modern-form-section-title">Configurações Gerais</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="calcularSTsobreIPI" name="calcularSTsobreIPI" class="modern-form-checkbox" />
+                  <span>Calcular ST sobre IPI do Produto</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="permitirItensRepetidos" name="permitirItensRepetidos" class="modern-form-checkbox" />
+                  <span>Permitir itens repetidos no pedido</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="mostrarMensagemProdutoAdicionado" name="mostrarMensagemProdutoAdicionado" class="modern-form-checkbox" checked />
+                  <span>Mostrar mensagem de produto já adicionado</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="mostrarPrecoBruto" name="mostrarPrecoBruto" class="modern-form-checkbox" checked />
+                  <span>Mostrar preço bruto ao adicionar</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="mostrarUltimoPreco" name="mostrarUltimoPreco" class="modern-form-checkbox" checked />
+                  <span>Mostrar último preço do produto</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="aplicarDescontoTabela" name="aplicarDescontoTabela" class="modern-form-checkbox" checked />
+                  <span>Aplicar desconto sobre preço de tabela</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="ecommerceMostrarTodos" name="ecommerceMostrarTodos" class="modern-form-checkbox" checked />
+                  <span>E-commerce - Mostrar todos no Portal do Cliente</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="naoEmitirPedidoTabelasDiferentes" name="naoEmitirPedidoTabelasDiferentes" class="modern-form-checkbox" />
+                  <span>Não emitir pedido com diferentes tabelas</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="mostrarApenasIndustriasCliente" name="mostrarApenasIndustriasCliente" class="modern-form-checkbox" />
+                  <span>Mostrar apenas indústrias relacionadas com cliente no pedido</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="atualizarParcelasAutomaticamente" name="atualizarParcelasAutomaticamente" class="modern-form-checkbox" checked />
+                  <span>Atualizar automaticamente as parcelas do pedido</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="copiarDataEmissaoFatura" name="copiarDataEmissaoFatura" class="modern-form-checkbox" checked />
+                  <span>Copiar data de emissão do pedido para data de fatura</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="permitirPagamentoSVPag" name="permitirPagamentoSVPag" class="modern-form-checkbox" />
+                  <span>Permitir Pagamento pelo OS.Pag dentro do E-commerce</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="exibirBotaoAtalho" name="exibirBotaoAtalho" class="modern-form-checkbox" checked />
+                  <span>Exibir botão de atalho na parte inferior direito da tela</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="mostrarApenasProdutosCategorias" name="mostrarApenasProdutosCategorias" class="modern-form-checkbox" />
+                  <span>Mostrar apenas produtos com categorias relacionadas com o cliente</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label for="naoEmitirPedidoStatus" class="modern-form-label">
+                  Não emitir pedido de clientes com status
+                </label>
+                <input
+                  type="text"
+                  id="naoEmitirPedidoStatus"
+                  name="naoEmitirPedidoStatus"
+                  class="modern-form-input"
+                  placeholder="Ex: Fechou"
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="statusPedidoPagoSVPag" class="modern-form-label">
+                  Status do Pedido pago por OS.Pag
+                </label>
+                <select
+                  id="statusPedidoPagoSVPag"
+                  name="statusPedidoPagoSVPag"
+                  class="modern-form-select"
+                >
+                  <option value="">Selecione</option>
+                  <option value="pendente">Pendente</option>
+                  <option value="pago">Pago</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </div>
+
+              <div class="modern-form-field full-width">
+                <div class="modern-form-help">
+                  Região deve ser selecionada somente quando o líder for vendedor.
+                </div>
+              </div>
+
+              <div class="modern-form-field">
+                <label for="configuracaoEquipeVenda" class="modern-form-label">
+                  Configuração Equipe de Venda
+                  <span style="color: var(--gray-400); cursor: help; margin-left: var(--space-1);" title="Configuração da equipe de vendas"><i class="ti ti-info-circle"></i></span>
+                </label>
+                <select
+                  id="configuracaoEquipeVenda"
+                  name="configuracaoEquipeVenda"
+                  class="modern-form-select"
+                >
+                  <option value="somente-clientes-regiao">Somente os Clientes da Região definida no cadastro dos vendedores (Membros da equipe)</option>
+                  <option value="todos-clientes">Todos os clientes</option>
+                </select>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="enviarEmailIndustriaOrcamento" name="enviarEmailIndustriaOrcamento" class="modern-form-checkbox" checked />
+                  <span>Enviar email para indústria no orçamento</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label for="identificarClienteRelatorios" class="modern-form-label">
+                  Identificar cliente nos relatórios por
+                </label>
+                <select
+                  id="identificarClienteRelatorios"
+                  name="identificarClienteRelatorios"
+                  class="modern-form-select"
+                >
+                  <option value="razaoSocial">Razão Social</option>
+                  <option value="nomeFantasia">Nome Fantasia</option>
+                  <option value="cnpj">CNPJ</option>
+                </select>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="naoEmitirPedidoLimiteCredito" name="naoEmitirPedidoLimiteCredito" class="modern-form-checkbox" />
+                  <span>Não emitir pedido com valor maior que o limite de crédito do cliente</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="incluirNovoItemFinalPedido" name="incluirNovoItemFinalPedido" class="modern-form-checkbox" checked />
+                  <span>Incluir novo item no final do pedido</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="permitirQuantidadeNegativa" name="permitirQuantidadeNegativa" class="modern-form-checkbox" checked />
+                  <span>Permitir quantidade negativa ao inserir itens no pedido</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Envio Rápido -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                <i class="ti ti-upload"></i>
+              </div>
+              <h3 class="modern-form-section-title">Envio Rápido</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field full-width">
+                <label for="mensagemEnvioRapido" class="modern-form-label">
+                  Personalize a mensagem que será enviada junto ao link do pedido ou orçamento.
+                  <span style="color: var(--gray-400); cursor: help; margin-left: var(--space-1);" title="Mensagem personalizada para envio rápido"><i class="ti ti-info-circle"></i></span>
+                </label>
+                <textarea
+                  id="mensagemEnvioRapido"
+                  name="mensagemEnvioRapido"
+                  class="modern-form-textarea"
+                  rows="4"
+                  maxlength="300"
+                  placeholder="Digite sua mensagem personalizada..."
+                ></textarea>
+                <div class="modern-form-help">
+                  Máx. 300 caracteres
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Secretária OS - Configuração -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--secondary-500),
+                    var(--secondary-600)
+                  );
+                "
+              >
+                🤖
+              </div>
+              <h3 class="modern-form-section-title">Secretária OS - Configuração</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="diasInativarCliente" class="modern-form-label">
+                  Dias para inativar o cliente
+                </label>
+                <select
+                  id="diasInativarCliente"
+                  name="diasInativarCliente"
+                  class="modern-form-select"
+                >
+                  <option value="3-meses">3 meses sem comprar</option>
+                  <option value="6-meses">6 meses sem comprar</option>
+                  <option value="12-meses">12 meses sem comprar</option>
+                </select>
+              </div>
+
+              <div class="modern-form-field">
+                <label for="statusClienteSemComprar" class="modern-form-label">
+                  Status do cliente após N dias sem comprar
+                </label>
+                <select
+                  id="statusClienteSemComprar"
+                  name="statusClienteSemComprar"
+                  class="modern-form-select"
+                >
+                  <option value="potencial">Potencial</option>
+                  <option value="inativo">Inativo</option>
+                  <option value="bloqueado">Bloqueado</option>
+                </select>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="registrarMudancaStatusCRM" name="registrarMudancaStatusCRM" class="modern-form-checkbox" checked />
+                  <span>Registrar mudança de status no CRM</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="ativarClienteEmitirPedido" name="ativarClienteEmitirPedido" class="modern-form-checkbox" checked />
+                  <span>Ativar cliente ao emitir pedido</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="bloquearEdicaoPedidoEmail" name="bloquearEdicaoPedidoEmail" class="modern-form-checkbox" />
+                  <span>Bloquear edição pedido após vendedor enviar por e-mail</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field full-width">
+                <label for="emailsRelatorioInativacao" class="modern-form-label">
+                  E-mails que receberão o relatório de inativação
+                  <span style="color: var(--gray-400); cursor: help; margin-left: var(--space-1);" title="E-mails para receber relatório de inativação"><i class="ti ti-info-circle"></i></span>
+                </label>
+                <input
+                  type="text"
+                  id="emailsRelatorioInativacao"
+                  name="emailsRelatorioInativacao"
+                  class="modern-form-input"
+                  placeholder="email1@exemplo.com; email2@exemplo.com"
+                />
+                <div class="modern-form-help">
+                  Informe e-mails separados por ponto e vírgula (;)
+                </div>
+              </div>
+
+              <div class="modern-form-field">
+                <label for="diasPreInativacao" class="modern-form-label">
+                  Dias p/ envio do e-mail de pré-inativação
+                  <span style="color: var(--gray-400); cursor: help; margin-left: var(--space-1);" title="Dias antes da inativação para enviar e-mail"><i class="ti ti-info-circle"></i></span>
+                </label>
+                <select
+                  id="diasPreInativacao"
+                  name="diasPreInativacao"
+                  class="modern-form-select"
+                >
+                  <option value="7-dias">7 dias sem comprar</option>
+                  <option value="15-dias">15 dias sem comprar</option>
+                  <option value="30-dias">30 dias sem comprar</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Secretária OS - Resumo de Vendas -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--amber-500),
+                    var(--amber-600)
+                  );
+                "
+              >
+                <i class="ti ti-chart-bar"></i>
+              </div>
+              <h3 class="modern-form-section-title">Secretária OS - Resumo de Vendas</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="emailsResumoVendas" class="modern-form-label">
+                  E-mails que receberão
+                </label>
+                <input
+                  type="text"
+                  id="emailsResumoVendas"
+                  name="emailsResumoVendas"
+                  class="modern-form-input"
+                  placeholder="email@exemplo.com"
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="receberResumoVendas" class="modern-form-label">
+                  Receber toda
+                </label>
+                <select
+                  id="receberResumoVendas"
+                  name="receberResumoVendas"
+                  class="modern-form-select"
+                >
+                  <option value="segunda">Segunda-feira</option>
+                  <option value="terca">Terça-feira</option>
+                  <option value="quarta">Quarta-feira</option>
+                  <option value="quinta">Quinta-feira</option>
+                  <option value="sexta">Sexta-feira</option>
+                  <option value="sabado">Sábado</option>
+                  <option value="domingo">Domingo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Secretária OS - XML para contador -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--rose-500),
+                    var(--rose-600)
+                  );
+                "
+              >
+                📄
+              </div>
+              <h3 class="modern-form-section-title">Secretária OS - XML para contador</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="emailContador" class="modern-form-label">
+                  E-mail Contador
+                </label>
+                <input
+                  type="email"
+                  id="emailContador"
+                  name="emailContador"
+                  class="modern-form-input"
+                  placeholder="contador@exemplo.com"
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="diaEnvioXML" class="modern-form-label">
+                  Dia para envio
+                </label>
+                <select
+                  id="diaEnvioXML"
+                  name="diaEnvioXML"
+                  class="modern-form-select"
+                >
+                  <option value="">Selecione</option>
+                  <option value="1">Dia 1</option>
+                  <option value="5">Dia 5</option>
+                  <option value="10">Dia 10</option>
+                  <option value="15">Dia 15</option>
+                  <option value="20">Dia 20</option>
+                  <option value="25">Dia 25</option>
+                  <option value="ultimo">Último dia do mês</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Configuração Tawk.to -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    #4f46e5,
+                    #4338ca
+                  );
+                "
+              >
+                💬
+              </div>
+              <h3 class="modern-form-section-title">Configuração Tawk.to</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="chaveAPITawkto" class="modern-form-label">
+                  Chave API Tawk.to
+                </label>
+                <input
+                  type="text"
+                  id="chaveAPITawkto"
+                  name="chaveAPITawkto"
+                  class="modern-form-input"
+                  placeholder="Cole sua chave API aqui"
+                />
+              </div>
+
+              <div class="modern-form-field">
+                <label for="chaveAPITawktoPortal" class="modern-form-label">
+                  Chave API Tawk.to no Portal do Cliente
+                </label>
+                <input
+                  type="text"
+                  id="chaveAPITawktoPortal"
+                  name="chaveAPITawktoPortal"
+                  class="modern-form-input"
+                  placeholder="Cole sua chave API aqui"
+                />
+                <div class="modern-form-help">
+                  <a href="#" target="_blank" style="color: var(--primary-600); text-decoration: none;">
+                    Como integrar o Chat Online do Tawk.to!
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Cartão de Aniversário -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    #ec4899,
+                    #db2777
+                  );
+                "
+              >
+                🎂
+              </div>
+              <h3 class="modern-form-section-title">Cartão de Aniversário</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="notificarVendedorAniversario" name="notificarVendedorAniversario" class="modern-form-checkbox" />
+                  <span>Notificar vendedor do cliente aniversariante</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label class="modern-form-checkbox-label">
+                  <input type="checkbox" id="enviarCartaoAniversariantes" name="enviarCartaoAniversariantes" class="modern-form-checkbox" />
+                  <span>Enviar cartão para aniversariantes do dia</span>
+                </label>
+              </div>
+
+              <div class="modern-form-field">
+                <label for="corCartaoAniversario" class="modern-form-label">
+                  Cor do Cartão
+                </label>
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                  <input
+                    type="color"
+                    id="corCartaoAniversario"
+                    name="corCartaoAniversario"
+                    class="modern-form-input"
+                    value="#ef4444"
+                    style="width: 60px; height: 40px; cursor: pointer; border: 1px solid var(--gray-300); border-radius: var(--radius-md);"
+                  />
+                  <span style="color: var(--gray-600); font-size: var(--text-sm);">Escolha a cor do cartão de aniversário</span>
+                </div>
+              </div>
+
+              <div class="modern-form-field full-width">
+                <label for="imagemMensagemAniversario" class="modern-form-label">
+                  Imagem e mensagem de feliz aniversário
+                </label>
+                <textarea
+                  id="imagemMensagemAniversario"
+                  name="imagemMensagemAniversario"
+                  class="modern-form-textarea"
+                  rows="6"
+                  placeholder="Digite ou cole aqui a mensagem de aniversário..."
+                ></textarea>
+                <div class="modern-form-help">
+                  Você pode usar HTML para formatar a mensagem e incluir imagens
+                </div>
+              </div>
+
+              <div class="modern-form-field full-width">
+                <label for="emailsNotificacaoAniversario" class="modern-form-label">
+                  E-mails de notificação dos aniversariantes do dia
+                </label>
+                <div class="modern-form-help" style="margin-bottom: var(--space-2);">
+                  Informar e-mails separados por ponto e vírgula (;)
+                </div>
+                <textarea
+                  id="emailsNotificacaoAniversario"
+                  name="emailsNotificacaoAniversario"
+                  class="modern-form-textarea"
+                  rows="3"
+                  placeholder="email1@exemplo.com; email2@exemplo.com"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Secretária OS - Margem de Lucro -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    #10b981,
+                    #059669
+                  );
+                "
+              >
+                <i class="ti ti-currency-dollar"></i>
+              </div>
+              <h3 class="modern-form-section-title">Secretária OS - Margem de Lucro</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="novoStatusMargemMinima" class="modern-form-label">
+                  Novo Status após atingir Margem Mínima
+                  <span style="color: var(--gray-400); cursor: help; margin-left: var(--space-1);" title="Status a ser aplicado quando atingir margem mínima"><i class="ti ti-info-circle"></i></span>
+                </label>
+                <select
+                  id="novoStatusMargemMinima"
+                  name="novoStatusMargemMinima"
+                  class="modern-form-select"
+                >
+                  <option value="">Selecione</option>
+                  <option value="aprovado">Aprovado</option>
+                  <option value="pendente">Pendente</option>
+                  <option value="revisar">Revisar</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Secretária OS - Cancelar Orçamento -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    #f59e0b,
+                    #d97706
+                  );
+                "
+              >
+                <i class="ti ti-x"></i>
+              </div>
+              <h3 class="modern-form-section-title">Secretária OS - Cancelar Orçamento</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field full-width">
+                <label for="emailsRelatorioOrcamentosCancelados" class="modern-form-label">
+                  E-mails que receberão o relatório de orçamentos cancelados.
+                  <span style="color: var(--gray-400); cursor: help; margin-left: var(--space-1);" title="E-mails para receber relatório de orçamentos cancelados"><i class="ti ti-info-circle"></i></span>
+                </label>
+                <input
+                  type="text"
+                  id="emailsRelatorioOrcamentosCancelados"
+                  name="emailsRelatorioOrcamentosCancelados"
+                  class="modern-form-input"
+                  placeholder="email1@exemplo.com; email2@exemplo.com"
+                />
+                <div class="modern-form-help">
+                  Informe e-mails separados por ponto e vírgula (;)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="modern-form-actions">
+          <a href="configuracoes.html" class="modern-form-button secondary" style="text-decoration: none;">
+            <i class="ti ti-arrow-back"></i> Cancelar
+          </a>
+          <button type="submit" class="modern-form-button primary">
+            <i class="ti ti-device-floppy"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <script>
+      // Função para inicializar configuração do sistema
+      function initConfiguracaoSistema() {
+        const API_BASE = 'http://localhost:3000/api';
+        const form = document.getElementById('formConfiguracaoSistema');
+
+        if (!form) {
+          return;
+        }
+
+        // Carregar dados existentes
+        async function carregarDados() {
+          const token = localStorage.getItem('oursales:auth-token');
+          
+          if (token) {
+            try {
+              const response = await fetch(`${API_BASE}/configuracoes/sistema`, {
+                method: 'GET',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              if (response.ok) {
+                const dados = await response.json();
+                preencherFormulario(dados);
+              }
+            } catch (error) {
+              console.error('Erro ao carregar dados:', error);
+            }
+          } else {
+            // Modo local
+            const data = localStorage.getItem('oursales:data');
+            if (data) {
+              const parsed = JSON.parse(data);
+              if (parsed.configuracaoSistema) {
+                preencherFormulario(parsed.configuracaoSistema);
+              }
+            }
+          }
+        }
+
+        // Preencher formulário
+        function preencherFormulario(dados) {
+          // Checkboxes
+          const checkboxes = [
+            'calcularSTsobreIPI',
+            'permitirItensRepetidos',
+            'mostrarMensagemProdutoAdicionado',
+            'mostrarPrecoBruto',
+            'mostrarUltimoPreco',
+            'aplicarDescontoTabela',
+            'ecommerceMostrarTodos',
+            'naoEmitirPedidoTabelasDiferentes',
+            'mostrarApenasIndustriasCliente',
+            'atualizarParcelasAutomaticamente',
+            'mostrarApenasProdutosCategorias',
+            'copiarDataEmissaoFatura',
+            'permitirPagamentoSVPag',
+            'exibirBotaoAtalho',
+            'registrarMudancaStatusCRM',
+            'ativarClienteEmitirPedido',
+            'bloquearEdicaoPedidoEmail',
+            'notificarVendedorAniversario',
+            'enviarCartaoAniversariantes',
+          ];
+
+          checkboxes.forEach((id) => {
+            const checkbox = document.getElementById(id);
+            if (checkbox && dados[id] !== undefined) {
+              checkbox.checked = dados[id];
+            }
+          });
+
+          // Campos de texto
+          const textFields = [
+            'naoEmitirPedidoStatus',
+            'mensagemEnvioRapido',
+            'emailsRelatorioInativacao',
+            'emailsResumoVendas',
+            'emailContador',
+            'chaveAPITawkto',
+            'chaveAPITawktoPortal',
+            'imagemMensagemAniversario',
+            'emailsNotificacaoAniversario',
+            'emailsRelatorioOrcamentosCancelados',
+          ];
+
+          textFields.forEach((id) => {
+            const field = document.getElementById(id);
+            if (field && dados[id]) {
+              field.value = dados[id];
+            }
+          });
+
+          // Selects
+          const selects = [
+            'statusPedidoPagoSVPag',
+            'configuracaoEquipeVenda',
+            'identificarClienteRelatorios',
+            'diasInativarCliente',
+            'statusClienteSemComprar',
+            'diasPreInativacao',
+            'receberResumoVendas',
+            'diaEnvioXML',
+            'novoStatusMargemMinima',
+          ];
+
+          selects.forEach((id) => {
+            const select = document.getElementById(id);
+            if (select && dados[id]) {
+              select.value = dados[id];
+            }
+          });
+
+          // Color picker
+          if (dados.corCartaoAniversario) {
+            const colorInput = document.getElementById('corCartaoAniversario');
+            if (colorInput) {
+              colorInput.value = dados.corCartaoAniversario;
+            }
+          }
+        }
+
+        // Submissão do formulário
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+
+          const formData = {
+            // Checkboxes
+            calcularSTsobreIPI: document.getElementById('calcularSTsobreIPI').checked,
+            permitirItensRepetidos: document.getElementById('permitirItensRepetidos').checked,
+            mostrarMensagemProdutoAdicionado: document.getElementById('mostrarMensagemProdutoAdicionado').checked,
+            mostrarPrecoBruto: document.getElementById('mostrarPrecoBruto').checked,
+            mostrarUltimoPreco: document.getElementById('mostrarUltimoPreco').checked,
+            aplicarDescontoTabela: document.getElementById('aplicarDescontoTabela').checked,
+            ecommerceMostrarTodos: document.getElementById('ecommerceMostrarTodos').checked,
+            naoEmitirPedidoTabelasDiferentes: document.getElementById('naoEmitirPedidoTabelasDiferentes').checked,
+            mostrarApenasIndustriasCliente: document.getElementById('mostrarApenasIndustriasCliente').checked,
+            atualizarParcelasAutomaticamente: document.getElementById('atualizarParcelasAutomaticamente').checked,
+            mostrarApenasProdutosCategorias: document.getElementById('mostrarApenasProdutosCategorias').checked,
+            copiarDataEmissaoFatura: document.getElementById('copiarDataEmissaoFatura').checked,
+            permitirPagamentoSVPag: document.getElementById('permitirPagamentoSVPag').checked,
+            exibirBotaoAtalho: document.getElementById('exibirBotaoAtalho').checked,
+            registrarMudancaStatusCRM: document.getElementById('registrarMudancaStatusCRM').checked,
+            ativarClienteEmitirPedido: document.getElementById('ativarClienteEmitirPedido').checked,
+            bloquearEdicaoPedidoEmail: document.getElementById('bloquearEdicaoPedidoEmail').checked,
+            notificarVendedorAniversario: document.getElementById('notificarVendedorAniversario').checked,
+            enviarCartaoAniversariantes: document.getElementById('enviarCartaoAniversariantes').checked,
+            
+            // Text fields
+            naoEmitirPedidoStatus: document.getElementById('naoEmitirPedidoStatus').value.trim(),
+            mensagemEnvioRapido: document.getElementById('mensagemEnvioRapido').value.trim(),
+            emailsRelatorioInativacao: document.getElementById('emailsRelatorioInativacao').value.trim(),
+            emailsResumoVendas: document.getElementById('emailsResumoVendas').value.trim(),
+            emailContador: document.getElementById('emailContador').value.trim(),
+            chaveAPITawkto: document.getElementById('chaveAPITawkto').value.trim(),
+            chaveAPITawktoPortal: document.getElementById('chaveAPITawktoPortal').value.trim(),
+            imagemMensagemAniversario: document.getElementById('imagemMensagemAniversario').value.trim(),
+            emailsNotificacaoAniversario: document.getElementById('emailsNotificacaoAniversario').value.trim(),
+            emailsRelatorioOrcamentosCancelados: document.getElementById('emailsRelatorioOrcamentosCancelados').value.trim(),
+            
+            // Selects
+            statusPedidoPagoSVPag: document.getElementById('statusPedidoPagoSVPag').value,
+            configuracaoEquipeVenda: document.getElementById('configuracaoEquipeVenda').value,
+            identificarClienteRelatorios: document.getElementById('identificarClienteRelatorios').value,
+            diasInativarCliente: document.getElementById('diasInativarCliente').value,
+            statusClienteSemComprar: document.getElementById('statusClienteSemComprar').value,
+            diasPreInativacao: document.getElementById('diasPreInativacao').value,
+            receberResumoVendas: document.getElementById('receberResumoVendas').value,
+            diaEnvioXML: document.getElementById('diaEnvioXML').value,
+            novoStatusMargemMinima: document.getElementById('novoStatusMargemMinima').value,
+            
+            // Color
+            corCartaoAniversario: document.getElementById('corCartaoAniversario').value,
+          };
+
+          const token = localStorage.getItem('oursales:auth-token');
+
+          if (!token) {
+            // Salvar localmente
+            const storage = {
+              load: () => {
+                const data = localStorage.getItem('oursales:data');
+                return data ? JSON.parse(data) : {};
+              },
+              save: (data) => {
+                localStorage.setItem('oursales:data', JSON.stringify(data));
+              },
+            };
+
+            const data = storage.load();
+            data.configuracaoSistema = {
+              ...formData,
+              atualizadoEm: new Date().toISOString(),
+            };
+
+            storage.save(data);
+            alert('Configurações do sistema salvas com sucesso!');
+            window.location.href = 'configuracoes.html';
+          } else {
+            // Salvar via API
+            try {
+              const response = await fetch(`${API_BASE}/configuracoes/sistema`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+              });
+
+              const result = await response.json();
+
+              if (response.ok) {
+                alert('Configurações do sistema salvas com sucesso!');
+                window.location.href = 'configuracoes.html';
+              } else {
+                alert(`Erro ao salvar: ${result.message || 'Erro desconhecido'}`);
+              }
+            } catch (error) {
+              alert(`Erro ao salvar configurações: ${error.message}`);
+            }
+          }
+        });
+
+        // Carregar dados ao inicializar
+        carregarDados();
+      }
+
+      // Inicializar quando a página carregar
+      document.addEventListener('DOMContentLoaded', () => {
+        initConfiguracaoSistema();
+      });
+    </script>
+  </body>
+</html>
+

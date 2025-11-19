@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OurSales • Indústria</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
+  </head>
+  <body data-page="industria-form">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <!-- Logo personalizada será inserida aqui -->
+          <span>OS</span>
+        </div>
+        <div class="header-brand">
+          <h1 id="industriaFormTitle"><i class="ti ti-building-factory"></i> Indústria - Nova</h1>
+          <p>
+            Cadastre indústrias com informações completas de contato, condições
+            comerciais e configurações para melhor relacionamento comercial.
+          </p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <div class="header-user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name">Admin</div>
+              <div class="user-role">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" data-page="home">Início</a>
+        <a href="clientes.html" data-page="clientes">Clientes</a>
+        <a href="orcamentos.html" data-page="orcamentos">Orçamentos</a>
+        <a href="pedidos.html" data-page="pedidos">Pedidos</a>
+        <a href="produtos.html" data-page="produtos">Produtos</a>
+        <a href="industrias.html" data-page="industrias">Indústrias</a>
+        <a href="crm.html" data-page="crm">CRM</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
+      </div>
+    </nav>
+
+    <main>
+      <form id="industriaForm" class="modern-form" novalidate>
+        <input type="hidden" id="industriaId" />
+
+        <div class="modern-form-header">
+          <h2 class="modern-form-title" id="industriaFormTitle">
+            Informações da Indústria
+          </h2>
+          <p class="modern-form-description">
+            Preencha os dados da indústria e configure condições comerciais.
+          </p>
+        </div>
+
+        <div class="modern-form-content">
+          <!-- Seção: Dados da Empresa -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary-500),
+                    var(--primary-600)
+                  );
+                "
+              >
+                <i class="ti ti-building"></i>
+              </div>
+              <h3 class="modern-form-section-title">Dados da Empresa</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label
+                  for="industriaRazaoSocial"
+                  class="modern-form-label required"
+                  >Razão Social</label
+                >
+                <input
+                  type="text"
+                  id="industriaRazaoSocial"
+                  class="modern-form-input"
+                  required
+                  placeholder="Nome da empresa conforme registro"
+                />
+                <div class="modern-form-help">
+                  Razão social conforme registro
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="industriaNomeFantasia" class="modern-form-label"
+                  >Nome Fantasia</label
+                >
+                <input
+                  type="text"
+                  id="industriaNomeFantasia"
+                  class="modern-form-input"
+                  placeholder="Nome comercial da empresa"
+                />
+                <div class="modern-form-help">Nome fantasia (opcional)</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="industriaCNPJ" class="modern-form-label required"
+                  >CNPJ</label
+                >
+                <input
+                  type="text"
+                  id="industriaCNPJ"
+                  class="modern-form-input"
+                  required
+                  placeholder="00.000.000/0001-00"
+                />
+                <div class="modern-form-help">CNPJ válido com formatação</div>
+              </div>
+              <div class="modern-form-field">
+                <label
+                  for="industriaInscricaoEstadual"
+                  class="modern-form-label"
+                  >Inscrição Estadual</label
+                >
+                <input
+                  type="text"
+                  id="industriaInscricaoEstadual"
+                  class="modern-form-input"
+                  placeholder="Digite a IE"
+                />
+                <div class="modern-form-help">
+                  Inscrição estadual (opcional)
+                </div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="industriaEmail" class="modern-form-label"
+                  >E-mail</label
+                >
+                <input
+                  type="email"
+                  id="industriaEmail"
+                  class="modern-form-input"
+                  placeholder="email@exemplo.com"
+                />
+                <div class="modern-form-help">
+                  E-mail principal da indústria
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="industriaComissao" class="modern-form-label"
+                  >Comissão (%)</label
+                >
+                <input
+                  type="number"
+                  id="industriaComissao"
+                  class="modern-form-input"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                />
+                <div class="modern-form-help">Percentual de comissão</div>
+              </div>
+              <div class="modern-form-field">
+                <label
+                  for="industriaPagamentoComissao"
+                  class="modern-form-label"
+                  >Pagamento Comissão</label
+                >
+                <select
+                  id="industriaPagamentoComissao"
+                  class="modern-form-select"
+                >
+                  <option value="">Selecione</option>
+                  <option value="mensal">Mensal</option>
+                  <option value="trimestral">Trimestral</option>
+                  <option value="semestral">Semestral</option>
+                  <option value="anual">Anual</option>
+                </select>
+                <div class="modern-form-help">
+                  Período de pagamento da comissão
+                </div>
+              </div>
+              <div class="modern-form-field">
+                <label for="industriaStatus" class="modern-form-label"
+                  >Status</label
+                >
+                <select id="industriaStatus" class="modern-form-select">
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
+                  <option value="suspenso">Suspenso</option>
+                </select>
+                <div class="modern-form-help">Status da indústria</div>
+              </div>
+            </div>
+            <div class="modern-form-field">
+              <label for="industriaLogoURL" class="modern-form-label"
+                >URL do Logo</label
+              >
+              <input
+                type="url"
+                id="industriaLogoURL"
+                class="modern-form-input"
+                placeholder="https://exemplo.com/logo.png"
+              />
+              <div class="modern-form-help">URL do logo da indústria</div>
+            </div>
+          </div>
+
+          <!-- Seção: Endereço -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--emerald-500),
+                    var(--emerald-600)
+                  );
+                "
+              >
+                🏠
+              </div>
+              <h3 class="modern-form-section-title">Endereço</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="industriaEndereco" class="modern-form-label"
+                  >Endereço</label
+                >
+                <input
+                  type="text"
+                  id="industriaEndereco"
+                  class="modern-form-input"
+                  placeholder="Rua, Avenida, etc."
+                />
+                <div class="modern-form-help">Endereço completo</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="industriaBairro" class="modern-form-label"
+                  >Bairro</label
+                >
+                <input
+                  type="text"
+                  id="industriaBairro"
+                  class="modern-form-input"
+                  placeholder="Nome do bairro"
+                />
+                <div class="modern-form-help">Bairro</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="industriaCEP" class="modern-form-label">CEP</label>
+                <input
+                  type="text"
+                  id="industriaCEP"
+                  class="modern-form-input"
+                  placeholder="00000-000"
+                />
+                <div class="modern-form-help">CEP com formatação</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="industriaCidade" class="modern-form-label"
+                  >Cidade</label
+                >
+                <input
+                  type="text"
+                  id="industriaCidade"
+                  class="modern-form-input"
+                  placeholder="Nome da cidade"
+                />
+                <div class="modern-form-help">Cidade</div>
+              </div>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="industriaEstado" class="modern-form-label"
+                  >Estado</label
+                >
+                <select id="industriaEstado" class="modern-form-select">
+                  <option value="">Selecione</option>
+                  <option value="AC">Acre</option>
+                  <option value="AL">Alagoas</option>
+                  <option value="AP">Amapá</option>
+                  <option value="AM">Amazonas</option>
+                  <option value="BA">Bahia</option>
+                  <option value="CE">Ceará</option>
+                  <option value="DF">Distrito Federal</option>
+                  <option value="ES">Espírito Santo</option>
+                  <option value="GO">Goiás</option>
+                  <option value="MA">Maranhão</option>
+                  <option value="MT">Mato Grosso</option>
+                  <option value="MS">Mato Grosso do Sul</option>
+                  <option value="MG">Minas Gerais</option>
+                  <option value="PA">Pará</option>
+                  <option value="PB">Paraíba</option>
+                  <option value="PR">Paraná</option>
+                  <option value="PE">Pernambuco</option>
+                  <option value="PI">Piauí</option>
+                  <option value="RJ">Rio de Janeiro</option>
+                  <option value="RN">Rio Grande do Norte</option>
+                  <option value="RS">Rio Grande do Sul</option>
+                  <option value="RO">Rondônia</option>
+                  <option value="RR">Roraima</option>
+                  <option value="SC">Santa Catarina</option>
+                  <option value="SP">São Paulo</option>
+                  <option value="SE">Sergipe</option>
+                  <option value="TO">Tocantins</option>
+                </select>
+                <div class="modern-form-help">Estado</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Contato -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--amber-500),
+                    var(--amber-600)
+                  );
+                "
+              >
+                <i class="ti ti-phone"></i>
+              </div>
+              <h3 class="modern-form-section-title">Contato</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="industriaTelefone" class="modern-form-label"
+                  >Telefone</label
+                >
+                <input
+                  type="tel"
+                  id="industriaTelefone"
+                  class="modern-form-input"
+                  placeholder="(00) 00000-0000"
+                />
+                <div class="modern-form-help">Telefone principal</div>
+              </div>
+              <div class="modern-form-field">
+                <label
+                  for="industriaTelefoneAdicional"
+                  class="modern-form-label"
+                  >Telefone Adicional</label
+                >
+                <input
+                  type="tel"
+                  id="industriaTelefoneAdicional"
+                  class="modern-form-input"
+                  placeholder="(00) 00000-0000"
+                />
+                <div class="modern-form-help">
+                  Telefone adicional (opcional)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Contatos -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--secondary-500),
+                    var(--secondary-600)
+                  );
+                "
+              >
+                <i class="ti ti-users"></i>
+              </div>
+              <h3 class="modern-form-section-title">Contatos</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Telefone</th>
+                    <th>Cargo</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="industriaContatosTbody">
+                  <tr>
+                    <td colspan="5" class="empty-state">
+                      Nenhum contato adicionado!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="industriaContatoAdicionar"
+                class="modern-form-button secondary"
+              >
+                <i class="ti ti-plus"></i> Adicionar Contato
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Condições de Pagamento -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--purple-500),
+                    var(--purple-600)
+                  );
+                "
+              >
+                <i class="ti ti-credit-card"></i>
+              </div>
+              <h3 class="modern-form-section-title">Condições de Pagamento</h3>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Descrição</th>
+                    <th>Parcelas</th>
+                    <th>Intervalo (dias)</th>
+                    <th>Desconto/Acréscimo (%)</th>
+                    <th>Pedido Mínimo (R$)</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="industriaPagamentosTbody">
+                  <tr>
+                    <td colspan="6" class="empty-state">
+                      Nenhuma condição de pagamento adicionada!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: var(--space-4)">
+              <button
+                type="button"
+                id="industriaPagamentoAdicionar"
+                class="modern-form-button secondary"
+              >
+                <i class="ti ti-plus"></i> Adicionar Condição
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção: Tabelas de Preços -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--blue-500),
+                    var(--blue-600)
+                  );
+                "
+              >
+                <i class="ti ti-currency-dollar"></i>
+              </div>
+              <h3 class="modern-form-section-title">Tabelas de Preços</h3>
+            </div>
+            <div class="modern-form-grid">
+              <div class="modern-form-field">
+                <label for="novaTabelaNome" class="modern-form-label"
+                  >Nome da Nova Tabela</label
+                >
+                <div style="display: flex; gap: var(--space-2)">
+                  <input
+                    type="text"
+                    id="novaTabelaNome"
+                    class="modern-form-input"
+                    placeholder="Nome da tabela"
+                    style="flex: 1"
+                  />
+                  <button
+                    type="button"
+                    id="tabelaAdicionar"
+                    class="modern-form-button secondary"
+                  >
+                    Adicionar
+                  </button>
+                </div>
+                <div class="modern-form-help">Criar nova tabela de preços</div>
+              </div>
+            </div>
+            <div id="tabelasLista" style="margin-top: var(--space-4)">
+              <!-- Tabelas serão renderizadas aqui dinamicamente -->
+            </div>
+          </div>
+
+          <!-- Seção: Configurações -->
+          <div class="modern-form-section">
+            <div class="modern-form-section-header">
+              <div
+                class="modern-form-section-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--gray-500),
+                    var(--gray-600)
+                  );
+                "
+              >
+                <i class="ti ti-settings"></i>
+              </div>
+              <h3 class="modern-form-section-title">Configurações</h3>
+            </div>
+            <div class="modern-form-field">
+              <label class="modern-form-label">
+                <input
+                  type="checkbox"
+                  id="industriaValidarEmbalagem"
+                  style="margin-right: var(--space-2)"
+                />
+                Validar Embalagem
+              </label>
+              <div class="modern-form-help">
+                Validar informações de embalagem nos produtos
+              </div>
+            </div>
+            <div class="modern-form-field">
+              <label for="industriaObservacoes" class="modern-form-label"
+                >Observações</label
+              >
+              <textarea
+                id="industriaObservacoes"
+                class="modern-form-textarea"
+                rows="4"
+                placeholder="Observações gerais sobre a indústria..."
+              ></textarea>
+              <div class="modern-form-help">
+                Observações importantes sobre a indústria
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modern-form-actions">
+          <a href="industrias.html" class="modern-form-button secondary">
+            <i class="ti ti-arrow-back"></i> Cancelar
+          </a>
+          <button
+            type="submit"
+            id="industriaSalvar"
+            class="modern-form-button primary"
+          >
+            <i class="ti ti-device-floppy"></i> Salvar Indústria
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <footer>
+      Cadastre indústrias com informações completas para melhor relacionamento
+      comercial e controle de produtos.
+    </footer>
+
+    <script src="assets/js/input-masks.js"></script>
+    <script>
+      // Garantir que as máscaras sejam aplicadas corretamente após o DOM estar pronto
+      document.addEventListener('DOMContentLoaded', function() {
+        // Aguardar um pouco para garantir que todos os campos estejam renderizados
+        setTimeout(function() {
+          // Aplicar máscara diretamente ao campo CNPJ se existir
+          const cnpjField = document.querySelector('#industriaCNPJ');
+          if (cnpjField && window.maskCNPJ) {
+            console.log('Aplicando máscara CNPJ ao campo:', cnpjField.id);
+            
+            // Aplicar máscara no evento input (sem clonar para manter referência)
+            if (!cnpjField.hasAttribute('data-mask-applied')) {
+              cnpjField.setAttribute('data-mask-applied', 'true');
+              
+              cnpjField.addEventListener('input', function(e) {
+                window.maskCNPJ(e.target);
+              });
+              
+              // Aplicar máscara ao colar
+              cnpjField.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                  window.maskCNPJ(e.target);
+                }, 10);
+              });
+              
+              // Aplicar máscara se já tiver valor
+              if (cnpjField.value) {
+                window.maskCNPJ(cnpjField);
+              }
+            }
+            
+            console.log('Máscara CNPJ aplicada com sucesso');
+          } else {
+            console.warn('Campo CNPJ ou função maskCNPJ não encontrados');
+          }
+          
+          // Chamar inicialização geral também
+          if (window.initInputMasks) {
+            window.initInputMasks();
+          }
+        }, 200);
+      });
+    </script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
+  </body>
+</html>
