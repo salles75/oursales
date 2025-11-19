@@ -4,7 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Produto</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
     <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
   </head>
   <body data-page="produto-form">
     <header>
@@ -14,7 +22,7 @@
           <span>OS</span>
         </div>
         <div class="header-brand">
-          <h1 id="produtoFormTitle">📦 Produto - Novo</h1>
+          <h1 id="produtoFormTitle"><i class="ti ti-package"></i> Produto - Novo</h1>
           <p>
             Cadastre produtos com informações completas de preços, estoque,
             dimensões e características para melhor controle comercial.
@@ -43,7 +51,7 @@
         <a href="produtos.html" data-page="produtos">Produtos</a>
         <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
-        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
       </div>
     </nav>
 
@@ -75,7 +83,7 @@
                   );
                 "
               >
-                📦
+                <i class="ti ti-package"></i>
               </div>
               <h3 class="modern-form-section-title">Informações Básicas</h3>
             </div>
@@ -215,7 +223,7 @@
                   );
                 "
               >
-                💰
+                <i class="ti ti-currency-dollar"></i>
               </div>
               <h3 class="modern-form-section-title">Preços e Custos</h3>
             </div>
@@ -367,13 +375,13 @@
                 <label for="produtoTabelaPreco" class="modern-form-label"
                   >Tabela de Preço</label
                 >
-                <input
-                  type="text"
+                <select
                   id="produtoTabelaPreco"
-                  class="modern-form-input"
-                  placeholder="Tabela de preço"
-                />
-                <div class="modern-form-help">Tabela de preço aplicável</div>
+                  class="modern-form-select"
+                >
+                  <option value="">Selecione</option>
+                </select>
+                <div class="modern-form-help">Tabelas filtradas pela indústria selecionada</div>
               </div>
             </div>
           </div>
@@ -391,7 +399,7 @@
                   );
                 "
               >
-                📊
+                <i class="ti ti-chart-bar"></i>
               </div>
               <h3 class="modern-form-section-title">Controle de Estoque</h3>
             </div>
@@ -553,7 +561,7 @@
                   );
                 "
               >
-                🖼️
+                <i class="ti ti-photo"></i>
               </div>
               <h3 class="modern-form-section-title">Mídia</h3>
             </div>
@@ -586,7 +594,7 @@
                   );
                 "
               >
-                🏛️
+                <i class="ti ti-building"></i>
               </div>
               <h3 class="modern-form-section-title">
                 Substituições Tributárias
@@ -596,28 +604,50 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Estado</th>
-                    <th>Alíquota (%)</th>
-                    <th>Base de Cálculo</th>
+                    <th>UF</th>
+                    <th>ST (%)</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody id="produtoSTTbody">
                   <tr>
-                    <td colspan="4" class="empty-state">
+                    <td colspan="3" class="empty-state">
                       Nenhuma substituição tributária adicionada!
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div style="margin-top: var(--space-4)">
+            <div style="margin-top: var(--space-4); display: flex; gap: var(--space-3); align-items: flex-end;">
+              <div class="modern-form-field" style="flex: 0 0 120px;">
+                <label for="stEstado" class="modern-form-label">UF</label>
+                <input
+                  type="text"
+                  id="stEstado"
+                  class="modern-form-input"
+                  placeholder="Ex: BA"
+                  maxlength="2"
+                  style="text-transform: uppercase;"
+                />
+              </div>
+              <div class="modern-form-field" style="flex: 0 0 150px;">
+                <label for="stAliquota" class="modern-form-label">ST (%)</label>
+                <input
+                  type="number"
+                  id="stAliquota"
+                  class="modern-form-input"
+                  placeholder="Ex: 18.5"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                />
+              </div>
               <button
                 type="button"
                 id="produtoSTAdicionar"
                 class="modern-form-button secondary"
               >
-                <span>➕</span> Adicionar ST
+                <i class="ti ti-plus"></i> Adicionar
               </button>
             </div>
           </div>
@@ -625,14 +655,14 @@
 
         <div class="modern-form-actions">
           <a href="produtos.html" class="modern-form-button secondary">
-            <span>↩️</span> Cancelar
+            <i class="ti ti-arrow-back"></i> Cancelar
           </a>
           <button
             type="submit"
             id="produtoSalvar"
             class="modern-form-button primary"
           >
-            <span>💾</span> Salvar Produto
+            <i class="ti ti-device-floppy"></i> Salvar Produto
           </button>
         </div>
       </form>
@@ -644,5 +674,6 @@
     </footer>
 
     <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
   </body>
 </html>

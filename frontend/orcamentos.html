@@ -4,9 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Orçamentos</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
     <link rel="stylesheet" href="assets/css/style.css" />
     <link rel="stylesheet" href="assets/css/fix-animations.css" />
     <link rel="stylesheet" href="assets/css/table-improvements.css" />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
   </head>
   <body data-page="orcamentos">
     <header>
@@ -45,7 +51,7 @@
         <a href="produtos.html" data-page="produtos">Produtos</a>
         <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
-        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
       </div>
     </nav>
 
@@ -93,11 +99,14 @@
       orçamentos.
     </footer>
 
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/scroll-optimization.js" defer></script>
     <script src="assets/js/column-customizer.js" defer></script>
     <script src="assets/js/disable-animations.js" defer></script>
     <script src="assets/js/oursales-fixes.js" defer></script>
     <script src="assets/js/column-manager.js" defer></script>
     <script src="assets/js/input-masks.js"></script>
     <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
   </body>
 </html>

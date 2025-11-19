@@ -602,7 +602,7 @@ function fixAddButtons() {
         const addButton = document.createElement("button");
         addButton.type = "button";
         addButton.className = "button-add-inline button-primary";
-        addButton.innerHTML = "➕";
+        addButton.innerHTML = "<i class=\"ti ti-plus\"></i>";
         addButton.title = "Adicionar nova linha";
         addButton.style.marginRight = "8px";
         addButton.style.fontSize = "12px";
@@ -661,7 +661,7 @@ function fixAddButtons() {
 
         if (removeButton) {
           // Atualizar o botão remover com ícone de lixeira
-          removeButton.innerHTML = "🗑️";
+          removeButton.innerHTML = "<i class=\"ti ti-trash\"></i>";
           removeButton.title = "Remover linha";
           removeButton.style.backgroundColor = "#dc3545";
           removeButton.style.color = "white";
@@ -816,7 +816,8 @@ function fixClientButtons() {
 // === OTIMIZAÇÕES DE PERFORMANCE ===
 
 // Debounce para eventos de scroll e resize
-function debounce(func, wait) {
+// Usar função local com nome diferente para evitar conflito com app.js
+const debounceLocal = function(func, wait) {
   let timeout;
   return function executedFunction(...args) {
     const later = () => {
@@ -824,9 +825,9 @@ function debounce(func, wait) {
       func(...args);
     };
     clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+    timeout = setTimeout(later, wait || 300);
   };
-}
+};
 
 // Throttle para eventos frequentes
 function throttle(func, limit) {
@@ -914,11 +915,13 @@ function initOurSalesFixes() {
   optimizeCSS();
 
   // Otimizar eventos de scroll
-  const optimizedScrollHandler = throttle(optimizedScroll, 16); // ~60fps
-  window.addEventListener("scroll", optimizedScrollHandler, { passive: true });
+  // NOTA: Scroll optimization já está sendo feita por scroll-optimization.js
+  // Não adicionar listeners duplicados aqui para evitar conflitos
+  // const optimizedScrollHandler = throttle(optimizedScroll, 16); // ~60fps
+  // window.addEventListener("scroll", optimizedScrollHandler, { passive: true });
 
   // Otimizar resize
-  const optimizedResizeHandler = debounce(() => {
+  const optimizedResizeHandler = debounceLocal(() => {
     // Recalcular layouts se necessário
     if (typeof applyLazyLoading === "function") {
       applyLazyLoading();

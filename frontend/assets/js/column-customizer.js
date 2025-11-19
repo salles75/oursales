@@ -119,11 +119,10 @@ class ColumnCustomizer {
         'Prazo de Pagamento': 'prazoPagamento'
       },
       produtos: {
-        'Nome do Produto': 'nome',
+        'Descrição': 'descricao',
         'Categoria': 'categoria',
         'Preço': 'preco',
         'Estoque': 'estoque',
-        'Descrição': 'descricao',
         'SKU': 'sku',
         'Marca': 'marca',
         'Fornecedor': 'fornecedor',
@@ -315,11 +314,10 @@ class ColumnCustomizer {
         { key: "prazoPagamento", label: "Prazo de Pagamento" },
       ],
       produtos: [
-        { key: "nome", label: "Nome do Produto" },
+        { key: "descricao", label: "Descrição" },
         { key: "categoria", label: "Categoria" },
         { key: "preco", label: "Preço" },
         { key: "estoque", label: "Estoque" },
-        { key: "descricao", label: "Descrição" },
         { key: "sku", label: "SKU" },
         { key: "marca", label: "Marca" },
         { key: "fornecedor", label: "Fornecedor" },

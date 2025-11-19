@@ -4,7 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • CRM</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
     <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
   </head>
   <body data-page="crm">
     <header>
@@ -43,7 +49,7 @@
         <a href="produtos.html" data-page="produtos">Produtos</a>
         <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
-        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
       </div>
     </nav>
 
@@ -159,6 +165,8 @@
       conjunto.
     </footer>
 
+    <script src="assets/js/api.js"></script>
     <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
   </body>
 </html>

@@ -4,7 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Novo Orçamento</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
     <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/produto-modal.css" />
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
   </head>
   <body data-page="orcamento-form">
     <header>
@@ -14,7 +23,7 @@
           <span>OS</span>
         </div>
         <div class="header-brand">
-          <h1 id="orcamentoFormTitle">🛒 Orçamento - Novo</h1>
+          <h1 id="orcamentoFormTitle"><i class="ti ti-shopping-cart"></i> Orçamento - Novo</h1>
           <p>
             Preencha as informações do orçamento, adicione produtos e calcule os
             totais.
@@ -43,7 +52,7 @@
         <a href="produtos.html" data-page="produtos">Produtos</a>
         <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
-        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
       </div>
     </nav>
 
@@ -74,7 +83,7 @@
                   );
                 "
               >
-                📋
+                <i class="ti ti-clipboard-list"></i>
               </div>
               <h3 class="modern-form-section-title">Informações Básicas</h3>
             </div>
@@ -207,13 +216,36 @@
                   );
                 "
               >
-                📦
+                <i class="ti ti-package"></i>
               </div>
               <h3 class="modern-form-section-title">Itens do Orçamento</h3>
             </div>
 
+            <!-- Filtros de Busca -->
             <div class="modern-form-grid">
               <div class="modern-form-field">
+                <label for="filtroIndustria" class="modern-form-label"
+                  >Indústria</label
+                >
+                <select id="filtroIndustria" class="modern-form-select">
+                  <option value="">Todas as indústrias</option>
+                </select>
+                <div class="modern-form-help">Filtre por indústria</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="filtroTabelaPreco" class="modern-form-label"
+                  >Tabela de Preço</label
+                >
+                <select id="filtroTabelaPreco" class="modern-form-select">
+                  <option value="">Todas as tabelas</option>
+                </select>
+                <div class="modern-form-help">Filtre por tabela de preço</div>
+              </div>
+            </div>
+
+            <!-- Campo de Busca -->
+            <div class="modern-form-grid">
+              <div class="modern-form-field" style="grid-column: 1 / -1;">
                 <label for="produtoSearch" class="modern-form-label"
                   >Buscar Produto</label
                 >
@@ -221,20 +253,123 @@
                   type="text"
                   id="produtoSearch"
                   class="modern-form-input"
-                  placeholder="Nome do produto, código ou SKU"
+                  placeholder="Nome do produto, código ou código original"
                 />
                 <div class="modern-form-help">Digite para buscar produtos</div>
               </div>
+            </div>
+
+            <!-- Resultados da Busca -->
+            <div id="produtosSearchResults" style="display: none; margin-top: var(--space-4);">
               <div class="modern-form-field">
-                <label class="modern-form-label">&nbsp;</label>
-                <button
-                  type="button"
-                  id="adicionarProduto"
-                  class="modern-form-button secondary"
-                >
-                  <span>➕</span> Adicionar Produto
-                </button>
+                <label class="modern-form-label">Resultados da Busca</label>
+                <div id="produtosResultsList" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: white;">
+                  <!-- Os resultados serão inseridos aqui via JavaScript -->
+                </div>
               </div>
+            </div>
+
+            <!-- Filtros de quantidade (Descontos Adicionais) -->
+            <div
+              style="
+                display: flex;
+                gap: var(--space-2);
+                margin: var(--space-4) 0;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro1"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro2"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro3"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro4"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro5"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro6"
+              />
+              <input
+                type="number"
+                placeholder="0"
+                style="
+                  width: 60px;
+                  padding: var(--space-2);
+                  border: 1px solid var(--border-light);
+                  border-radius: var(--radius-md);
+                "
+                id="filtro7"
+              />
+              <button
+                type="button"
+                id="aplicarFiltros"
+                class="modern-form-button secondary"
+              >
+                Aplicar
+              </button>
+              <button
+                type="button"
+                id="limparFiltros"
+                class="modern-form-button secondary"
+              >
+                Limpar %
+              </button>
             </div>
 
             <div class="table-container">
@@ -275,7 +410,7 @@
                   );
                 "
               >
-                💰
+                <i class="ti ti-currency-dollar"></i>
               </div>
               <h3 class="modern-form-section-title">Totais do Orçamento</h3>
             </div>
@@ -502,7 +637,7 @@
                   );
                 "
               >
-                📝
+                <i class="ti ti-file-text"></i>
               </div>
               <h3 class="modern-form-section-title">
                 Informações Complementares
@@ -674,7 +809,7 @@
                   id="selecionarArquivos"
                   class="modern-form-button secondary"
                 >
-                  <span>📁</span> Selecionar Arquivos
+                  <i class="ti ti-folder"></i> Selecionar Arquivos
                 </button>
                 <button
                   type="button"
@@ -695,24 +830,24 @@
             id="orcamentoVisualizar"
             class="modern-form-button secondary"
           >
-            <span>👁️</span> Visualizar
+            <i class="ti ti-eye"></i> Visualizar
           </button>
           <button
             type="button"
             id="orcamentoSalvarEnviar"
             class="modern-form-button secondary"
           >
-            <span>📤</span> Salvar e Enviar
+            <i class="ti ti-send"></i> Salvar e Enviar
           </button>
           <a href="orcamentos.html" class="modern-form-button secondary">
-            <span>↩️</span> Voltar
+            <i class="ti ti-arrow-back"></i> Voltar
           </a>
           <button
             type="submit"
             id="orcamentoSalvar"
             class="modern-form-button primary"
           >
-            <span>💾</span> Salvar Orçamento
+            <i class="ti ti-device-floppy"></i> Salvar Orçamento
           </button>
         </div>
       </form>
@@ -723,6 +858,8 @@
       orçamentos completos.
     </footer>
 
+    <script src="assets/js/scroll-optimization.js" defer></script>
     <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
   </body>
 </html>

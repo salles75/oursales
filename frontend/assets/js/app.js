@@ -1,3 +1,69 @@
+// === VALIDAÇÃO DE FORMULÁRIOS - ADICIONAR CLASSE SUBMITTED ===
+// Adiciona classe 'submitted' aos formulários após tentativa de submit
+// Isso permite que campos obrigatórios só fiquem vermelhos após tentativa de salvar
+(function () {
+  // Interceptar todos os submits de formulários na fase de captura
+  document.addEventListener(
+    "submit",
+    function (e) {
+      const form = e.target;
+      if (form && form.tagName === "FORM") {
+        // Adicionar classe 'submitted' ao formulário ANTES de qualquer preventDefault
+        form.classList.add("submitted");
+
+        // Se o formulário for válido, remover a classe após um tempo
+        if (form.checkValidity()) {
+          setTimeout(() => {
+            form.classList.remove("submitted");
+          }, 100);
+        }
+      }
+    },
+    true
+  ); // Usar capture phase para pegar antes de qualquer preventDefault
+
+  // Remover classe 'submitted' quando o usuário começar a digitar em campos inválidos
+  document.addEventListener("input", function (e) {
+    const input = e.target;
+    if (
+      input &&
+      (input.tagName === "INPUT" ||
+        input.tagName === "SELECT" ||
+        input.tagName === "TEXTAREA")
+    ) {
+      const form = input.closest("form");
+      if (form && form.classList.contains("submitted")) {
+        // Verificar se o campo agora é válido
+        if (input.validity.valid) {
+          // Se todos os campos do formulário são válidos, remover a classe
+          setTimeout(() => {
+            if (form.checkValidity()) {
+              form.classList.remove("submitted");
+            }
+          }, 100);
+        }
+      }
+    }
+  });
+
+  // Também remover ao mudar selects
+  document.addEventListener("change", function (e) {
+    const input = e.target;
+    if (input && input.tagName === "SELECT") {
+      const form = input.closest("form");
+      if (form && form.classList.contains("submitted")) {
+        if (input.validity.valid) {
+          setTimeout(() => {
+            if (form.checkValidity()) {
+              form.classList.remove("submitted");
+            }
+          }, 100);
+        }
+      }
+    }
+  });
+})();
+
 // === FUNÇÕES AUXILIARES PARA PERSONALIZAÇÃO DE COLUNAS ===
 
 function getCustomColumns(page) {
@@ -9,6 +75,36 @@ function getCustomColumns(page) {
     return [];
   }
 }
+
+// === UTILITÁRIOS OTIMIZADOS (inline para performance) ===
+// Tornar debounce global para uso em outros scripts
+window.debounce = (func, wait = 300) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
+const debounce = window.debounce; // Alias local
+
+// Cache de seletores DOM para evitar re-query
+const domCache = new Map();
+const $ = (selector, useCache = true) => {
+  if (useCache && domCache.has(selector)) {
+    const cached = domCache.get(selector);
+    if (cached && document.contains(cached)) return cached;
+  }
+  const el = document.querySelector(selector);
+  if (useCache && el) domCache.set(selector, el);
+  return el;
+};
+
+const $$ = (selector, useCache = false) => {
+  return Array.from(document.querySelectorAll(selector));
+};
+
+// Limpar cache quando necessário
+const clearDomCache = () => domCache.clear();
 
 function toggleSelectAll(checkbox) {
   const table = checkbox.closest("table");
@@ -212,24 +308,36 @@ const storage = {
         console.error("❌ ERRO: Tentando persistir cache vazio!");
         return;
       }
-      
+
       const jsonString = JSON.stringify(this.cache);
       window.localStorage.setItem(storageKey, jsonString);
-      console.log("💾 localStorage atualizado com sucesso. Tamanho:", jsonString.length, "bytes");
-      
+      console.log(
+        "💾 localStorage atualizado com sucesso. Tamanho:",
+        jsonString.length,
+        "bytes"
+      );
+
       // Verificar se realmente foi salvo
       const verification = window.localStorage.getItem(storageKey);
       if (!verification) {
         console.error("❌ ERRO: localStorage não contém dados após setItem!");
       } else {
         const parsed = JSON.parse(verification);
-        console.log("✅ Verificação: localStorage contém", Object.keys(parsed).length, "coleções");
-        console.log("✅ Verificação: industrias tem", parsed.industrias?.length || 0, "itens");
+        console.log(
+          "✅ Verificação: localStorage contém",
+          Object.keys(parsed).length,
+          "coleções"
+        );
+        console.log(
+          "✅ Verificação: industrias tem",
+          parsed.industrias?.length || 0,
+          "itens"
+        );
       }
     } catch (error) {
       console.error("❌ ERRO ao salvar dados no localStorage:", error);
       console.error("Detalhes do erro:", error.message);
-      if (error.name === 'QuotaExceededError') {
+      if (error.name === "QuotaExceededError") {
         console.error("💾 ERRO: Espaço insuficiente no localStorage!");
       }
     }
@@ -248,8 +356,16 @@ const storage = {
 
 // Funções auxiliares para industrias
 function getIndustrias() {
+  // Sempre recarregar do localStorage para garantir dados atualizados
+  storage.cache = null;
   const state = storage.load();
-  return state.industrias || [];
+  const industrias = state.industrias || [];
+  console.log(
+    "🔍 getIndustrias chamado - encontradas",
+    industrias.length,
+    "indústrias"
+  );
+  return industrias;
 }
 
 function seedDataIfEmpty() {
@@ -496,14 +612,27 @@ function initClientesPage() {
     window.location.href = "crm.html";
   });
 
-  editBtn?.addEventListener("click", () => {
+  editBtn?.addEventListener("click", async () => {
     if (!selectedId) {
       window.alert("Selecione um cliente para editar.");
       return;
     }
-    const cliente = storage
-      .load()
-      .clientes.find((item) => item.id === selectedId);
+
+    let cliente;
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        cliente = await API.getCliente(selectedId);
+      } else {
+        cliente = storage
+          .load()
+          .clientes.find((item) => item.id === selectedId);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar cliente:", error);
+      cliente = storage.load().clientes.find((item) => item.id === selectedId);
+    }
+
     if (!cliente) {
       window.alert("O cliente selecionado não está mais disponível.");
       selectedId = "";
@@ -516,7 +645,12 @@ function initClientesPage() {
     let tipoCliente = cliente.tipo;
     if (!tipoCliente) {
       // Inferir tipo pelo tamanho do documento (CPF tem 11 dígitos, CNPJ tem 14)
-      const docNumeros = (cliente.documento || "").replace(/\D/g, "");
+      const docNumeros = (
+        cliente.cnpj ||
+        cliente.cpf ||
+        cliente.documento ||
+        ""
+      ).replace(/\D/g, "");
       tipoCliente = docNumeros.length === 14 ? "PJ" : "PF";
     }
 
@@ -525,21 +659,38 @@ function initClientesPage() {
     window.location.href = `${pagina}?id=${selectedId}`;
   });
 
-  removeBtn?.addEventListener("click", () => {
+  removeBtn?.addEventListener("click", async () => {
     if (!selectedId) {
       window.alert("Selecione um cliente para remover.");
       return;
     }
-    const state = storage.load();
-    const relatedOrcamentos = state.orcamentos.filter(
-      (orcamento) => orcamento.clienteId === selectedId
-    ).length;
-    const relatedPedidos = state.pedidos.filter(
-      (pedido) => pedido.clienteId === selectedId
-    ).length;
-    const relatedCrm = state.crm.filter(
-      (registro) => registro.clienteId === selectedId
-    ).length;
+
+    // Verificar relacionamentos (tentar API primeiro, depois localStorage)
+    let relatedOrcamentos = 0;
+    let relatedPedidos = 0;
+    let relatedCrm = 0;
+
+    try {
+      const API = window.oursalesAPI;
+      if (API && API.shouldUseAPI()) {
+        // Na API, a exclusão em cascata é tratada pelo backend
+        // Apenas mostrar aviso genérico
+        relatedOrcamentos = 1; // Assumir que pode ter relacionamentos
+      } else {
+        const state = storage.load();
+        relatedOrcamentos = state.orcamentos.filter(
+          (orcamento) => orcamento.clienteId === selectedId
+        ).length;
+        relatedPedidos = state.pedidos.filter(
+          (pedido) => pedido.clienteId === selectedId
+        ).length;
+        relatedCrm = state.crm.filter(
+          (registro) => registro.clienteId === selectedId
+        ).length;
+      }
+    } catch (error) {
+      console.error("Erro ao verificar relacionamentos:", error);
+    }
 
     let mensagem = "Confirma remover este cliente?";
     if (relatedOrcamentos || relatedPedidos || relatedCrm) {
@@ -550,23 +701,34 @@ function initClientesPage() {
       return;
     }
 
-    storage.update((draft) => {
-      draft.clientes = draft.clientes.filter(
-        (cliente) => cliente.id !== selectedId
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        await API.deleteCliente(selectedId);
+      } else {
+        storage.update((draft) => {
+          draft.clientes = draft.clientes.filter(
+            (cliente) => cliente.id !== selectedId
+          );
+          draft.orcamentos = draft.orcamentos.filter(
+            (orcamento) => orcamento.clienteId !== selectedId
+          );
+          draft.pedidos = draft.pedidos.filter(
+            (pedido) => pedido.clienteId !== selectedId
+          );
+          draft.crm = draft.crm.filter(
+            (registro) => registro.clienteId !== selectedId
+          );
+        });
+      }
+      selectedId = "";
+      await render();
+    } catch (error) {
+      console.error("Erro ao remover cliente:", error);
+      window.alert(
+        "Erro ao remover cliente: " + (error.message || "Erro desconhecido")
       );
-      draft.orcamentos = draft.orcamentos.filter(
-        (orcamento) => orcamento.clienteId !== selectedId
-      );
-      draft.pedidos = draft.pedidos.filter(
-        (pedido) => pedido.clienteId !== selectedId
-      );
-      draft.crm = draft.crm.filter(
-        (registro) => registro.clienteId !== selectedId
-      );
-    });
-
-    selectedId = "";
-    render();
+    }
   });
 
   form.addEventListener("submit", (event) => {
@@ -657,8 +819,23 @@ function initClientesPage() {
     }
   });
 
-  function render() {
-    const clientes = storage.load().clientes;
+  async function render() {
+    // Carregar clientes da API ou localStorage
+    let clientes = [];
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        const response = await API.getClientes();
+        clientes = Array.isArray(response) ? response : response.data || [];
+      } else {
+        clientes = storage.load().clientes;
+      }
+    } catch (error) {
+      console.error("Erro ao carregar clientes:", error);
+      // Fallback para localStorage
+      clientes = storage.load().clientes;
+    }
+
     if (selectedId && !clientes.some((cliente) => cliente.id === selectedId)) {
       selectedId = "";
     }
@@ -684,6 +861,24 @@ function initClientesPage() {
 
     const linhas = clientes
       .map((cliente) => {
+        // Normalizar dados do cliente (API vs localStorage)
+        const nome =
+          cliente.nomeCompleto ||
+          cliente.razaoSocial ||
+          cliente.nomeFantasia ||
+          cliente.nome ||
+          "-";
+        const documento =
+          cliente.cnpj || cliente.cpf || cliente.documento || "-";
+        const email = cliente.email || "-";
+        const telefone = cliente.telefone || cliente.celular || "-";
+        const observacoes = cliente.observacoes || "-";
+        const cidade = cliente.cidade || "-";
+        const estado = cliente.estado || "-";
+        const cep = cliente.cep || "-";
+        const logradouro = cliente.logradouro || cliente.endereco || "-";
+        const criadoEm = cliente.criadoEm || cliente.dataCadastro;
+
         let rowContent = `
             <tr class="table-row${
               cliente.id === selectedId ? " is-selected" : ""
@@ -701,35 +896,35 @@ function initClientesPage() {
           let cellContent = "";
           switch (column) {
             case "nome":
-              cellContent = `<strong>${cliente.nome}</strong>`;
+              cellContent = `<strong>${nome}</strong>`;
               break;
             case "documento":
-              cellContent = cliente.documento || "-";
+              cellContent = documento;
               break;
             case "email":
-              cellContent = cliente.email || "-";
+              cellContent = email;
               break;
             case "telefone":
-              cellContent = cliente.telefone || "-";
+              cellContent = telefone;
               break;
             case "observacoes":
-              cellContent = cliente.observacoes || "-";
+              cellContent = observacoes;
               break;
             case "endereco":
-              cellContent = cliente.endereco || "-";
+              cellContent = logradouro;
               break;
             case "cidade":
-              cellContent = cliente.cidade || "-";
+              cellContent = cidade;
               break;
             case "estado":
-              cellContent = cliente.estado || "-";
+              cellContent = estado;
               break;
             case "cep":
-              cellContent = cliente.cep || "-";
+              cellContent = cep;
               break;
             case "dataCadastro":
-              cellContent = cliente.dataCadastro
-                ? new Date(cliente.dataCadastro).toLocaleDateString("pt-BR")
+              cellContent = criadoEm
+                ? new Date(criadoEm).toLocaleDateString("pt-BR")
                 : "-";
               break;
             case "ultimaCompra":
@@ -813,7 +1008,7 @@ function initClientesPage() {
           checkbox.dispatchEvent(new Event("change", { bubbles: true }));
         }
       });
-      
+
       // Double click para editar
       row.addEventListener("dblclick", (e) => {
         // Não editar se clicou no checkbox ou botão
@@ -823,7 +1018,7 @@ function initClientesPage() {
         ) {
           return;
         }
-        
+
         const clienteId = row.getAttribute("data-id");
         if (clienteId) {
           // Selecionar o cliente
@@ -833,19 +1028,41 @@ function initClientesPage() {
             checkbox.dispatchEvent(new Event("change", { bubbles: true }));
           }
           // Aguardar um pouco para garantir que a seleção foi processada
-          setTimeout(() => {
+          setTimeout(async () => {
             selectedId = clienteId;
-            const cliente = storage.load().clientes.find((item) => item.id === clienteId);
+            let cliente;
+            try {
+              const API = window.oursalesAPI;
+              if (API) {
+                cliente = await API.getCliente(clienteId);
+              } else {
+                cliente = storage
+                  .load()
+                  .clientes.find((item) => item.id === clienteId);
+              }
+            } catch (error) {
+              console.error("Erro ao carregar cliente:", error);
+              cliente = storage
+                .load()
+                .clientes.find((item) => item.id === clienteId);
+            }
+
             if (cliente) {
               // Se o cliente não tem tipo definido, detectar pelo documento
               let tipoCliente = cliente.tipo;
               if (!tipoCliente) {
                 // Inferir tipo pelo tamanho do documento (CPF tem 11 dígitos, CNPJ tem 14)
-                const docNumeros = (cliente.documento || "").replace(/\D/g, "");
+                const docNumeros = (
+                  cliente.cnpj ||
+                  cliente.cpf ||
+                  cliente.documento ||
+                  ""
+                ).replace(/\D/g, "");
                 tipoCliente = docNumeros.length === 14 ? "PJ" : "PF";
               }
               // Redirecionar para a página correta baseado no tipo
-              const pagina = tipoCliente === "PJ" ? "cliente-pj.html" : "cliente-pf.html";
+              const pagina =
+                tipoCliente === "PJ" ? "cliente-pj.html" : "cliente-pf.html";
               window.location.href = `${pagina}?id=${clienteId}`;
             }
           }, 100);
@@ -905,23 +1122,127 @@ function initClientePJPage() {
 
   const gerarCodigoBtn = document.querySelector("#pjGerarCodigo");
   const cancelarBtn = document.querySelector("#clientePJCancelar");
+  // Aplicar máscara no CNPJ explicitamente
+  if (fields.cnpj && typeof window.maskCNPJ === "function") {
+    fields.cnpj.addEventListener("input", () => window.maskCNPJ(fields.cnpj));
+    if (fields.cnpj.value) window.maskCNPJ(fields.cnpj);
+  }
+  // Gerar código
+  gerarCodigoBtn?.addEventListener("click", () => {
+    fields.codigo.value = `CLI-PJ-${Date.now().toString().slice(-6)}`;
+  });
 
-  const vendedoresLista = [
-    "Ana Souza",
-    "Bruno Oliveira",
-    "Carla Ribeiro",
-    "Diego Martins",
-    "Fernanda Costa",
-  ];
+  // Submit (criar/editar)
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
 
-  const industriasLista = [
-    "Todas as Indústrias",
-    "Alimentos",
-    "Bebidas",
-    "Higiene",
-    "Limpeza",
-    "Cosméticos",
-  ];
+    const cnpjNum = (fields.cnpj.value || "").replace(/\D/g, "");
+    if (!fields.razaoSocial.value.trim() || cnpjNum.length !== 14) {
+      window.alert("Preencha Razão Social e CNPJ válido (14 dígitos).");
+      return;
+    }
+
+    const data = {
+      tipo: "PJ",
+      nome: fields.nomeFantasia.value.trim() || fields.razaoSocial.value.trim(),
+      razaoSocial: fields.razaoSocial.value.trim(),
+      nomeFantasia: fields.nomeFantasia.value.trim(),
+      documento: fields.cnpj.value.trim(),
+      cnpj: fields.cnpj.value.trim(),
+      inscricaoEstadual: fields.inscricaoEstadual.value.trim(),
+      codigo: fields.codigo.value.trim(),
+      rede: fields.rede.value.trim(),
+      matriz: fields.matriz.value.trim(),
+      segmento: fields.segmento.value.trim(),
+      endereco: fields.endereco.value.trim(),
+      bairro: fields.bairro.value.trim(),
+      numero: fields.numero.value.trim(),
+      cep: fields.cep.value.trim(),
+      cidade: fields.cidade.value.trim(),
+      estado: fields.estado.value,
+      telefone: fields.telefone.value.trim(),
+      fax: fields.fax.value.trim(),
+      telefoneAdicional: fields.telefoneAdicional.value.trim(),
+      website: fields.website.value.trim(),
+      email: fields.email.value.trim(),
+      observacoes: fields.observacoes.value.trim(),
+      status: fields.status.value || "Ativo",
+      emailNfe: fields.emailNfe.value.trim(),
+      dataAbertura: fields.dataAbertura.value,
+      regiao: fields.regiao.value.trim(),
+      atualizadoEm: new Date().toISOString(),
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const editingId = urlParams.get("id");
+
+    if (editingId) {
+      storage.update((draft) => {
+        const cliente = draft.clientes.find((c) => c.id === editingId);
+        if (!cliente) return;
+        Object.assign(cliente, data);
+      });
+      window.alert("Cliente atualizado com sucesso!");
+    } else {
+      storage.update((draft) => {
+        draft.clientes.push({
+          id: generateId("cli"),
+          ...data,
+          criadoEm: new Date().toISOString(),
+        });
+        // Ordenar por nome
+        draft.clientes.sort((a, b) =>
+          (a.nome || "").localeCompare(b.nome || "", "pt-BR", {
+            sensitivity: "base",
+          })
+        );
+      });
+      window.alert("Cliente criado com sucesso!");
+    }
+
+    window.location.href = "clientes.html";
+  });
+
+  // Carregar vendedores e indústrias dinamicamente (mesma lógica do PJ)
+  let vendedoresLista = [];
+  let industriasLista = ["Todas as Indústrias"];
+
+  // Carregar indústrias da API/localStorage
+  async function carregarIndustrias() {
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        const response = await API.getIndustrias();
+        const industrias = Array.isArray(response) ? response : response.data || [];
+        industriasLista = ["Todas as Indústrias", ...industrias.map(ind => ind.nomeFantasia || ind.razaoSocial || ind.nome || '')];
+      } else {
+        const data = storage.load();
+        const industrias = data.industrias || [];
+        industriasLista = ["Todas as Indústrias", ...industrias.map(ind => ind.nomeFantasia || ind.razaoSocial || ind.nome || '')];
+      }
+    } catch (error) {
+      console.error("Erro ao carregar indústrias:", error);
+    }
+  }
+
+  // Carregar vendedores (usuários do sistema)
+  async function carregarVendedores() {
+    try {
+      vendedoresLista = [
+        "Ana Souza",
+        "Bruno Oliveira",
+        "Carla Ribeiro",
+        "Diego Martins",
+        "Fernanda Costa",
+      ];
+    } catch (error) {
+      console.error("Erro ao carregar vendedores:", error);
+    }
+  }
+
+  // Carregar dados ao inicializar
+  carregarIndustrias();
+  carregarVendedores();
 
   const buildStaticOptions = (
     values,
@@ -1004,8 +1325,8 @@ function initClientePJPage() {
         <input type="checkbox" name="contatoComprador" ${compradorChecked} />
       </td>
       <td class="actions">
-        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
-        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-plus"></i></button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
       </td>
     `;
 
@@ -1055,7 +1376,7 @@ function initClientePJPage() {
           <td>${dados.contatoCargo || ""}</td>
           <td>${dados.contatoComprador ? "Sim" : "Não"}</td>
           <td>
-            <button type="button" class="button-remove-inline" title="Remover contato" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+            <button type="button" class="button-remove-inline" title="Remover contato" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
           </td>
         `;
 
@@ -1071,7 +1392,7 @@ function initClientePJPage() {
             if (contatosBody.querySelectorAll("tr").length === 0) {
               const emptyRow = document.createElement("tr");
               emptyRow.innerHTML =
-                '<td colspan="7">📋 Nenhum contato adicionado!</td>';
+                '<td colspan="7"><i class="ti ti-info-circle"></i> Nenhum contato adicionado!</td>';
               contatosBody.appendChild(emptyRow);
             }
           });
@@ -1189,8 +1510,8 @@ function initClientePJPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
-        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-plus"></i></button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
       </td>
     `;
 
@@ -1243,7 +1564,7 @@ function initClientePJPage() {
           <td>${dados.pagamentoMinimo || ""}</td>
           <td>${dados.pagamentoIndustria || ""}</td>
           <td>
-            <button type="button" class="button-remove-inline" title="Remover pagamento" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+            <button type="button" class="button-remove-inline" title="Remover pagamento" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
           </td>
         `;
 
@@ -1259,7 +1580,7 @@ function initClientePJPage() {
             if (pagamentosBody.querySelectorAll("tr").length === 0) {
               const emptyRow = document.createElement("tr");
               emptyRow.innerHTML =
-                '<td colspan="7">📋 Nenhuma condição de pagamento adicionada!</td>';
+                '<td colspan="7"><i class="ti ti-info-circle"></i> Nenhuma condição de pagamento adicionada!</td>';
               pagamentosBody.appendChild(emptyRow);
             }
           });
@@ -1302,8 +1623,8 @@ function initClientePJPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
-        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-plus"></i></button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
       </td>
     `;
 
@@ -1349,7 +1670,7 @@ function initClientePJPage() {
         newListRow.innerHTML = `
           <td>${dados.pjVendedor || ""}</td>
           <td>
-            <button type="button" class="button-remove-inline" title="Remover vendedor" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+            <button type="button" class="button-remove-inline" title="Remover vendedor" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
           </td>
         `;
 
@@ -1365,7 +1686,7 @@ function initClientePJPage() {
             if (vendedoresBody.querySelectorAll("tr").length === 0) {
               const emptyRow = document.createElement("tr");
               emptyRow.innerHTML =
-                '<td colspan="2">📋 Nenhum vendedor adicionado!</td>';
+                '<td colspan="2"><i class="ti ti-info-circle"></i> Nenhum vendedor adicionado!</td>';
               vendedoresBody.appendChild(emptyRow);
             }
           });
@@ -1432,8 +1753,8 @@ function initClientePJPage() {
         />
       </td>
       <td class="actions">
-        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
-        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-plus"></i></button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
       </td>
     `;
 
@@ -1481,7 +1802,7 @@ function initClientePJPage() {
           <td>${dados.pjTabelaPreco || ""}</td>
           <td>${dados.pjIndustriaDesconto || ""}</td>
           <td>
-            <button type="button" class="button-remove-inline" title="Remover indústria" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+            <button type="button" class="button-remove-inline" title="Remover indústria" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
           </td>
         `;
 
@@ -1497,7 +1818,7 @@ function initClientePJPage() {
             if (industriasBody.querySelectorAll("tr").length === 0) {
               const emptyRow = document.createElement("tr");
               emptyRow.innerHTML =
-                '<td colspan="4">📋 Nenhuma indústria adicionada!</td>';
+                '<td colspan="4"><i class="ti ti-info-circle"></i> Nenhuma indústria adicionada!</td>';
               industriasBody.appendChild(emptyRow);
             }
           });
@@ -1541,8 +1862,8 @@ function initClientePJPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
-        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-plus"></i></button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
       </td>
     `;
 
@@ -1588,7 +1909,7 @@ function initClientePJPage() {
         newListRow.innerHTML = `
           <td>${dados.pjTransportadora || ""}</td>
           <td>
-            <button type="button" class="button-remove-inline" title="Remover transportadora" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+            <button type="button" class="button-remove-inline" title="Remover transportadora" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
           </td>
         `;
 
@@ -1604,7 +1925,7 @@ function initClientePJPage() {
             if (transportadorasBody.querySelectorAll("tr").length === 0) {
               const emptyRow = document.createElement("tr");
               emptyRow.innerHTML =
-                '<td colspan="2">📋 Nenhuma transportadora adicionada!</td>';
+                '<td colspan="2"><i class="ti ti-info-circle"></i> Nenhuma transportadora adicionada!</td>';
               transportadorasBody.appendChild(emptyRow);
             }
           });
@@ -1784,20 +2105,15 @@ function initClientePJPage() {
     event.preventDefault();
 
     const razaoSocial = fields.razaoSocial.value.trim();
-    const nomeFantasia = fields.nomeFantasia.value.trim();
-    const cnpj = fields.cnpj.value.trim();
-
-    if (!razaoSocial || !nomeFantasia || !cnpj) {
-      window.alert("Informe Razão Social, Nome Fantasia e CNPJ.");
+    const cnpjDigits = (fields.cnpj.value || "").replace(/\D/g, "");
+    if (!razaoSocial || cnpjDigits.length !== 14) {
+      window.alert("Informe Razão Social e CNPJ válido (14 dígitos).");
       return;
     }
 
     const contatos = Array.from(contatosBody.querySelectorAll("tr"))
       .map((tr) => {
         const nome = tr.querySelector('[name="contatoNome"]').value.trim();
-        if (!nome) {
-          return null;
-        }
         const email = tr.querySelector('[name="contatoEmail"]').value.trim();
         const telefone = tr
           .querySelector('[name="contatoTelefone"]')
@@ -1807,14 +2123,10 @@ function initClientePJPage() {
         ).value;
         const cargo = tr.querySelector('[name="contatoCargo"]').value.trim();
         const comprador = tr.querySelector('[name="contatoComprador"]').checked;
+        if (!nome && !email && !telefone) return null;
         return { nome, email, telefone, aniversario, cargo, comprador };
       })
       .filter(Boolean);
-
-    if (!contatos.length) {
-      window.alert("Cadastre ao menos um contato com nome informado.");
-      return;
-    }
 
     const pagamentos = Array.from(pagamentosBody.querySelectorAll("tr"))
       .map((tr) => {
@@ -2076,23 +2388,56 @@ function initClientePFPage() {
 
   const gerarCodigoBtn = document.querySelector("#pfGerarCodigo");
   const cancelarBtn = document.querySelector("#clientePFCancelar");
+  // Aplicar máscaras no CPF e RG explicitamente
+  if (fields.cpf && typeof window.maskCPF === "function") {
+    fields.cpf.addEventListener("input", () => window.maskCPF(fields.cpf));
+    if (fields.cpf.value) window.maskCPF(fields.cpf);
+  }
+  if (fields.rg && typeof window.maskRG === "function") {
+    fields.rg.addEventListener("input", () => window.maskRG(fields.rg));
+    if (fields.rg.value) window.maskRG(fields.rg);
+  }
 
-  const vendedoresLista = [
-    "Ana Souza",
-    "Bruno Oliveira",
-    "Carla Ribeiro",
-    "Diego Martins",
-    "Fernanda Costa",
-  ];
+  // Carregar vendedores e indústrias dinamicamente (mesma lógica do PJ)
+  let vendedoresLista = [];
+  let industriasLista = ["Todas as Indústrias"];
 
-  const industriasLista = [
-    "Todas as Indústrias",
-    "Alimentos",
-    "Bebidas",
-    "Higiene",
-    "Limpeza",
-    "Cosméticos",
-  ];
+  // Carregar indústrias da API/localStorage
+  async function carregarIndustrias() {
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        const response = await API.getIndustrias();
+        const industrias = Array.isArray(response) ? response : response.data || [];
+        industriasLista = ["Todas as Indústrias", ...industrias.map(ind => ind.nomeFantasia || ind.razaoSocial || ind.nome || '')];
+      } else {
+        const data = storage.load();
+        const industrias = data.industrias || [];
+        industriasLista = ["Todas as Indústrias", ...industrias.map(ind => ind.nomeFantasia || ind.razaoSocial || ind.nome || '')];
+      }
+    } catch (error) {
+      console.error("Erro ao carregar indústrias:", error);
+    }
+  }
+
+  // Carregar vendedores (usuários do sistema)
+  async function carregarVendedores() {
+    try {
+      vendedoresLista = [
+        "Ana Souza",
+        "Bruno Oliveira",
+        "Carla Ribeiro",
+        "Diego Martins",
+        "Fernanda Costa",
+      ];
+    } catch (error) {
+      console.error("Erro ao carregar vendedores:", error);
+    }
+  }
+
+  // Carregar dados ao inicializar
+  carregarIndustrias();
+  carregarVendedores();
 
   const buildStaticOptions = (
     values,
@@ -2280,8 +2625,8 @@ function initClientePFPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
-        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-plus"></i></button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
       </td>
     `;
 
@@ -2314,8 +2659,8 @@ function initClientePFPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
-        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-plus"></i></button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
       </td>
     `;
 
@@ -2372,8 +2717,8 @@ function initClientePFPage() {
         />
       </td>
       <td class="actions">
-        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
-        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-plus"></i></button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
       </td>
     `;
 
@@ -2407,8 +2752,8 @@ function initClientePFPage() {
         </select>
       </td>
       <td class="actions">
-        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">➕</button>
-        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;">🗑️</button>
+        <button type="button" class="button-add-inline" title="Adicionar nova linha" style="background-color: #007bff !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-plus"></i></button>
+        <button type="button" class="button-remove-inline" title="Remover linha" style="background-color: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 4px !important; font-size: 16px !important; cursor: pointer !important; margin: 4px !important; min-width: 40px !important; height: 40px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;"><i class="ti ti-trash"></i></button>
       </td>
     `;
 
@@ -2603,10 +2948,7 @@ function initClientePFPage() {
       })
       .filter(Boolean);
 
-    if (!contatos.length) {
-      window.alert("Cadastre ao menos um contato com nome informado.");
-      return;
-    }
+    // Contato passa a ser opcional: permitir salvar mesmo sem contatos
 
     const pagamentos = Array.from(pagamentosBody.querySelectorAll("tr"))
       .map((tr) => {
@@ -2901,16 +3243,29 @@ function initTransportadorasPage() {
     focusFirstInput(fields.nome);
   });
 
-  removeBtn?.addEventListener("click", () => {
+  removeBtn?.addEventListener("click", async () => {
     if (!selectedId) {
       window.alert("Selecione uma transportadora para remover.");
       return;
     }
-    const relacionados = storage
-      .load()
-      .pedidos.filter(
-        (pedido) => pedido.transportadoraId === selectedId
-      ).length;
+
+    // Verificar relacionamentos
+    let relacionados = 0;
+    try {
+      const API = window.oursalesAPI;
+      if (API && API.shouldUseAPI()) {
+        // Na API, a exclusão em cascata é tratada pelo backend
+        relacionados = 1; // Assumir que pode ter relacionamentos
+      } else {
+        relacionados = storage
+          .load()
+          .pedidos.filter(
+            (pedido) => pedido.transportadoraId === selectedId
+          ).length;
+      }
+    } catch (error) {
+      console.error("Erro ao verificar relacionamentos:", error);
+    }
 
     let mensagem = "Confirma remover esta transportadora?";
     if (relacionados) {
@@ -2921,17 +3276,26 @@ function initTransportadorasPage() {
       return;
     }
 
-    storage.update((draft) => {
-      draft.transportadoras = draft.transportadoras.filter(
-        (item) => item.id !== selectedId
-      );
-      draft.pedidos = draft.pedidos.filter(
-        (pedido) => pedido.transportadoraId !== selectedId
-      );
-    });
-
-    selectedId = "";
-    render();
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        await API.deleteTransportadora(selectedId);
+      } else {
+        storage.update((draft) => {
+          draft.transportadoras = draft.transportadoras.filter(
+            (item) => item.id !== selectedId
+          );
+          draft.pedidos = draft.pedidos.filter(
+            (pedido) => pedido.transportadoraId !== selectedId
+          );
+        });
+      }
+      selectedId = "";
+      await render();
+    } catch (error) {
+      console.error("Erro ao remover transportadora:", error);
+      window.alert("Erro ao remover transportadora: " + (error.message || "Erro desconhecido"));
+    }
   });
 
   form.addEventListener("submit", (event) => {
@@ -3026,8 +3390,22 @@ function initTransportadorasPage() {
     }
   });
 
-  function render() {
-    const transportadoras = storage.load().transportadoras;
+  async function render() {
+    // Carregar transportadoras da API ou localStorage
+    let transportadoras = [];
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        const response = await API.getTransportadoras();
+        transportadoras = Array.isArray(response) ? response : response.data || [];
+      } else {
+        transportadoras = storage.load().transportadoras;
+      }
+    } catch (error) {
+      console.error("Erro ao carregar transportadoras:", error);
+      transportadoras = storage.load().transportadoras;
+    }
+
     if (
       selectedId &&
       !transportadoras.some(
@@ -3100,50 +3478,74 @@ function initIndustriasPage() {
   let selectedId = "";
 
   const updateActionsState = () => {
-    const checkedBoxes = listContainer?.querySelectorAll(
-      'input[type="checkbox"][name="industriaSelecionada"]:checked'
-    ) || [];
+    const checkedBoxes =
+      listContainer?.querySelectorAll(
+        'input[type="checkbox"][name="industriaSelecionada"]:checked'
+      ) || [];
     const hasSelection = checkedBoxes.length > 0;
     const hasSingleSelection = checkedBoxes.length === 1;
-    
+
     // Editar só funciona com uma seleção
     if (editBtn) editBtn.disabled = !hasSingleSelection;
     // Remover funciona com uma ou múltiplas seleções
     if (removeBtn) removeBtn.disabled = !hasSelection;
   };
 
-  openBtn?.addEventListener("click", () => {
-    window.location.href = "industria-form.html";
-  });
+  if (openBtn) {
+    console.log("✅ Botão industriaCriar encontrado, adicionando listener");
+    openBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("✅ Click no botão industriaCriar detectado");
+      window.location.href = "industria-form.html";
+    });
+  } else {
+    console.error("❌ Botão #industriaCriar não encontrado!");
+  }
 
-  removeBtn?.addEventListener("click", () => {
-    const checkedBoxes = listContainer?.querySelectorAll(
-      'input[type="checkbox"][name="industriaSelecionada"]:checked'
-    ) || [];
-    
+  removeBtn?.addEventListener("click", async () => {
+    const checkedBoxes =
+      listContainer?.querySelectorAll(
+        'input[type="checkbox"][name="industriaSelecionada"]:checked'
+      ) || [];
+
     if (checkedBoxes.length === 0) {
       window.alert("Selecione uma ou mais indústrias para remover.");
       return;
     }
 
     const count = checkedBoxes.length;
-    const message = count === 1 
-      ? "Confirma remover esta indústria?"
-      : `Confirma remover ${count} indústrias?`;
-    
+    const message =
+      count === 1
+        ? "Confirma remover esta indústria?"
+        : `Confirma remover ${count} indústrias?`;
+
     if (!window.confirm(message)) {
       return;
     }
 
-    const idsToRemove = Array.from(checkedBoxes).map(cb => cb.value);
-    storage.update((draft) => {
-      draft.industrias = draft.industrias.filter(
-        (industria) => !idsToRemove.includes(industria.id)
-      );
-    });
-
-    selectedId = "";
-    render();
+    const idsToRemove = Array.from(checkedBoxes).map((cb) => cb.value);
+    
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        // Remover uma por uma via API
+        for (const id of idsToRemove) {
+          await API.deleteIndustria(id);
+        }
+      } else {
+        storage.update((draft) => {
+          draft.industrias = draft.industrias.filter(
+            (industria) => !idsToRemove.includes(industria.id)
+          );
+        });
+      }
+      selectedId = "";
+      await render();
+    } catch (error) {
+      console.error("Erro ao remover indústria(s):", error);
+      window.alert("Erro ao remover indústria(s): " + (error.message || "Erro desconhecido"));
+    }
   });
 
   // Event listener para seleção via checkbox
@@ -3170,27 +3572,42 @@ function initIndustriasPage() {
   });
 
   editBtn?.addEventListener("click", () => {
-    const checkedBoxes = listContainer?.querySelectorAll(
-      'input[type="checkbox"][name="industriaSelecionada"]:checked'
-    ) || [];
-    
+    const checkedBoxes =
+      listContainer?.querySelectorAll(
+        'input[type="checkbox"][name="industriaSelecionada"]:checked'
+      ) || [];
+
     if (checkedBoxes.length === 0) {
       window.alert("Selecione uma indústria para editar.");
       return;
     }
-    
+
     if (checkedBoxes.length > 1) {
       window.alert("Selecione apenas uma indústria para editar.");
       return;
     }
-    
+
     selectedId = checkedBoxes[0].value;
     window.sessionStorage.setItem("oursales:editIndustria", selectedId);
     window.location.href = "industria-form.html";
   });
 
-  function render() {
-    const industrias = storage.load().industrias;
+  async function render() {
+    // Carregar indústrias da API ou localStorage
+    let industrias = [];
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        const response = await API.getIndustrias();
+        industrias = Array.isArray(response) ? response : response.data || [];
+      } else {
+        industrias = storage.load().industrias;
+      }
+    } catch (error) {
+      console.error("Erro ao carregar indústrias:", error);
+      industrias = storage.load().industrias;
+    }
+
     if (
       selectedId &&
       !industrias.some((industria) => industria.id === selectedId)
@@ -3334,7 +3751,7 @@ function initIndustriasPage() {
           checkbox.dispatchEvent(new Event("change", { bubbles: true }));
         }
       });
-      
+
       // Double click para editar
       row.addEventListener("dblclick", (e) => {
         // Não editar se clicou no checkbox ou botão
@@ -3344,7 +3761,7 @@ function initIndustriasPage() {
         ) {
           return;
         }
-        
+
         const industriaId = row.getAttribute("data-id");
         if (industriaId) {
           // Selecionar a indústria
@@ -3355,7 +3772,10 @@ function initIndustriasPage() {
           }
           // Aguardar um pouco para garantir que a seleção foi processada
           setTimeout(() => {
-            window.sessionStorage.setItem("oursales:editIndustria", industriaId);
+            window.sessionStorage.setItem(
+              "oursales:editIndustria",
+              industriaId
+            );
             window.location.href = "industria-form.html";
           }, 100);
         }
@@ -3399,7 +3819,7 @@ function initIndustriaFormPage() {
     observacoes: document.querySelector("#industriaObservacoes"),
     validarEmbalagem: document.querySelector("#industriaValidarEmbalagem"),
   };
-  
+
   // Verificar se campos obrigatórios foram encontrados
   if (!fields.razaoSocial) {
     console.error("Campo razaoSocial não encontrado");
@@ -3407,7 +3827,7 @@ function initIndustriaFormPage() {
   if (!fields.cnpj) {
     console.error("Campo cnpj não encontrado");
   }
-  
+
   console.log("Campos encontrados:", fields);
 
   let condicoesPagamento = [];
@@ -3429,17 +3849,17 @@ function initIndustriaFormPage() {
   // Submit do formulário
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    
+
     console.log("Formulário de indústria submetido");
     console.log("Campos:", fields);
-    
+
     // Verificar se os campos obrigatórios estão preenchidos
     if (!fields.razaoSocial || !fields.razaoSocial.value.trim()) {
       window.alert("Por favor, preencha a Razão Social.");
       fields.razaoSocial?.focus();
       return;
     }
-    
+
     if (!fields.cnpj || !fields.cnpj.value.trim()) {
       window.alert("Por favor, preencha o CNPJ.");
       fields.cnpj?.focus();
@@ -3473,7 +3893,7 @@ function initIndustriaFormPage() {
     };
 
     console.log("Dados a serem salvos:", data);
-    
+
     try {
       if (editingIndustriaId) {
         console.log("Editando indústria ID:", editingIndustriaId);
@@ -3489,67 +3909,105 @@ function initIndustriaFormPage() {
             throw new Error("Indústria não encontrada");
           }
         });
-        
+
         // Garantir persistência
         storage.persist();
         console.log("Persistência concluída - Atualização");
-        
+
         window.alert("Indústria atualizada com sucesso!");
       } else {
         console.log("Criando nova indústria");
         const novaId = generateId("ind");
         console.log("Novo ID gerado:", novaId);
-        
+
         // Verificar estado antes
         const beforeState = storage.load();
-        console.log("📊 Indústrias ANTES de adicionar:", beforeState.industrias.length);
+        console.log(
+          "📊 Indústrias ANTES de adicionar:",
+          beforeState.industrias.length
+        );
         console.log("📊 Cache antes:", storage.cache?.industrias?.length || 0);
-        
+
         storage.update((draft) => {
-          console.log("🔄 Dentro do update - draft.industrias antes:", draft.industrias?.length || 0);
+          console.log(
+            "🔄 Dentro do update - draft.industrias antes:",
+            draft.industrias?.length || 0
+          );
           if (!Array.isArray(draft.industrias)) {
-            console.error("❌ ERRO: draft.industrias não é um array!", draft.industrias);
+            console.error(
+              "❌ ERRO: draft.industrias não é um array!",
+              draft.industrias
+            );
             draft.industrias = [];
           }
-          
+
           const nova = { id: novaId, ...data };
           draft.industrias.push(nova);
-          
+
           console.log("✅ Dentro do update - indústria adicionada:", nova);
-          console.log("✅ Dentro do update - draft.industrias depois:", draft.industrias.length);
+          console.log(
+            "✅ Dentro do update - draft.industrias depois:",
+            draft.industrias.length
+          );
         });
-        
+
         // Verificar cache após update
-        console.log("📊 Cache APÓS update:", storage.cache?.industrias?.length || 0);
+        console.log(
+          "📊 Cache APÓS update:",
+          storage.cache?.industrias?.length || 0
+        );
         if (storage.cache?.industrias) {
-          const encontrada = storage.cache.industrias.find(ind => ind.id === novaId);
-          console.log("🔍 Indústria encontrada no cache:", encontrada ? "✅ SIM" : "❌ NÃO");
+          const encontrada = storage.cache.industrias.find(
+            (ind) => ind.id === novaId
+          );
+          console.log(
+            "🔍 Indústria encontrada no cache:",
+            encontrada ? "✅ SIM" : "❌ NÃO"
+          );
         }
-        
+
         // Garantir persistência (storage.update já chamou persist, mas vamos verificar)
         try {
           storage.persist();
           console.log("💾 persist() chamado novamente com sucesso");
-          
+
           // Verificar localStorage diretamente
           const raw = window.localStorage.getItem("oursales:data");
           if (raw) {
             const parsed = JSON.parse(raw);
-            console.log("📦 Dados no localStorage após persist:", parsed.industrias?.length || 0);
-            const noLocalStorage = parsed.industrias?.find(ind => ind.id === novaId);
+            console.log(
+              "📦 Dados no localStorage após persist:",
+              parsed.industrias?.length || 0
+            );
+            const noLocalStorage = parsed.industrias?.find(
+              (ind) => ind.id === novaId
+            );
             if (noLocalStorage) {
-              console.log("✅ Indústria encontrada no localStorage:", noLocalStorage);
+              console.log(
+                "✅ Indústria encontrada no localStorage:",
+                noLocalStorage
+              );
             } else {
               console.error("❌ Indústria NÃO encontrada no localStorage!");
-              console.error("📋 Todas as indústrias no localStorage:", parsed.industrias);
-              console.error("🆔 IDs no localStorage:", parsed.industrias?.map(ind => ind.id) || []);
+              console.error(
+                "Todas as indústrias no localStorage:",
+                parsed.industrias
+              );
+              console.error(
+                "🆔 IDs no localStorage:",
+                parsed.industrias?.map((ind) => ind.id) || []
+              );
               console.error("🆔 ID procurado:", novaId);
-              window.alert("❌ Erro: Indústria não foi salva. Verifique o console (F12) para mais detalhes.");
+              window.alert(
+                "❌ Erro: Indústria não foi salva. Verifique o console (F12) para mais detalhes."
+              );
               return;
             }
           } else {
             console.error("❌ ERRO: localStorage está vazio após persist()!");
-            window.alert("❌ Erro: localStorage está vazio. Verifique o console (F12).");
+            window.alert(
+              "❌ Erro: localStorage está vazio. Verifique o console (F12)."
+            );
             return;
           }
         } catch (persistError) {
@@ -3557,29 +4015,41 @@ function initIndustriaFormPage() {
           window.alert("❌ Erro ao salvar: " + persistError.message);
           return;
         }
-        
+
         // Limpar cache para verificar se realmente foi salvo
         storage.cache = null;
-        
+
         // Verificar se foi salvo após limpar cache
         const saved = storage.load();
-        console.log("📊 Indústrias DEPOIS de limpar cache e recarregar:", saved.industrias.length);
-        const savedIndustria = saved.industrias.find(ind => ind.id === novaId);
-        
+        console.log(
+          "📊 Indústrias DEPOIS de limpar cache e recarregar:",
+          saved.industrias.length
+        );
+        const savedIndustria = saved.industrias.find(
+          (ind) => ind.id === novaId
+        );
+
         if (!savedIndustria) {
-          console.error("❌ ERRO: Indústria não foi encontrada após recarregar!");
-          console.error("📋 Todas as indústrias carregadas:", saved.industrias);
-          console.error("🆔 IDs das indústrias:", saved.industrias.map(ind => ind.id));
+          console.error(
+            "❌ ERRO: Indústria não foi encontrada após recarregar!"
+          );
+          console.error("Todas as indústrias carregadas:", saved.industrias);
+          console.error(
+            "🆔 IDs das indústrias:",
+            saved.industrias.map((ind) => ind.id)
+          );
           console.error("🆔 ID procurado:", novaId);
-          window.alert("❌ Erro: Indústria não foi encontrada após salvar. Verifique o console (F12).");
+          window.alert(
+            "❌ Erro: Indústria não foi encontrada após salvar. Verifique o console (F12)."
+          );
           return; // Não redirecionar se não salvou
         }
-        
+
         console.log("✅ Indústria confirmada salva:", savedIndustria);
         console.log("✅ Total de indústrias salvas:", saved.industrias.length);
         window.alert("✅ Indústria cadastrada com sucesso!");
       }
-      
+
       // Pequeno delay para garantir que o salvamento foi concluído
       setTimeout(() => {
         window.location.href = "industrias.html";
@@ -3587,7 +4057,11 @@ function initIndustriaFormPage() {
     } catch (error) {
       console.error("Erro ao salvar indústria:", error);
       console.error("Stack trace:", error.stack);
-      window.alert("Erro ao salvar indústria: " + error.message + ". Por favor, verifique o console para mais detalhes.");
+      window.alert(
+        "Erro ao salvar indústria: " +
+          error.message +
+          ". Por favor, verifique o console para mais detalhes."
+      );
     }
   });
 
@@ -3895,7 +4369,8 @@ function initIndustriaFormPage() {
 
 function initProdutosPage() {
   const form = document.querySelector("#produtoForm");
-  if (!form) return;
+  // Não retornar cedo - a página de listagem não tem formulário
+  // if (!form) return;
 
   const overlay = document.querySelector("#produtoOverlay");
   const drawer = document.querySelector("#produtoDrawer");
@@ -3946,28 +4421,102 @@ function initProdutosPage() {
     if (removeBtn) removeBtn.disabled = !hasSelection;
   };
 
-  const clearForm = () => {
-    form.reset();
-    fields.id.value = "";
-  };
+  // Event listener para botão criar - funciona mesmo sem formulário
+  if (openBtn) {
+    console.log("✅ Botão produtoCriar encontrado, adicionando listener");
+    openBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("✅ Click no botão produtoCriar detectado");
+      window.location.href = "produto-form.html";
+    });
+  } else {
+    console.error("❌ Botão #produtoCriar não encontrado!");
+  }
 
-  const closeForm = () => {
-    clearForm();
-    hideDrawer(drawer, overlay);
-  };
+  // Só processar formulário se ele existir (página produto-form.html)
+  if (form) {
+    const clearForm = () => {
+      form.reset();
+      if (fields.id) fields.id.value = "";
+    };
 
-  overlay?.addEventListener("click", closeForm);
-  closeBtn?.addEventListener("click", closeForm);
-  cancelBtn?.addEventListener("click", closeForm);
+    const closeForm = () => {
+      clearForm();
+      if (drawer && overlay) hideDrawer(drawer, overlay);
+    };
 
-  openBtn?.addEventListener("click", () => {
-    window.location.href = "produto-form.html";
-  });
+    // Event listeners condicionais - só adicionar se os elementos existirem
+    if (overlay) overlay.addEventListener("click", closeForm);
+    if (closeBtn) closeBtn.addEventListener("click", closeForm);
+    if (cancelBtn) cancelBtn.addEventListener("click", closeForm);
 
-  // Event listeners para importação
-  importBtn?.addEventListener("click", () => {
-    window.location.href = "importar-produtos.html";
-  });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const id = fields.id ? fields.id.value : "";
+      const preco = Number.parseFloat(fields.preco ? fields.preco.value : 0);
+      const estoque = Number.parseInt(
+        fields.estoque ? fields.estoque.value : 0,
+        10
+      );
+
+      if (!Number.isFinite(preco) || preco < 0) {
+        window.alert("Informe um preço válido.");
+        return;
+      }
+
+      if (!Number.isFinite(estoque) || estoque < 0) {
+        window.alert("Informe o estoque disponível.");
+        return;
+      }
+
+      const data = {
+        nome: fields.nome ? fields.nome.value.trim() : "",
+        sku: fields.sku ? fields.sku.value.trim() : "",
+        categoria: fields.categoria ? fields.categoria.value.trim() : "",
+        preco,
+        estoque,
+        descricao: fields.descricao ? fields.descricao.value.trim() : "",
+      };
+
+      if (!data.nome || !data.sku) {
+        window.alert("Preencha nome e SKU do produto.");
+        return;
+      }
+
+      if (id) {
+        storage.update((draft) => {
+          const produto = draft.produtos.find((item) => item.id === id);
+          if (!produto) return;
+          Object.assign(produto, data);
+          draft.produtos.sort((a, b) =>
+            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+          );
+        });
+        selectedId = id;
+      } else {
+        let createdId = "";
+        storage.update((draft) => {
+          const novo = { id: generateId("pro"), ...data };
+          draft.produtos.push(novo);
+          draft.produtos.sort((a, b) =>
+            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+          );
+          createdId = novo.id;
+        });
+        selectedId = createdId;
+      }
+
+      closeForm();
+      if (typeof render === "function") render();
+    });
+  }
+
+  // Event listeners para importação (funcionam independente do formulário)
+  // Botão de importar agora redireciona para configurações via onclick no HTML
+  // importBtn?.addEventListener("click", () => {
+  //   window.location.href = "configuracoes.html#importar-produtos";
+  // });
 
   importProdutosOverlay?.addEventListener("click", () => {
     hideDrawer(importProdutosDrawer, importProdutosOverlay);
@@ -4066,7 +4615,7 @@ function initProdutosPage() {
     }
   });
 
-  removeBtn?.addEventListener("click", () => {
+  removeBtn?.addEventListener("click", async () => {
     if (!selectedId) {
       window.alert("Selecione um produto para remover.");
       return;
@@ -4076,71 +4625,23 @@ function initProdutosPage() {
       return;
     }
 
-    storage.update((draft) => {
-      draft.produtos = draft.produtos.filter(
-        (produto) => produto.id !== selectedId
-      );
-    });
-
-    selectedId = "";
-    render();
-  });
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const id = fields.id.value;
-    const preco = Number.parseFloat(fields.preco.value);
-    const estoque = Number.parseInt(fields.estoque.value, 10);
-
-    if (!Number.isFinite(preco) || preco < 0) {
-      window.alert("Informe um preço válido.");
-      return;
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        await API.deleteProduto(selectedId);
+      } else {
+        storage.update((draft) => {
+          draft.produtos = draft.produtos.filter(
+            (produto) => produto.id !== selectedId
+          );
+        });
+      }
+      selectedId = "";
+      await render();
+    } catch (error) {
+      console.error("Erro ao remover produto:", error);
+      window.alert("Erro ao remover produto: " + (error.message || "Erro desconhecido"));
     }
-
-    if (!Number.isFinite(estoque) || estoque < 0) {
-      window.alert("Informe o estoque disponível.");
-      return;
-    }
-
-    const data = {
-      nome: fields.nome.value.trim(),
-      sku: fields.sku.value.trim(),
-      categoria: fields.categoria.value.trim(),
-      preco,
-      estoque,
-      descricao: fields.descricao.value.trim(),
-    };
-
-    if (!data.nome || !data.sku) {
-      window.alert("Preencha nome e SKU do produto.");
-      return;
-    }
-
-    if (id) {
-      storage.update((draft) => {
-        const produto = draft.produtos.find((item) => item.id === id);
-        if (!produto) return;
-        Object.assign(produto, data);
-        draft.produtos.sort((a, b) =>
-          a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
-        );
-      });
-      selectedId = id;
-    } else {
-      let createdId = "";
-      storage.update((draft) => {
-        const novo = { id: generateId("pro"), ...data };
-        draft.produtos.push(novo);
-        draft.produtos.sort((a, b) =>
-          a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
-        );
-        createdId = novo.id;
-      });
-      selectedId = createdId;
-    }
-
-    closeForm();
-    render();
   });
 
   listContainer?.addEventListener("change", (event) => {
@@ -4185,8 +4686,22 @@ function initProdutosPage() {
     window.location.href = "produto-form.html";
   });
 
-  function render() {
-    const produtos = storage.load().produtos;
+  async function render() {
+    // Carregar produtos da API ou localStorage
+    let produtos = [];
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        const response = await API.getProdutos();
+        produtos = Array.isArray(response) ? response : response.data || [];
+      } else {
+        produtos = storage.load().produtos;
+      }
+    } catch (error) {
+      console.error("Erro ao carregar produtos:", error);
+      produtos = storage.load().produtos;
+    }
+
     if (selectedId && !produtos.some((produto) => produto.id === selectedId)) {
       selectedId = "";
     }
@@ -4201,11 +4716,10 @@ function initProdutosPage() {
     // Obter colunas personalizadas
     const customColumns = getCustomColumns("produtos");
     const allColumns = [
-      "nome",
+      "descricao",
       "categoria",
       "preco",
       "estoque",
-      "descricao",
       "sku",
       "marca",
     ];
@@ -4230,23 +4744,23 @@ function initProdutosPage() {
         visibleColumns.forEach((column) => {
           let cellContent = "";
           switch (column) {
-            case "nome":
-              cellContent = produto.nome || "-";
+            case "descricao":
+              // Nome do produto é usado como descrição
+              cellContent = produto.descricao || produto.nome || "-";
               break;
             case "categoria":
               cellContent = produto.categoria || "-";
               break;
             case "preco":
-              cellContent = formatCurrency(produto.preco || 0);
+              cellContent = formatCurrency(
+                produto.preco || produto.precoVenda || 0
+              );
               break;
             case "estoque":
-              cellContent = produto.estoque || 0;
-              break;
-            case "descricao":
-              cellContent = produto.descricao || "-";
+              cellContent = produto.estoque || produto.estoqueAtual || 0;
               break;
             case "sku":
-              cellContent = produto.sku || "-";
+              cellContent = produto.sku || produto.codigo || "-";
               break;
             case "marca":
               cellContent = produto.marca || "-";
@@ -4268,7 +4782,8 @@ function initProdutosPage() {
               cellContent = "-";
           }
 
-          const className = column === "nome" ? "" : "dynamic-column";
+          // Primeira coluna (descrição) não tem classe dynamic-column
+          const className = column === "descricao" ? "" : "dynamic-column";
           rowContent += `<td class="${className}">${cellContent}</td>`;
         });
 
@@ -4331,7 +4846,7 @@ function initProdutosPage() {
           checkbox.dispatchEvent(new Event("change", { bubbles: true }));
         }
       });
-      
+
       // Double click para editar
       row.addEventListener("dblclick", (e) => {
         // Não editar se clicou no checkbox ou botão
@@ -4341,7 +4856,7 @@ function initProdutosPage() {
         ) {
           return;
         }
-        
+
         const produtoId = row.getAttribute("data-id");
         if (produtoId) {
           // Selecionar o produto
@@ -4437,6 +4952,43 @@ function initProdutoFormPage() {
   // Carregar indústrias ao inicializar
   carregarIndustrias();
 
+  // Carregar tabelas de preços conforme a indústria
+  function carregarTabelasPrecos(industriaId, selectedTabelaId = "") {
+    try {
+      const selectTabela = fields.tabelaPreco;
+      if (!selectTabela) return;
+
+      // Reset opções
+      selectTabela.innerHTML = '<option value="">Selecione</option>';
+
+      if (!industriaId) return;
+
+      const industria = getIndustrias().find((i) => i.id === industriaId);
+      const tabelas = industria?.tabelasPrecos || [];
+
+      tabelas
+        .slice()
+        .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "pt-BR"))
+        .forEach((t) => {
+          const option = document.createElement("option");
+          option.value = t.id;
+          option.textContent = t.nome;
+          selectTabela.appendChild(option);
+        });
+
+      if (selectedTabelaId) {
+        selectTabela.value = selectedTabelaId;
+      }
+    } catch (error) {
+      console.error("Erro ao carregar tabelas de preços:", error);
+    }
+  }
+
+  // Atualizar tabelas ao mudar a indústria
+  fields.industria?.addEventListener("change", (e) => {
+    carregarTabelasPrecos(e.target.value);
+  });
+
   // Funções auxiliares
   const calcularPrecoVenda = () => {
     const precoCompra = Number.parseFloat(fields.precoCompra.value) || 0;
@@ -4467,14 +5019,14 @@ function initProdutoFormPage() {
   };
 
   const renderSubstituicoesTributarias = () => {
-    const tbody = document.querySelector("#stListaEstados");
+    const tbody = document.querySelector("#produtoSTTbody");
     if (!tbody) return;
 
     if (substituicoesTributarias.length === 0) {
       tbody.innerHTML = `
         <tr>
           <td colspan="3" class="empty-state">
-            Nenhuma substituição tributária cadastrada
+            Nenhuma substituição tributária adicionada!
           </td>
         </tr>
       `;
@@ -4485,15 +5037,16 @@ function initProdutoFormPage() {
       .map(
         (st, index) => `
         <tr>
-          <td>${st.estado}</td>
-          <td>${st.aliquota}%</td>
+          <td><strong>${st.estado || st.uf || ""}</strong></td>
+          <td>${st.aliquota || st.percentual || 0}%</td>
           <td style="text-align: center;">
             <button
               type="button"
               class="button-danger button-small"
               onclick="window.removeST(${index})"
+              title="Remover"
             >
-              🗑️
+              <i class="ti ti-trash"></i>
             </button>
           </td>
         </tr>
@@ -4512,35 +5065,72 @@ function initProdutoFormPage() {
   const gerarCodigoBtn = document.querySelector("#gerarCodigo");
   gerarCodigoBtn?.addEventListener("click", gerarCodigo);
 
-  // Adicionar ST
-  const adicionarSTBtn = document.querySelector("#adicionarST");
-  adicionarSTBtn?.addEventListener("click", () => {
-    const estado = document.querySelector("#stEstado")?.value;
-    const aliquota = document.querySelector("#stAliquota")?.value;
+  // Elementos de input de ST
+  const estadoInput = document.querySelector("#stEstado");
+  const aliquotaInput = document.querySelector("#stAliquota");
+
+  // Função para adicionar ST
+  const adicionarST = () => {
+    const estado = estadoInput?.value?.trim().toUpperCase();
+    const aliquota = aliquotaInput?.value?.trim();
 
     if (!estado || !aliquota) {
-      window.alert("Preencha o estado e a alíquota.");
+      window.alert("Preencha a UF e a porcentagem da ST.");
+      return;
+    }
+
+    if (estado.length !== 2) {
+      window.alert("A UF deve ter 2 caracteres (ex: BA, SP, RJ).");
+      return;
+    }
+
+    const aliquotaNum = Number.parseFloat(aliquota);
+    if (isNaN(aliquotaNum) || aliquotaNum < 0 || aliquotaNum > 100) {
+      window.alert("A porcentagem da ST deve ser um número entre 0 e 100.");
       return;
     }
 
     // Verificar se o estado já foi adicionado
     const jaExiste = substituicoesTributarias.some(
-      (st) => st.estado === estado
+      (st) => (st.estado || st.uf || "").toUpperCase() === estado
     );
     if (jaExiste) {
-      window.alert("Este estado já possui substituição tributária cadastrada.");
+      window.alert("Esta UF já possui substituição tributária cadastrada.");
       return;
     }
 
     substituicoesTributarias.push({
-      estado,
-      aliquota: Number.parseFloat(aliquota),
+      estado: estado,
+      uf: estado, // Compatibilidade
+      aliquota: aliquotaNum,
+      percentual: aliquotaNum, // Compatibilidade
     });
 
     renderSubstituicoesTributarias();
 
     // Limpar campos
-    document.querySelector("#stAliquota").value = "";
+    estadoInput.value = "";
+    aliquotaInput.value = "";
+    estadoInput.focus();
+  };
+
+  // Adicionar ST - Event Listeners
+  const adicionarSTBtn = document.querySelector("#produtoSTAdicionar");
+  adicionarSTBtn?.addEventListener("click", adicionarST);
+
+  // Permitir adicionar com Enter
+  estadoInput?.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      aliquotaInput?.focus();
+    }
+  });
+
+  aliquotaInput?.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      adicionarST();
+    }
   });
 
   // Função global para remover ST
@@ -4650,7 +5240,12 @@ function initProdutoFormPage() {
       .produtos.find((item) => item.id === editingProdutoId);
     if (produto) {
       formTitle.textContent = `📦 Produto - Editando ${produto.nome}`;
-      fields.industria.value = produto.industria || "";
+      fields.industria.value = produto.industria || produto.industriaId || "";
+      // Carregar tabelas de preço da indústria e selecionar a do produto, se houver
+      carregarTabelasPrecos(
+        fields.industria.value,
+        produto.tabelaPreco || produto.tabelaPrecoId || ""
+      );
       fields.sku.value = produto.sku || "";
       fields.nome.value = produto.nome || "";
       fields.precoVenda.value = produto.precoVenda || produto.preco || 0;
@@ -4668,7 +5263,16 @@ function initProdutoFormPage() {
       fields.unidadeMedida.value = produto.unidadeMedida || "";
       fields.embalagem.value = produto.embalagem || "";
       fields.observacoes.value = produto.observacoes || produto.descricao || "";
-      fields.tabelaPreco.value = produto.tabelaPreco || "";
+      if (!fields.tabelaPreco.value && produto.tabelaPreco) {
+        // fallback caso tenha sido salvo nome ao invés de id
+        const ind = getIndustrias().find(
+          (i) => i.id === fields.industria.value
+        );
+        const byName = ind?.tabelasPrecos?.find(
+          (t) => t.nome === produto.tabelaPreco
+        );
+        if (byName) fields.tabelaPreco.value = byName.id;
+      }
       fields.categoria.value = produto.categoria || "";
       fields.status.value = produto.status || "ativo";
       fields.altura.value = produto.altura || 0;
@@ -4684,6 +5288,71 @@ function initProdutoFormPage() {
       if (produto.substituicoesTributarias) {
         substituicoesTributarias = [...produto.substituicoesTributarias];
         renderSubstituicoesTributarias();
+      } else {
+        // Tentar carregar ST-UF das observações ou da tabela de preços
+        const stUfMatch = (
+          produto.observacoes ||
+          produto.descricao ||
+          ""
+        ).match(/ST-UF:\s*([A-Z]{2})/i);
+        if (stUfMatch) {
+          const uf = stUfMatch[1].toUpperCase();
+          // Se encontrou ST-UF mas não tem substituições, criar uma entrada padrão
+          if (substituicoesTributarias.length === 0) {
+            substituicoesTributarias.push({
+              estado: uf,
+              uf: uf,
+              aliquota: 0, // Será preenchido manualmente
+              percentual: 0,
+            });
+            renderSubstituicoesTributarias();
+          }
+        }
+
+        // Verificar se há ST na tabela de preços
+        if (produto.tabelaPrecoId || produto.tabelaPreco) {
+          const data = storage.load();
+          const industrias = data.industrias || [];
+          const industria = industrias.find(
+            (i) => i.id === produto.industriaId
+          );
+
+          if (industria && industria.tabelasPrecos) {
+            const tabelaPreco = industria.tabelasPrecos.find(
+              (t) => t.id === (produto.tabelaPrecoId || produto.tabelaPreco)
+            );
+
+            if (tabelaPreco && tabelaPreco.produtos) {
+              const produtoTabela = tabelaPreco.produtos.find(
+                (p) =>
+                  p.produtoId === produto.id || p.produto?.id === produto.id
+              );
+
+              if (produtoTabela && produtoTabela.observacoes) {
+                // Extrair ST-UF das observações da tabela de preços
+                const stUfTabelaMatch =
+                  produtoTabela.observacoes.match(/ST-UF:\s*([A-Z]{2})/i);
+                if (stUfTabelaMatch) {
+                  const ufTabela = stUfTabelaMatch[1].toUpperCase();
+                  // Verificar se já não existe
+                  const jaExiste = substituicoesTributarias.some(
+                    (st) =>
+                      (st.estado || st.uf || "").toUpperCase() === ufTabela
+                  );
+                  if (!jaExiste) {
+                    substituicoesTributarias.push({
+                      estado: ufTabela,
+                      uf: ufTabela,
+                      aliquota: 0, // Será preenchido manualmente
+                      percentual: 0,
+                    });
+                    renderSubstituicoesTributarias();
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -4706,9 +5375,17 @@ function initOrcamentosPage() {
   };
 
   // Event Listeners
-  openBtn?.addEventListener("click", () => {
-    window.location.href = "orcamento-form.html";
-  });
+  if (openBtn) {
+    console.log("✅ Botão orcamentoCriar encontrado, adicionando listener");
+    openBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("✅ Click no botão orcamentoCriar detectado");
+      window.location.href = "orcamento-form.html";
+    });
+  } else {
+    console.error("❌ Botão #orcamentoCriar não encontrado!");
+  }
 
   editBtn?.addEventListener("click", () => {
     if (!validateSingleSelection("edit")) {
@@ -4722,7 +5399,7 @@ function initOrcamentosPage() {
     window.location.href = "orcamento-form.html";
   });
 
-  removeBtn?.addEventListener("click", () => {
+  removeBtn?.addEventListener("click", async () => {
     if (!selectedId) {
       window.alert("Selecione um orçamento para remover.");
       return;
@@ -4730,13 +5407,24 @@ function initOrcamentosPage() {
     if (!window.confirm("Confirma remover este orçamento?")) {
       return;
     }
-    storage.update((draft) => {
-      draft.orcamentos = draft.orcamentos.filter(
-        (item) => item.id !== selectedId
-      );
-    });
-    selectedId = "";
-    render();
+
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        await API.deleteOrcamento(selectedId);
+      } else {
+        storage.update((draft) => {
+          draft.orcamentos = draft.orcamentos.filter(
+            (item) => item.id !== selectedId
+          );
+        });
+      }
+      selectedId = "";
+      await render();
+    } catch (error) {
+      console.error("Erro ao remover orçamento:", error);
+      window.alert("Erro ao remover orçamento: " + (error.message || "Erro desconhecido"));
+    }
   });
 
   listContainer?.addEventListener("change", (event) => {
@@ -4784,8 +5472,22 @@ function initOrcamentosPage() {
     }
   });
 
-  function render() {
-    const orcamentos = storage.load().orcamentos;
+  async function render() {
+    // Carregar orçamentos da API ou localStorage
+    let orcamentos = [];
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        const response = await API.getOrcamentos();
+        orcamentos = Array.isArray(response) ? response : response.data || [];
+      } else {
+        orcamentos = storage.load().orcamentos;
+      }
+    } catch (error) {
+      console.error("Erro ao carregar orçamentos:", error);
+      orcamentos = storage.load().orcamentos;
+    }
+
     if (selectedId && !orcamentos.some((item) => item.id === selectedId)) {
       selectedId = "";
     }
@@ -4939,7 +5641,7 @@ function initOrcamentosPage() {
           checkbox.dispatchEvent(new Event("change", { bubbles: true }));
         }
       });
-      
+
       // Double click para editar
       row.addEventListener("dblclick", (e) => {
         // Não editar se clicou no checkbox ou botão
@@ -4949,7 +5651,7 @@ function initOrcamentosPage() {
         ) {
           return;
         }
-        
+
         const orcamentoId = row.getAttribute("data-id");
         if (orcamentoId) {
           // Selecionar o orçamento
@@ -4960,7 +5662,10 @@ function initOrcamentosPage() {
           }
           // Aguardar um pouco para garantir que a seleção foi processada
           setTimeout(() => {
-            window.sessionStorage.setItem("oursales:editOrcamento", orcamentoId);
+            window.sessionStorage.setItem(
+              "oursales:editOrcamento",
+              orcamentoId
+            );
             window.location.href = "orcamento-form.html";
           }, 100);
         }
@@ -4976,6 +5681,18 @@ function initOrcamentosPage() {
  * Orçamento Form Page - Página separada para criar/editar orçamentos
  */
 function initOrcamentoFormPage() {
+  // Garantir que o scroll não esteja bloqueado (limpeza de resquícios do modal)
+  // MAS NÃO resetar scroll position aqui para evitar problemas
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.width = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.margin = "";
+  document.body.style.padding = "";
+
   const form = document.querySelector("#orcamentoForm");
   if (!form) return;
 
@@ -5005,6 +5722,8 @@ function initOrcamentoFormPage() {
   };
 
   let orcamentoItens = [];
+  // Tornar acessível globalmente
+  window.orcamentoItens = orcamentoItens;
   let editingOrcamentoId =
     window.sessionStorage.getItem("oursales:editOrcamento") || null;
 
@@ -5016,6 +5735,453 @@ function initOrcamentoFormPage() {
   const refreshSelects = () => {
     fillClientesSelect(fields.cliente);
     fillTransportadorasSelect(fields.transportadora);
+  };
+
+  // Renderizar itens do orçamento
+  function renderOrcamentoItens() {
+    const tbody = document.querySelector("#orcamentoItensList");
+    if (!tbody) return;
+
+    if (orcamentoItens.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="empty-state">
+            Nenhum produto adicionado neste orçamento!
+          </td>
+        </tr>
+      `;
+      calculateTotals();
+      return;
+    }
+
+    tbody.innerHTML = orcamentoItens
+      .map((item, index) => {
+        // Calcular preço da tabela dinâmico
+        // Prioridade: descontos específicos do item + descontos aplicados dos quadrados > descontos do modal > preço original
+        let precoTabelaDinamico = item.precoTabela || 0;
+
+        // Descontos específicos do item (formato: [5, 3, 0, 0, 0, 0, 0] -> "5+3+0+0+0+0+0")
+        const descontosItem = item.descontosItem || [0, 0, 0, 0, 0, 0, 0];
+        const descontosItemTexto = descontosItem.join("+");
+        const temDescontosItem = descontosItem.some((d) => d !== 0);
+
+        // Se há descontos específicos do item ou descontos aplicados dos quadrados, recalcular
+        const temDescontosQuadrados =
+          item.descontosAplicados && item.descontosAplicados.length > 0;
+        const temDescontosModal = item.descontos && item.descontos.length > 0;
+
+        if (temDescontosItem || temDescontosQuadrados || temDescontosModal) {
+          precoTabelaDinamico = item.precoComDesconto || precoTabelaDinamico;
+        }
+
+        // Observação específica do item
+        const observacaoItem = item.observacaoItem || "";
+        const temObservacao = observacaoItem.trim().length > 0;
+
+        return `
+        <tr>
+          <td></td>
+          <td style="position: relative; vertical-align: top;">
+            <div style="margin-bottom: 4px;">
+              <button 
+                type="button" 
+                onclick="window.editarDescontosItemOrcamento && window.editarDescontosItemOrcamento(${index})"
+                style="background: ${
+                  temDescontosItem ? "#3b82f6" : "#f3f4f6"
+                }; color: ${
+          temDescontosItem ? "white" : "#6b7280"
+        }; border: 1px solid ${
+          temDescontosItem ? "#3b82f6" : "#d1d5db"
+        }; cursor: pointer; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 500;"
+                title="Editar descontos específicos do item"
+              >
+                ${temDescontosItem ? descontosItemTexto : "0+0+0+0+0+0+0"}
+              </button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              ${item.codigo || "-"}
+              <button 
+                type="button" 
+                onclick="window.abrirObservacaoItemOrcamento && window.abrirObservacaoItemOrcamento(${index})"
+                style="background: none; border: none; cursor: pointer; padding: 2px; font-size: 14px; color: ${
+                  temObservacao ? "#dc2626" : "#6b7280"
+                };"
+                title="${
+                  temObservacao ? "Editar observação" : "Adicionar observação"
+                }"
+              >
+                💬
+              </button>
+            </div>
+            ${
+              temObservacao
+                ? `
+              <div style="color: #dc2626; font-size: 12px; margin-top: 4px; padding: 4px; background: rgba(220, 38, 38, 0.1); border-radius: 4px; word-break: break-word; white-space: normal; line-height: 1.4;">
+                ${observacaoItem}
+              </div>
+            `
+                : ""
+            }
+          </td>
+          <td style="vertical-align: top;">${item.produtoNome || "-"}</td>
+          <td style="vertical-align: top;">${formatCurrency(
+            precoTabelaDinamico
+          )}</td>
+          <td style="vertical-align: top;">${formatCurrency(
+            item.precoFinal || 0
+          )}</td>
+          <td style="vertical-align: top;">
+            <input type="number" min="0" step="0.01" value="${
+              item.quantidade || 1
+            }" 
+                   style="width: 80px; padding: 4px;" 
+                   onchange="window.atualizarQuantidadeItemOrcamento && window.atualizarQuantidadeItemOrcamento(${index}, this.value)">
+          </td>
+          <td style="vertical-align: top;">${formatCurrency(
+            (item.precoFinal || 0) * (item.quantidade || 0)
+          )}</td>
+          <td style="vertical-align: top;">
+            <button type="button" onclick="window.removerItemOrcamento && window.removerItemOrcamento(${index})" 
+                    style="background: var(--danger-500); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+              <i class="ti ti-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+      })
+      .join("");
+    calculateTotals();
+  }
+
+  // Tornar renderOrcamentoItens acessível globalmente
+  window.renderOrcamentoItens = renderOrcamentoItens;
+
+  window.atualizarQuantidadeItemOrcamento = function (index, quantidade) {
+    orcamentoItens[index].quantidade = parseFloat(quantidade) || 0;
+    // Recalcular totais do item
+    const item = orcamentoItens[index];
+    item.total = item.precoComDesconto * item.quantidade;
+    item.totalBruto = item.precoFinal * item.quantidade;
+    // Sincronizar com window.orcamentoItens
+    window.orcamentoItens = orcamentoItens;
+    renderOrcamentoItens();
+    calculateTotals();
+  };
+
+  window.removerItemOrcamento = function (index) {
+    orcamentoItens.splice(index, 1);
+    // Sincronizar com window.orcamentoItens
+    window.orcamentoItens = orcamentoItens;
+    renderOrcamentoItens();
+    calculateTotals();
+  };
+
+  window.abrirObservacaoItemOrcamento = function (index) {
+    const item = orcamentoItens[index];
+    const observacaoAtual = item.observacaoItem || "";
+    const novaObservacao = window.prompt(
+      "Observação específica do item:",
+      observacaoAtual
+    );
+
+    if (novaObservacao !== null) {
+      item.observacaoItem = novaObservacao.trim();
+      // Sincronizar com window.orcamentoItens
+      window.orcamentoItens = orcamentoItens;
+      renderOrcamentoItens();
+    }
+  };
+
+  window.editarDescontosItemOrcamento = function (index) {
+    const item = orcamentoItens[index];
+    const precoTabela = item.precoTabela || 0;
+    const descontosGerais = item.descontosAplicados || [];
+    const descontosItemAtuais = item.descontosItem || [0, 0, 0, 0, 0, 0, 0];
+
+    // Criar overlay
+    const overlay = document.createElement("div");
+    overlay.id = "descontosItemOverlay";
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+
+    // Criar modal
+    const modal = document.createElement("div");
+    modal.id = "descontosItemModal";
+    modal.style.cssText = `
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      z-index: 10001;
+    `;
+
+    // Obter descontos gerais do pedido (dos quadrados ou do modal)
+    let descontosGeraisTexto =
+      descontosGerais.length > 0
+        ? descontosGerais.join("+")
+        : item.descontos && item.descontos.length > 0
+        ? item.descontos.join("+")
+        : "Nenhum desconto geral aplicado";
+
+    // Calcular preço com descontos gerais
+    let precoComDescontosGerais = precoTabela;
+    if (descontosGerais.length > 0) {
+      descontosGerais.forEach((desc) => {
+        if (desc > 0) {
+          precoComDescontosGerais = precoComDescontosGerais * (1 - desc / 100);
+        } else if (desc < 0) {
+          precoComDescontosGerais =
+            precoComDescontosGerais * (1 + Math.abs(desc) / 100);
+        }
+      });
+    } else if (item.descontos && item.descontos.length > 0) {
+      item.descontos.forEach((desc) => {
+        if (desc > 0) {
+          precoComDescontosGerais = precoComDescontosGerais * (1 - desc / 100);
+        } else if (desc < 0) {
+          precoComDescontosGerais =
+            precoComDescontosGerais * (1 + Math.abs(desc) / 100);
+        }
+      });
+    }
+
+    modal.innerHTML = `
+      <div style="padding: 24px; border-bottom: 1px solid #e5e7eb;">
+        <h2 style="margin: 0; font-size: 20px; font-weight: 600; color: #1f2937;">
+          Descontos Específicos do Item
+        </h2>
+        <p style="margin: 8px 0 0 0; font-size: 14px; color: #6b7280;">
+          ${item.produtoNome || item.codigo || "Item"}
+        </p>
+      </div>
+      
+      <div style="padding: 24px;">
+        <div style="margin-bottom: 24px; padding: 16px; background: #f3f4f6; border-radius: 8px;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">Descontos Gerais do Pedido:</div>
+          <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${descontosGeraisTexto}</div>
+          <div style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+            Preço com descontos gerais: ${formatCurrency(
+              precoComDescontosGerais
+            )}
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 24px;">
+          <label style="display: block; font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 12px;">
+            Descontos Específicos do Item (%)
+          </label>
+          <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+            ${[1, 2, 3, 4, 5, 6, 7]
+              .map(
+                (i) => `
+              <div>
+                <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Desc ${i}</label>
+                <input type="number" id="itemDesc${i}" step="0.01" placeholder="0" 
+                       value="${descontosItemAtuais[i - 1] || ""}"
+                       style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+            Use valores positivos para desconto e negativos para acréscimo
+          </div>
+        </div>
+        
+        <div style="padding: 16px; background: #f9fafb; border-radius: 8px; margin-bottom: 24px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Preço Original</div>
+              <div style="font-size: 18px; font-weight: 600; color: #1f2937;">${formatCurrency(
+                precoTabela
+              )}</div>
+            </div>
+            <div>
+              <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Preço com Descontos</div>
+              <div id="precoComDescontosItem" style="font-size: 18px; font-weight: 600; color: #059669;">${formatCurrency(
+                precoComDescontosGerais
+              )}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px;">
+        <button id="cancelarDescontosItemBtn" style="padding: 10px 20px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer; font-size: 14px; color: #374151;">
+          Cancelar
+        </button>
+        <button id="aplicarDescontosItemBtn" style="padding: 10px 20px; border: none; background: #3b82f6; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+          Aplicar
+        </button>
+      </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Função para calcular e atualizar preço
+    const calcularPrecoItem = () => {
+      const descontosItem = [];
+      for (let i = 1; i <= 7; i++) {
+        const valor =
+          parseFloat(modal.querySelector(`#itemDesc${i}`).value) || 0;
+        if (valor !== 0) descontosItem.push(valor);
+      }
+
+      // Calcular preço: primeiro descontos gerais, depois descontos específicos do item
+      let novoPreco = precoTabela;
+
+      // Aplicar descontos gerais primeiro (dos quadrados)
+      descontosGerais.forEach((desc) => {
+        if (desc > 0) {
+          novoPreco = novoPreco * (1 - desc / 100);
+        } else if (desc < 0) {
+          novoPreco = novoPreco * (1 + Math.abs(desc) / 100);
+        }
+      });
+
+      // Se não há descontos gerais, aplicar descontos do modal (se houver)
+      if (
+        descontosGerais.length === 0 &&
+        item.descontos &&
+        item.descontos.length > 0
+      ) {
+        item.descontos.forEach((desc) => {
+          if (desc > 0) {
+            novoPreco = novoPreco * (1 - desc / 100);
+          } else if (desc < 0) {
+            novoPreco = novoPreco * (1 + Math.abs(desc) / 100);
+          }
+        });
+      }
+
+      // Depois aplicar descontos específicos do item
+      descontosItem.forEach((desc) => {
+        if (desc > 0) {
+          novoPreco = novoPreco * (1 - desc / 100);
+        } else if (desc < 0) {
+          novoPreco = novoPreco * (1 + Math.abs(desc) / 100);
+        }
+      });
+
+      const precoEl = modal.querySelector("#precoComDescontosItem");
+      if (precoEl) {
+        precoEl.textContent = formatCurrency(novoPreco);
+      }
+    };
+
+    // Event listeners para campos de desconto
+    for (let i = 1; i <= 7; i++) {
+      modal
+        .querySelector(`#itemDesc${i}`)
+        .addEventListener("input", calcularPrecoItem);
+    }
+
+    // Função para fechar modal
+    const fecharModal = () => {
+      overlay.remove();
+      modal.remove();
+    };
+
+    // Botão cancelar
+    modal
+      .querySelector("#cancelarDescontosItemBtn")
+      .addEventListener("click", fecharModal);
+
+    // Botão aplicar
+    modal
+      .querySelector("#aplicarDescontosItemBtn")
+      .addEventListener("click", () => {
+        // Coletar descontos específicos do item
+        const descontosItem = [];
+        for (let i = 1; i <= 7; i++) {
+          const valor =
+            parseFloat(modal.querySelector(`#itemDesc${i}`).value) || 0;
+          descontosItem.push(valor);
+        }
+
+        // Salvar descontos específicos do item
+        item.descontosItem = descontosItem;
+
+        // Recalcular preço
+        let novoPrecoComDesconto = precoTabela;
+
+        // Aplicar descontos gerais primeiro (dos quadrados)
+        descontosGerais.forEach((desc) => {
+          if (desc > 0) {
+            novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+          } else if (desc < 0) {
+            novoPrecoComDesconto =
+              novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+          }
+        });
+
+        // Se não há descontos gerais, aplicar descontos do modal (se houver)
+        if (
+          descontosGerais.length === 0 &&
+          item.descontos &&
+          item.descontos.length > 0
+        ) {
+          item.descontos.forEach((desc) => {
+            if (desc > 0) {
+              novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+            } else if (desc < 0) {
+              novoPrecoComDesconto =
+                novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+            }
+          });
+        }
+
+        // Depois aplicar descontos específicos do item
+        descontosItem.forEach((desc) => {
+          if (desc > 0) {
+            novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+          } else if (desc < 0) {
+            novoPrecoComDesconto =
+              novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+          }
+        });
+
+        item.precoComDesconto = novoPrecoComDesconto;
+        const ipi = item.ipi || 0;
+        const st = item.st || 0;
+        const valorIPI = (novoPrecoComDesconto * ipi) / 100;
+        const valorST = (novoPrecoComDesconto * st) / 100;
+        item.precoFinal = novoPrecoComDesconto + valorIPI + valorST;
+        item.total = novoPrecoComDesconto * item.quantidade;
+        item.totalBruto = item.precoFinal * item.quantidade;
+
+        // Sincronizar com window.orcamentoItens
+        window.orcamentoItens = orcamentoItens;
+        renderOrcamentoItens();
+        calculateTotals();
+
+        fecharModal();
+      });
+
+    // Fechar ao clicar no overlay
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        fecharModal();
+      }
+    });
+
+    // Calcular preço inicial
+    calcularPrecoItem();
   };
 
   const calculateTotals = () => {
@@ -5193,29 +6359,1285 @@ function initOrcamentoFormPage() {
   fields.valorAcrescimo?.addEventListener("input", calculateTotals);
   fields.valorDesconto?.addEventListener("input", calculateTotals);
 
+  // Busca de Produtos
+  const filtroIndustria = document.querySelector("#filtroIndustria");
+  const filtroTabelaPreco = document.querySelector("#filtroTabelaPreco");
+  const produtoSearch = document.querySelector("#produtoSearch");
+  const produtosSearchResults = document.querySelector(
+    "#produtosSearchResults"
+  );
+  const produtosResultsList = document.querySelector("#produtosResultsList");
+
+  // Carregar indústrias no filtro
+  function carregarIndustriasFiltro() {
+    if (!filtroIndustria) {
+      console.warn("⚠️ filtroIndustria não encontrado");
+      return;
+    }
+    const industrias = getIndustrias();
+    console.log(
+      "🔍 carregarIndustriasFiltro - encontradas",
+      industrias.length,
+      "indústrias"
+    );
+    filtroIndustria.innerHTML = '<option value="">Todas as indústrias</option>';
+    industrias.forEach((ind) => {
+      const option = document.createElement("option");
+      option.value = ind.id;
+      option.textContent = ind.nomeFantasia || ind.razaoSocial;
+      filtroIndustria.appendChild(option);
+    });
+  }
+
+  // Carregar tabelas de preços quando indústria mudar
+  function carregarTabelasPrecoFiltro() {
+    if (!filtroTabelaPreco || !filtroIndustria) {
+      console.warn("⚠️ filtroTabelaPreco ou filtroIndustria não encontrado");
+      return;
+    }
+    const industriaId = filtroIndustria.value;
+    filtroTabelaPreco.innerHTML = '<option value="">Todas as tabelas</option>';
+
+    if (!industriaId) {
+      filtroTabelaPreco.disabled = false;
+      // Carregar todas as tabelas
+      const industrias = getIndustrias();
+      let totalTabelas = 0;
+      industrias.forEach((ind) => {
+        const tabelas = ind.tabelasPrecos || [];
+        totalTabelas += tabelas.length;
+        tabelas.forEach((tab) => {
+          const option = document.createElement("option");
+          option.value = tab.id;
+          option.textContent = `${ind.nomeFantasia || ind.razaoSocial} | ${
+            tab.nome
+          }`;
+          filtroTabelaPreco.appendChild(option);
+        });
+      });
+      console.log(
+        "🔍 carregarTabelasPrecoFiltro - carregadas",
+        totalTabelas,
+        "tabelas (todas as indústrias)"
+      );
+      return;
+    }
+
+    filtroTabelaPreco.disabled = false;
+    const industria = getIndustrias().find((i) => i.id === industriaId);
+    const tabelas = industria?.tabelasPrecos || [];
+    console.log(
+      "🔍 carregarTabelasPrecoFiltro - indústria",
+      industriaId,
+      "- encontradas",
+      tabelas.length,
+      "tabelas"
+    );
+    tabelas.forEach((tab) => {
+      const option = document.createElement("option");
+      option.value = tab.id;
+      option.textContent = tab.nome;
+      filtroTabelaPreco.appendChild(option);
+    });
+  }
+
+  // Buscar produtos
+  function buscarProdutos() {
+    if (!produtoSearch || !produtosResultsList || !produtosSearchResults)
+      return;
+
+    const searchTerm = (produtoSearch.value || "").trim().toLowerCase();
+    const industriaId = filtroIndustria?.value || "";
+    const tabelaPrecoId = filtroTabelaPreco?.value || "";
+
+    if (!searchTerm || searchTerm.length < 2) {
+      produtosSearchResults.style.display = "none";
+      return;
+    }
+
+    // Sempre recarregar do localStorage para garantir dados atualizados
+    storage.cache = null;
+    const produtos = storage.load().produtos || [];
+    const industrias = getIndustrias();
+
+    console.log(
+      "🔍 buscarProdutos (pedido) - termo:",
+      searchTerm,
+      "- produtos no sistema:",
+      produtos.length,
+      "- indústrias:",
+      industrias.length
+    );
+
+    let resultados = produtos.filter((produto) => {
+      // Filtrar por termo de busca
+      const matchSearch =
+        (produto.nome || "").toLowerCase().includes(searchTerm) ||
+        (produto.codigo || "").toLowerCase().includes(searchTerm) ||
+        (produto.codigoOriginal || produto.sku || "")
+          .toLowerCase()
+          .includes(searchTerm);
+
+      if (!matchSearch) return false;
+
+      // Filtrar por indústria
+      if (industriaId && produto.industriaId !== industriaId) {
+        return false;
+      }
+
+      // Filtrar por tabela de preço
+      if (tabelaPrecoId && produto.tabelaPreco !== tabelaPrecoId) {
+        // Verificar se o produto está na tabela de preço selecionada
+        const industria = industrias.find(
+          (i) => i.id === (produto.industriaId || industriaId)
+        );
+        const tabela = industria?.tabelasPrecos?.find(
+          (t) => t.id === tabelaPrecoId
+        );
+        if (
+          !tabela ||
+          !tabela.produtos?.some((p) => p.produtoId === produto.id)
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    // Para cada produto, encontrar o preço na tabela de preço
+    resultados = resultados.map((produto) => {
+      const industria = industrias.find((i) => i.id === produto.industriaId);
+      let precoTabela = produto.precoVenda || 0;
+      let tabelaPrecoNome = "";
+      let industriaNome =
+        industria?.nomeFantasia || industria?.razaoSocial || "";
+      let codigoOriginal = produto.codigoOriginal || produto.sku || "-";
+      let unidade = produto.unidadeMedida || "UN";
+      let embalagem = produto.embalagem || produto.quantidadeEmbalagem || "-";
+
+      // Se há tabela de preço selecionada, buscar o preço específico
+      if (tabelaPrecoId) {
+        const tabela = industria?.tabelasPrecos?.find(
+          (t) => t.id === tabelaPrecoId
+        );
+        if (tabela) {
+          tabelaPrecoNome = tabela.nome;
+          const produtoTabela = tabela.produtos?.find(
+            (p) => p.produtoId === produto.id
+          );
+          if (produtoTabela) {
+            precoTabela = produtoTabela.preco || precoTabela;
+          }
+        }
+      } else if (produto.tabelaPreco) {
+        // Usar a tabela de preço do produto
+        const tabela = industria?.tabelasPrecos?.find(
+          (t) => t.id === produto.tabelaPreco
+        );
+        if (tabela) {
+          tabelaPrecoNome = tabela.nome;
+          const produtoTabela = tabela.produtos?.find(
+            (p) => p.produtoId === produto.id
+          );
+          if (produtoTabela) {
+            precoTabela = produtoTabela.preco || precoTabela;
+          }
+        }
+      }
+
+      return {
+        ...produto,
+        precoTabela,
+        tabelaPrecoNome,
+        industriaNome,
+        codigoOriginal,
+        unidade,
+        embalagem,
+      };
+    });
+
+    // Renderizar resultados
+    if (resultados.length === 0) {
+      produtosResultsList.innerHTML = `
+        <div style="padding: var(--space-4); text-align: center; color: var(--text-tertiary);">
+          Nenhum produto encontrado com os filtros selecionados.
+        </div>
+      `;
+      produtosSearchResults.style.display = "block";
+      return;
+    }
+
+    produtosResultsList.innerHTML = resultados
+      .map((produto) => {
+        const tagHtml =
+          produto.tabelaPrecoNome && produto.industriaNome
+            ? `<div style="margin-top: 8px;"><span style="display: inline-block; padding: 4px 12px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; font-size: 12px; color: var(--primary-600);">${produto.industriaNome} | ${produto.tabelaPrecoNome}</span></div>`
+            : "";
+
+        return `
+          <div style="padding: var(--space-3); border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background 0.2s;" 
+               onmouseover="this.style.background='rgba(102, 126, 234, 0.05)'" 
+               onmouseout="this.style.background='white'"
+               data-produto-id="${produto.id}">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <div style="flex: 1;">
+                <div style="display: flex; gap: var(--space-3); margin-bottom: var(--space-2);">
+                  <strong style="color: var(--text-primary);">Cód. ${
+                    produto.codigo || "-"
+                  }</strong>
+                  <span style="color: var(--text-secondary);">Cód. Interno: ${
+                    produto.codigoOriginal || "-"
+                  }</span>
+                  <span style="color: var(--text-secondary);">Unid: ${
+                    produto.unidade
+                  }</span>
+                  <span style="color: var(--text-secondary);">Emb: ${
+                    produto.embalagem
+                  }</span>
+                </div>
+                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-2);">
+                  ${produto.nome || produto.descricao || "-"}
+                </div>
+                ${tagHtml}
+              </div>
+              <div style="margin-left: var(--space-4); text-align: right;">
+                <div style="font-size: 18px; font-weight: bold; color: var(--primary-600);">
+                  R$ ${parseFloat(produto.precoTabela || 0)
+                    .toFixed(2)
+                    .replace(".", ",")}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    produtosSearchResults.style.display = "block";
+
+    // Otimizado: usar event delegation (apenas um listener ao invés de N listeners)
+    // Remove listener anterior se existir para evitar duplicatas
+    if (produtosResultsList._clickHandler) {
+      produtosResultsList.removeEventListener(
+        "click",
+        produtosResultsList._clickHandler
+      );
+    }
+    produtosResultsList._clickHandler = (e) => {
+      console.log("🔍 Handler de clique chamado", e.target);
+      const item = e.target.closest("[data-produto-id]");
+      console.log("🔍 Item encontrado:", item);
+      if (item) {
+        // CRÍTICO: Prevenir comportamento padrão e propagação ANTES de qualquer coisa
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        // IMPORTANTE: Salvar posição de scroll e posição do elemento ANTES de qualquer outra operação
+        const scrollY =
+          window.scrollY ||
+          window.pageYOffset ||
+          document.documentElement.scrollTop ||
+          0;
+        const itemRect = item.getBoundingClientRect();
+        console.log("📌 Posição de scroll capturada no clique:", scrollY);
+        console.log("📍 Posição do elemento:", itemRect);
+
+        const produtoId = item.getAttribute("data-produto-id");
+        console.log("🔍 Produto ID:", produtoId);
+        console.log(
+          "🔍 window.abrirProdutoModal existe?",
+          typeof window.abrirProdutoModal
+        );
+        if (produtoId && window.abrirProdutoModal) {
+          console.log("✅ Chamando abrirProdutoModal...");
+          // Chamar IMEDIATAMENTE sem setTimeout para evitar problemas
+          window.abrirProdutoModal(produtoId, scrollY, itemRect);
+        } else {
+          console.error(
+            "❌ Erro: produtoId ou abrirProdutoModal não disponível"
+          );
+        }
+        return false;
+      }
+    };
+    produtosResultsList.addEventListener(
+      "click",
+      produtosResultsList._clickHandler,
+      { capture: true } // Usar capture para garantir que seja processado primeiro
+    );
+  }
+
+  // Event listeners para busca de produtos
+  filtroIndustria?.addEventListener("change", () => {
+    carregarTabelasPrecoFiltro();
+    buscarProdutos();
+  });
+
+  filtroTabelaPreco?.addEventListener("change", buscarProdutos);
+
+  // Otimizado: usar debounce para busca
+  produtoSearch?.addEventListener("input", debounce(buscarProdutos, 300));
+
+  // Inicializar busca - usar setTimeout para garantir que o DOM está pronto
+  setTimeout(() => {
+    console.log("🔍 Inicializando filtros de busca de produtos (orcamento)...");
+    console.log("🔍 filtroIndustria existe?", !!filtroIndustria);
+    console.log("🔍 filtroTabelaPreco existe?", !!filtroTabelaPreco);
+    carregarIndustriasFiltro();
+    carregarTabelasPrecoFiltro();
+  }, 100);
+
+  // Event listeners para botões de descontos adicionais
+  const aplicarFiltrosBtn = document.querySelector("#aplicarFiltros");
+  const limparFiltrosBtn = document.querySelector("#limparFiltros");
+
+  aplicarFiltrosBtn?.addEventListener("click", () => {
+    const filtro1 = parseFloat(document.querySelector("#filtro1")?.value || 0);
+    const filtro2 = parseFloat(document.querySelector("#filtro2")?.value || 0);
+    const filtro3 = parseFloat(document.querySelector("#filtro3")?.value || 0);
+    const filtro4 = parseFloat(document.querySelector("#filtro4")?.value || 0);
+    const filtro5 = parseFloat(document.querySelector("#filtro5")?.value || 0);
+    const filtro6 = parseFloat(document.querySelector("#filtro6")?.value || 0);
+    const filtro7 = parseFloat(document.querySelector("#filtro7")?.value || 0);
+
+    // Coletar TODOS os descontos/acréscimos dos quadrados (cumulativos)
+    // Valores positivos = desconto, valores negativos = acréscimo
+    const descontosQuadrados = [
+      filtro1,
+      filtro2,
+      filtro3,
+      filtro4,
+      filtro5,
+      filtro6,
+      filtro7,
+    ].filter((d) => d !== 0); // Aceita valores positivos e negativos
+
+    if (descontosQuadrados.length === 0) {
+      window.alert("Informe pelo menos um desconto ou acréscimo para aplicar.");
+      return;
+    }
+
+    // Aplicar descontos/acréscimos aos itens
+    orcamentoItens.forEach((item) => {
+      // SEMPRE usar o preço original da tabela como base
+      const precoTabela = item.precoTabela || 0;
+
+      // Primeiro aplicar descontos específicos do item (se houver)
+      let novoPrecoComDesconto = precoTabela;
+      const descontosItem = item.descontosItem || [0, 0, 0];
+      descontosItem.forEach((desc) => {
+        if (desc > 0) {
+          novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+        } else if (desc < 0) {
+          novoPrecoComDesconto =
+            novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+        }
+      });
+
+      // Depois aplicar TODOS os descontos/acréscimos dos quadrados (cumulativo)
+      descontosQuadrados.forEach((desc) => {
+        if (desc > 0) {
+          // Desconto: reduzir o preço
+          novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+        } else if (desc < 0) {
+          // Acréscimo: aumentar o preço
+          novoPrecoComDesconto =
+            novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+        }
+      });
+
+      item.precoComDesconto = novoPrecoComDesconto;
+
+      // Recalcular IPI e ST sobre o novo preço
+      const ipi = item.ipi || 0;
+      const st = item.st || 0;
+      const valorIPI = (item.precoComDesconto * ipi) / 100;
+      const valorST = (item.precoComDesconto * st) / 100;
+      item.precoFinal = item.precoComDesconto + valorIPI + valorST;
+
+      // Atualizar totais
+      item.total = item.precoComDesconto * item.quantidade;
+      item.totalBruto = item.precoFinal * item.quantidade;
+
+      // Salvar descontos aplicados (todos os descontos dos quadrados)
+      item.descontosAplicados = [...descontosQuadrados];
+    });
+
+    // Sincronizar com window.orcamentoItens
+    window.orcamentoItens = orcamentoItens;
+    renderOrcamentoItens();
+    calculateTotals();
+  });
+
+  limparFiltrosBtn?.addEventListener("click", () => {
+    // Limpar todos os campos de filtro
+    document.querySelector("#filtro1").value = "";
+    document.querySelector("#filtro2").value = "";
+    document.querySelector("#filtro3").value = "";
+    document.querySelector("#filtro4").value = "";
+    document.querySelector("#filtro5").value = "";
+    document.querySelector("#filtro6").value = "";
+    document.querySelector("#filtro7").value = "";
+
+    // Remover TODOS os descontos e voltar ao preço original da tabela
+    orcamentoItens.forEach((item) => {
+      // Remover TODOS os descontos (quadrados, específicos do item, etc)
+      if (item.descontosAplicados) {
+        delete item.descontosAplicados;
+      }
+      if (item.descontoAdicional) {
+        delete item.descontoAdicional;
+      }
+      if (item.descontosItem) {
+        delete item.descontosItem;
+      }
+
+      // Voltar ao preço original da tabela (SEM nenhum desconto)
+      const precoTabela = item.precoTabela || 0;
+      item.precoComDesconto = precoTabela;
+
+      // Recalcular IPI e ST sobre o novo preço
+      const ipi = item.ipi || 0;
+      const st = item.st || 0;
+      const valorIPI = (item.precoComDesconto * ipi) / 100;
+      const valorST = (item.precoComDesconto * st) / 100;
+      item.precoFinal = item.precoComDesconto + valorIPI + valorST;
+
+      // Atualizar totais
+      item.total = item.precoComDesconto * item.quantidade;
+      item.totalBruto = item.precoFinal * item.quantidade;
+    });
+
+    // Sincronizar com window.orcamentoItens
+    window.orcamentoItens = orcamentoItens;
+    renderOrcamentoItens();
+    calculateTotals();
+  });
+
   // Inicialização
   refreshSelects();
   fields.data.value = new Date().toISOString().split("T")[0];
-
-  // Carregar dados se for edição
-  if (editingOrcamentoId) {
-    const orcamento = storage
-      .load()
-      .orcamentos.find((item) => item.id === editingOrcamentoId);
-    if (orcamento) {
-      formTitle.textContent = `🛒 Orçamento - Editando Nº ${orcamento.id.toUpperCase()}`;
-      fields.cliente.value = orcamento.clienteId || "";
-      fields.data.value = orcamento.data || fields.data.value;
-      fields.validade.value = orcamento.validade || "";
-      fields.descricao.value = orcamento.descricao || "";
-      fields.observacoes.value = orcamento.observacoes || "";
-      fields.condicaoPagamento.value = orcamento.condicaoPagamento || "";
-      fields.status.value = orcamento.status || "pendente";
-    }
-  }
-
-  calculateTotals();
+  renderOrcamentoItens();
 }
+
+/**
+ * Função global para abrir modal de detalhes do produto
+ * Disponível para uso em orcamento-form e pedido-form
+ */
+window.abrirProdutoModal = function (
+  produtoId,
+  scrollYOverride = null,
+  itemRect = null
+) {
+  // PREVENIR EXECUÇÕES SIMULTÂNEAS
+  if (window._abrirProdutoModalEmExecucao) {
+    console.log("⚠️ Modal já está sendo aberto, ignorando...");
+    return;
+  }
+  window._abrirProdutoModalEmExecucao = true;
+
+  try {
+    console.log("🚀 abrirProdutoModal chamado com produtoId:", produtoId);
+
+    // CRÍTICO: Capturar posição de scroll ANTES de qualquer modificação no DOM
+    const scrollY =
+      scrollYOverride !== null
+        ? scrollYOverride
+        : window.scrollY ||
+          window.pageYOffset ||
+          document.documentElement.scrollTop ||
+          0;
+
+    console.log("📌 Posição de scroll capturada:", scrollY);
+
+    // PRIMEIRO: Remover modais antigos se existirem (limpeza COMPLETA)
+    const oldOverlay = document.getElementById("produtoDetalhesOverlay");
+    const oldModal = document.getElementById("produtoDetalhesModal");
+    if (oldOverlay) {
+      console.log("Removendo overlay antigo");
+      oldOverlay.remove();
+    }
+    if (oldModal) {
+      console.log("Removendo modal antigo");
+      oldModal.remove();
+    }
+
+    // DEPOIS: Verificar se ainda existe algum modal (após limpeza)
+    const existingModal = document.getElementById("produtoDetalhesModal");
+    if (existingModal) {
+      console.log("⚠️ Modal ainda existe após remoção, forçando remoção...");
+      existingModal.remove();
+    }
+
+    const produto = storage.load().produtos.find((p) => p.id === produtoId);
+    if (!produto) {
+      console.error("❌ Produto não encontrado:", produtoId);
+      window.alert("Produto não encontrado.");
+      window._abrirProdutoModalEmExecucao = false;
+      return;
+    }
+
+    console.log("✅ Produto encontrado:", produto.nome);
+
+    // Buscar dados do produto e tabela de preço
+    const industrias = getIndustrias();
+    const industria = industrias.find((i) => i.id === produto.industriaId);
+    let precoTabela = produto.precoVenda || produto.precoTabela || 0;
+    let tabelaPrecoNome = "";
+
+    // CRÍTICO: Buscar tabela de preço do filtro selecionado OU do produto
+    const filtroTabelaPrecoEl = document.querySelector("#filtroTabelaPreco");
+    let tabelaPrecoId = filtroTabelaPrecoEl?.value || produto.tabelaPreco || "";
+
+    // CRÍTICO: Buscar IPI e ST do produto na tabela de preço
+    let ipiProduto = produto.ipi || 0;
+    let stProduto = produto.st || 0;
+    let produtoTabelaData = null;
+
+    if (tabelaPrecoId && industria?.tabelasPrecos) {
+      const tabela = industria.tabelasPrecos.find(
+        (t) => t.id === tabelaPrecoId
+      );
+      if (tabela) {
+        tabelaPrecoNome = tabela.nome;
+        produtoTabelaData = tabela.produtos?.find(
+          (p) => p.produtoId === produto.id || p.produto?.id === produto.id
+        );
+        if (produtoTabelaData) {
+          precoTabela =
+            produtoTabelaData.preco ||
+            produtoTabelaData.precoVenda ||
+            precoTabela;
+          // CRÍTICO: IPI e ST vêm da tabela de preço, não do produto diretamente
+          ipiProduto =
+            produtoTabelaData.ipi !== undefined
+              ? produtoTabelaData.ipi
+              : produto.ipi || 0;
+          stProduto =
+            produtoTabelaData.st !== undefined
+              ? produtoTabelaData.st
+              : produto.st || 0;
+        }
+      }
+    }
+
+    // Se não encontrou na tabela específica, tentar buscar na tabela padrão do produto
+    if (!produtoTabelaData && produto.tabelaPreco && industria?.tabelasPrecos) {
+      const tabela = industria.tabelasPrecos.find(
+        (t) => t.id === produto.tabelaPreco
+      );
+      if (tabela) {
+        tabelaPrecoNome = tabela.nome;
+        produtoTabelaData = tabela.produtos?.find(
+          (p) => p.produtoId === produto.id || p.produto?.id === produto.id
+        );
+        if (produtoTabelaData) {
+          precoTabela =
+            produtoTabelaData.preco ||
+            produtoTabelaData.precoVenda ||
+            precoTabela;
+          ipiProduto =
+            produtoTabelaData.ipi !== undefined
+              ? produtoTabelaData.ipi
+              : produto.ipi || 0;
+          stProduto =
+            produtoTabelaData.st !== undefined
+              ? produtoTabelaData.st
+              : produto.st || 0;
+        }
+      }
+    }
+
+    // Se ainda não encontrou, usar valores padrão do produto
+    if (!produtoTabelaData) {
+      console.log(
+        "⚠️ Produto não encontrado na tabela de preço, usando valores padrão do produto"
+      );
+    }
+
+    // Criar overlay simples - apenas um backdrop
+    const overlay = document.createElement("div");
+    overlay.id = "produtoDetalhesOverlay";
+
+    overlay.style.cssText = `
+      position: fixed !important;
+      top: 0 !important;
+    left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.75) !important;
+      backdrop-filter: blur(4px) !important;
+      z-index: 99999 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+    `;
+
+    // Guardar scroll position ANTES de qualquer modificação
+    const savedScrollY =
+      window.scrollY ||
+      window.pageYOffset ||
+      document.documentElement.scrollTop ||
+      0;
+    overlay.dataset.scrollY = savedScrollY.toString();
+
+    // Aplicar overflow hidden APENAS no body (simples)
+    const originalBodyOverflow = document.body.style.overflow || "";
+    overlay.dataset.bodyOverflow = originalBodyOverflow;
+    document.body.style.overflow = "hidden";
+
+    // Adicionar overlay ao body
+    document.body.appendChild(overlay);
+
+    // Criar modal novo - sempre centralizado
+    const modal = document.createElement("div");
+    modal.id = "produtoDetalhesModal";
+
+    // Modal sempre centralizado - SIMPLES
+    modal.style.cssText = `
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      background: white !important;
+      border-radius: 12px !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
+      z-index: 100000 !important;
+      max-width: 800px !important;
+      width: 90vw !important;
+      max-height: 90vh !important;
+      overflow-y: auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    `;
+
+    // Media query para mobile
+    if (!document.getElementById("modal-responsive-style")) {
+      const style = document.createElement("style");
+      style.id = "modal-responsive-style";
+      style.textContent = `
+        @media (max-width: 768px) {
+          #produtoDetalhesModal {
+            width: 95vw !important;
+            max-height: 95vh !important;
+          }
+        }
+        @media (max-width: 480px) {
+          #produtoDetalhesModal {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            border-radius: 0 !important;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const codigo = produto.codigo || produto.sku || "-";
+    const codigoOriginal = produto.codigoOriginal || "";
+
+    // Variáveis para cálculos - usar valores da tabela de preço
+    let quantidadeAtual = 1;
+    let ipiAtual = ipiProduto; // IPI da tabela de preço
+    let stAtual = stProduto; // ST da tabela de preço
+    const descontosAtuais = [0, 0, 0, 0, 0, 0, 0];
+
+    // Função para calcular totais
+    function calcularTotais() {
+      let precoComDesconto = precoTabela;
+
+      // Aplicar descontos/acréscimos acumulativos
+      // Valores positivos = desconto, valores negativos = acréscimo
+      descontosAtuais.forEach((desc) => {
+        if (desc > 0) {
+          // Desconto: reduzir o preço
+          precoComDesconto = precoComDesconto * (1 - desc / 100);
+        } else if (desc < 0) {
+          // Acréscimo: aumentar o preço
+          precoComDesconto = precoComDesconto * (1 + Math.abs(desc) / 100);
+        }
+      });
+
+      const precoUnit = precoComDesconto;
+      const total = precoUnit * quantidadeAtual;
+      const valorIPI = (precoComDesconto * ipiAtual) / 100;
+      const valorST = (precoComDesconto * stAtual) / 100;
+      const totalBruto =
+        total + valorIPI * quantidadeAtual + valorST * quantidadeAtual;
+
+      // Atualizar campos
+      const precoUnitEl = modal.querySelector("#calcPrecoUnit");
+      const totalEl = modal.querySelector("#calcTotal");
+      const totalBrutoEl = modal.querySelector("#calcTotalBruto");
+
+      if (precoUnitEl) precoUnitEl.textContent = formatCurrency(precoUnit);
+      if (totalEl) totalEl.textContent = formatCurrency(total);
+      if (totalBrutoEl) totalBrutoEl.textContent = formatCurrency(totalBruto);
+    }
+
+    // HTML do modal
+    modal.innerHTML = `
+    <div style="padding: 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-weight: 600; font-size: 16px; color: #1f2937; margin-bottom: 4px;">
+          ${codigo}${codigoOriginal ? ` | ${codigoOriginal}` : ""}
+        </div>
+        <div style="color: #6b7280; font-size: 14px;">${
+          produto.nome || produto.descricao || "-"
+        }</div>
+      </div>
+      <button id="modalFecharBtn" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280; padding: 4px; line-height: 1;">&times;</button>
+    </div>
+
+    <div style="padding: 24px; flex: 1; overflow-y: auto;">
+      <div style="display: grid; gap: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Tab. Preço</label>
+            <div style="font-size: 14px; color: #1f2937;">${
+              tabelaPrecoNome || "-"
+            }</div>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Preço Tab.</label>
+            <div style="font-size: 14px; font-weight: 600; color: #1f2937;">${formatCurrency(
+              precoTabela
+            )}</div>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Embalagem</label>
+            <div style="font-size: 14px; color: #1f2937;">${
+              produto.embalagem || "-"
+            }</div>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Unidade</label>
+            <div style="font-size: 14px; color: #1f2937;">${
+              produto.unidadeMedida || produto.unidade || "UN"
+            }</div>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">NCM</label>
+            <div style="font-size: 14px; color: #1f2937;">${
+              produto.ncm || "-"
+            }</div>
+          </div>
+          ${
+            industria
+              ? `
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Indústria</label>
+            <div style="font-size: 14px; color: #1f2937;">${
+              industria.nomeFantasia ||
+              industria.razaoSocial ||
+              industria.nome ||
+              "-"
+            }</div>
+          </div>
+          `
+              : ""
+          }
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">IPI (%)</label>
+            <input type="number" id="modalIPI" step="0.01" min="0" value="${ipiAtual}" 
+                   readonly
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #f3f4f6; color: #6b7280; cursor: not-allowed;" 
+                   title="IPI definido na tabela de preço - não editável" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">ST (%)</label>
+            <input type="number" id="modalST" step="0.01" min="0" value="${stAtual}" 
+                   readonly
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #f3f4f6; color: #6b7280; cursor: not-allowed;" 
+                   title="ST definido na tabela de preço - não editável" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Quantidade</label>
+            <input type="number" id="modalQuantidade" step="0.01" min="0.01" value="1" 
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Preço Unit.</label>
+            <div id="calcPrecoUnit" style="font-size: 14px; font-weight: 600; color: #1f2937; padding: 8px; background: #f3f4f6; border-radius: 6px;">${formatCurrency(
+              precoTabela
+            )}</div>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Total</label>
+            <div id="calcTotal" style="font-size: 14px; font-weight: 600; color: #1f2937; padding: 8px; background: #f3f4f6; border-radius: 6px;">${formatCurrency(
+              precoTabela
+            )}</div>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Total Bruto</label>
+            <div id="calcTotalBruto" style="font-size: 16px; font-weight: 700; color: #059669; padding: 8px; background: #f3f4f6; border-radius: 6px;">${formatCurrency(
+              precoTabela
+            )}</div>
+          </div>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 8px;">Descontos (%)</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            ${[1, 2, 3, 4, 5, 6, 7]
+              .map(
+                (i) => `
+              <input type="number" id="modalDesc${i}" step="0.01" placeholder="0" 
+                     style="width: 80px; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px;">Observação</label>
+          <textarea id="modalObservacao" rows="2" placeholder="Observações sobre o produto..." 
+                    style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; resize: vertical;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px;">
+      <button id="modalCancelarBtn" style="padding: 10px 20px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer; font-size: 14px; color: #374151;">
+        Cancelar
+      </button>
+      <button id="modalAdicionarBtn" style="padding: 10px 20px; border: none; background: #3b82f6; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+        + Adicionar
+      </button>
+    </div>
+    `;
+
+    // Adicionar modal ao body (não ao overlay) para position fixed funcionar corretamente
+    document.body.appendChild(modal);
+
+    // Função para fechar modal - SIMPLES
+    function fecharModal() {
+      // Liberar flag de execução
+      window._abrirProdutoModalEmExecucao = false;
+
+      // Restaurar overflow do body
+      document.body.style.overflow = overlay.dataset.bodyOverflow || "";
+
+      // Remover elementos
+      overlay.remove();
+      modal.remove();
+
+      // Restaurar scroll position
+      const savedScrollY = parseFloat(overlay.dataset.scrollY || "0") || 0;
+      window.scrollTo(0, savedScrollY);
+    }
+
+    // Event listeners para cálculos
+    modal.querySelector("#modalQuantidade").addEventListener("input", (e) => {
+      quantidadeAtual = parseFloat(e.target.value) || 1;
+      calcularTotais();
+    });
+
+    // IPI e ST são readonly - não precisam de listeners de input
+    // Os valores são fixos e vêm da tabela de preço
+
+    for (let i = 1; i <= 7; i++) {
+      modal.querySelector(`#modalDesc${i}`).addEventListener("input", (e) => {
+        const valor = e.target.value;
+        // Aceitar valores vazios, positivos e negativos
+        descontosAtuais[i - 1] = valor === "" ? 0 : parseFloat(valor) || 0;
+        calcularTotais();
+      });
+    }
+
+    // Botão fechar
+    modal
+      .querySelector("#modalFecharBtn")
+      .addEventListener("click", fecharModal);
+
+    // Botão cancelar
+    modal
+      .querySelector("#modalCancelarBtn")
+      .addEventListener("click", fecharModal);
+
+    // Botão adicionar
+    modal.querySelector("#modalAdicionarBtn").addEventListener("click", () => {
+      const quantidade =
+        parseFloat(modal.querySelector("#modalQuantidade").value) || 1;
+      // CRÍTICO: IPI e ST vêm da tabela de preço (valores readonly)
+      // Usar valores das variáveis ipiAtual e stAtual que já foram carregados corretamente
+      const ipi = ipiAtual; // Valor da tabela de preço (não editável)
+      const st = stAtual; // Valor da tabela de preço (não editável)
+      const observacoes = modal.querySelector("#modalObservacao").value.trim();
+
+      // Calcular descontos/acréscimos
+      // Valores positivos = desconto, valores negativos = acréscimo
+      const descontos = [];
+      for (let i = 1; i <= 7; i++) {
+        const desc =
+          parseFloat(modal.querySelector(`#modalDesc${i}`).value) || 0;
+        if (desc !== 0) descontos.push(desc); // Aceita valores positivos e negativos
+      }
+
+      // Recalcular preço com descontos/acréscimos
+      let precoComDesconto = precoTabela;
+      descontos.forEach((desc) => {
+        if (desc > 0) {
+          // Desconto: reduzir o preço
+          precoComDesconto = precoComDesconto * (1 - desc / 100);
+        } else if (desc < 0) {
+          // Acréscimo: aumentar o preço
+          precoComDesconto = precoComDesconto * (1 + Math.abs(desc) / 100);
+        }
+      });
+
+      const valorIPI = (precoComDesconto * ipi) / 100;
+      const valorST = (precoComDesconto * st) / 100;
+      const precoFinal = precoComDesconto + valorIPI + valorST;
+      const totalBruto = precoFinal * quantidade;
+
+      // Criar item
+      const novoItem = {
+        id: generateId("item"),
+        produtoId: produto.id,
+        produtoNome: produto.nome || produto.descricao,
+        codigo: codigo,
+        codigoOriginal: codigoOriginal,
+        precoTabela: precoTabela,
+        precoComDesconto: precoComDesconto,
+        precoFinal: precoFinal,
+        quantidade: quantidade,
+        tabelaPrecoNome: tabelaPrecoNome,
+        tabelaPrecoId: tabelaPrecoId,
+        ipi: ipi,
+        st: st,
+        descontos: descontos,
+        total: precoComDesconto * quantidade,
+        totalBruto: totalBruto,
+        observacoes: observacoes,
+        embalagem: produto.embalagem || "",
+        unidade: produto.unidadeMedida || produto.unidade || "",
+      };
+
+      // Sincronizar descontos do modal com os campos de filtro da página
+      if (descontos.length > 0) {
+        // Verificar se estamos em orçamento-form ou pedido-form
+        const aplicarFiltrosBtn = document.querySelector("#aplicarFiltros");
+        if (aplicarFiltrosBtn) {
+          // Limpar campos existentes primeiro
+          for (let i = 1; i <= 7; i++) {
+            const filtroEl = document.querySelector(`#filtro${i}`);
+            if (filtroEl) filtroEl.value = "";
+          }
+
+          // Preencher campos com os descontos do modal
+          descontos.forEach((desc, idx) => {
+            if (idx < 7) {
+              const filtroEl = document.querySelector(`#filtro${idx + 1}`);
+              if (filtroEl) filtroEl.value = desc.toString();
+            }
+          });
+        }
+      }
+
+      // Verificar se estamos em orçamento ou pedido
+      const isPedido =
+        typeof window.pedidoItens !== "undefined" &&
+        Array.isArray(window.pedidoItens);
+      const isOrcamento =
+        typeof orcamentoItens !== "undefined" && Array.isArray(orcamentoItens);
+
+      if (isPedido) {
+        // Verificar se o produto já existe (pelo código)
+        const itemExistente = window.pedidoItens.find(
+          (item) => item.codigo === codigo
+        );
+
+        if (itemExistente) {
+          // Produto já existe: perguntar se quer somar a quantidade
+          const quantidadeAtual = itemExistente.quantidade || 0;
+          const quantidadeNova = quantidade;
+          const confirmar = window.confirm(
+            `O produto "${
+              itemExistente.produtoNome || codigo
+            }" já está no pedido com quantidade ${quantidadeAtual}.\n\n` +
+              `Deseja adicionar mais ${quantidadeNova} unidades? (Total: ${
+                quantidadeAtual + quantidadeNova
+              })`
+          );
+
+          if (!confirmar) {
+            // Não fechar o modal, apenas cancelar a adição
+            return;
+          }
+
+          // Produto já existe: somar a quantidade
+          itemExistente.quantidade = quantidadeAtual + quantidadeNova;
+          // Atualizar descontos do modal (apenas para referência)
+          if (descontos.length > 0) {
+            itemExistente.descontos = descontos;
+          } else {
+            itemExistente.descontos = [];
+          }
+
+          // Recalcular preço considerando descontos específicos do item, descontos dos quadrados e descontos do modal
+          let novoPrecoComDesconto = itemExistente.precoTabela || 0;
+
+          // Primeiro aplicar descontos específicos do item (se houver)
+          const descontosItem = itemExistente.descontosItem || [0, 0, 0];
+          descontosItem.forEach((desc) => {
+            if (desc > 0) {
+              novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+            } else if (desc < 0) {
+              novoPrecoComDesconto =
+                novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+            }
+          });
+
+          // Depois aplicar descontos dos quadrados (se houver)
+          if (
+            itemExistente.descontosAplicados &&
+            itemExistente.descontosAplicados.length > 0
+          ) {
+            itemExistente.descontosAplicados.forEach((desc) => {
+              if (desc > 0) {
+                novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+              } else if (desc < 0) {
+                novoPrecoComDesconto =
+                  novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+              }
+            });
+          }
+          // Se não há descontos dos quadrados, aplicar descontos/acréscimos do modal
+          else if (descontos.length > 0) {
+            descontos.forEach((desc) => {
+              if (desc > 0) {
+                novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+              } else if (desc < 0) {
+                novoPrecoComDesconto =
+                  novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+              }
+            });
+          }
+
+          itemExistente.precoComDesconto = novoPrecoComDesconto;
+          const valorIPI = (novoPrecoComDesconto * ipi) / 100;
+          const valorST = (novoPrecoComDesconto * st) / 100;
+          itemExistente.precoFinal = novoPrecoComDesconto + valorIPI + valorST;
+          // Recalcular total do item existente
+          itemExistente.total =
+            itemExistente.precoComDesconto * itemExistente.quantidade;
+          itemExistente.totalBruto =
+            itemExistente.precoFinal * itemExistente.quantidade;
+
+          // Atualizar observações se houver (opcional: concatenar ou substituir)
+          if (observacoes) {
+            itemExistente.observacoes = itemExistente.observacoes
+              ? `${itemExistente.observacoes} | ${observacoes}`
+              : observacoes;
+          }
+          // Sincronizar com pedidoItens local
+          pedidoItens = window.pedidoItens;
+        } else {
+          // Produto novo: adicionar normalmente
+          window.pedidoItens.push(novoItem);
+          // Sincronizar com pedidoItens local
+          pedidoItens = window.pedidoItens;
+        }
+
+        if (typeof window.renderPedidoItens === "function") {
+          window.renderPedidoItens();
+        }
+        if (typeof window.calculateTotalsPedido === "function") {
+          window.calculateTotalsPedido();
+        } else if (typeof calculateTotals === "function") {
+          calculateTotals();
+        }
+      } else if (isOrcamento) {
+        // Obter orcamentoItens do escopo global ou local
+        const orcamentoItensLocal =
+          typeof window.orcamentoItens !== "undefined" &&
+          Array.isArray(window.orcamentoItens)
+            ? window.orcamentoItens
+            : orcamentoItens || [];
+        // Verificar se o produto já existe (pelo código)
+        const itemExistente = orcamentoItensLocal.find(
+          (item) => item.codigo === codigo
+        );
+
+        if (itemExistente) {
+          // Produto já existe: perguntar se quer somar a quantidade
+          const quantidadeAtual = itemExistente.quantidade || 0;
+          const quantidadeNova = quantidade;
+          const confirmar = window.confirm(
+            `O produto "${
+              itemExistente.produtoNome || codigo
+            }" já está no orçamento com quantidade ${quantidadeAtual}.\n\n` +
+              `Deseja adicionar mais ${quantidadeNova} unidades? (Total: ${
+                quantidadeAtual + quantidadeNova
+              })`
+          );
+
+          if (!confirmar) {
+            // Não fechar o modal, apenas cancelar a adição
+            return;
+          }
+
+          // Produto já existe: somar a quantidade
+          itemExistente.quantidade = quantidadeAtual + quantidadeNova;
+          // Atualizar descontos do modal (apenas para referência)
+          if (descontos.length > 0) {
+            itemExistente.descontos = descontos;
+          } else {
+            itemExistente.descontos = [];
+          }
+
+          // Recalcular preço considerando descontos específicos do item, descontos dos quadrados e descontos do modal
+          let novoPrecoComDesconto = itemExistente.precoTabela || 0;
+
+          // Primeiro aplicar descontos específicos do item (se houver)
+          const descontosItem = itemExistente.descontosItem || [0, 0, 0];
+          descontosItem.forEach((desc) => {
+            if (desc > 0) {
+              novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+            } else if (desc < 0) {
+              novoPrecoComDesconto =
+                novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+            }
+          });
+
+          // Depois aplicar descontos dos quadrados (se houver)
+          if (
+            itemExistente.descontosAplicados &&
+            itemExistente.descontosAplicados.length > 0
+          ) {
+            itemExistente.descontosAplicados.forEach((desc) => {
+              if (desc > 0) {
+                novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+              } else if (desc < 0) {
+                novoPrecoComDesconto =
+                  novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+              }
+            });
+          }
+          // Se não há descontos dos quadrados, aplicar descontos/acréscimos do modal
+          else if (descontos.length > 0) {
+            descontos.forEach((desc) => {
+              if (desc > 0) {
+                novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+              } else if (desc < 0) {
+                novoPrecoComDesconto =
+                  novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+              }
+            });
+          }
+
+          itemExistente.precoComDesconto = novoPrecoComDesconto;
+          const valorIPI = (novoPrecoComDesconto * ipi) / 100;
+          const valorST = (novoPrecoComDesconto * st) / 100;
+          itemExistente.precoFinal = novoPrecoComDesconto + valorIPI + valorST;
+          // Recalcular total do item existente
+          itemExistente.total =
+            itemExistente.precoComDesconto * itemExistente.quantidade;
+          itemExistente.totalBruto =
+            itemExistente.precoFinal * itemExistente.quantidade;
+
+          // Atualizar observações se houver (opcional: concatenar ou substituir)
+          if (observacoes) {
+            itemExistente.observacoes = itemExistente.observacoes
+              ? `${itemExistente.observacoes} | ${observacoes}`
+              : observacoes;
+          }
+        } else {
+          // Produto novo: adicionar normalmente
+          orcamentoItensLocal.push(novoItem);
+        }
+
+        // Sincronizar com window.orcamentoItens e variável local
+        window.orcamentoItens = orcamentoItensLocal;
+        orcamentoItens = orcamentoItensLocal;
+
+        if (typeof window.renderOrcamentoItens === "function") {
+          window.renderOrcamentoItens();
+        } else {
+          renderOrcamentoItens();
+        }
+        if (typeof window.calculateTotals === "function") {
+          window.calculateTotals();
+        } else if (typeof calculateTotals === "function") {
+          calculateTotals();
+        }
+      }
+
+      fecharModal();
+
+      // Limpar busca
+      const produtoSearch = document.querySelector("#produtoSearch");
+      const produtosSearchResults = document.querySelector(
+        "#produtosSearchResults"
+      );
+      if (produtoSearch) produtoSearch.value = "";
+      if (produtosSearchResults) produtosSearchResults.style.display = "none";
+    });
+
+    // Fechar ao clicar no overlay
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        fecharModal();
+      }
+    });
+
+    // Fechar com ESC
+    const escHandler = (e) => {
+      if (e.key === "Escape") {
+        fecharModal();
+        document.removeEventListener("keydown", escHandler);
+      }
+    };
+    document.addEventListener("keydown", escHandler);
+
+    // Calcular valores iniciais
+    calcularTotais();
+
+    // Focar no campo quantidade
+    setTimeout(() => {
+      const quantidadeInput = modal.querySelector("#modalQuantidade");
+      if (quantidadeInput) {
+        quantidadeInput.focus();
+      }
+    }, 100);
+  } catch (error) {
+    console.error("❌ Erro ao abrir modal:", error);
+    console.error("Stack trace:", error.stack);
+
+    // CRÍTICO: Resetar flag mesmo em caso de erro
+    window._abrirProdutoModalEmExecucao = false;
+
+    // Limpar qualquer overlay/modal parcial criado
+    const errorOverlay = document.getElementById("produtoDetalhesOverlay");
+    const errorModal = document.getElementById("produtoDetalhesModal");
+    if (errorOverlay) errorOverlay.remove();
+    if (errorModal) errorModal.remove();
+
+    // Restaurar estilos do body em caso de erro
+    document.body.style.overflow = overlay?.dataset?.bodyOverflow || "";
+    document.documentElement.style.overflow =
+      overlay?.dataset?.htmlOverflow || "";
+
+    window.alert(
+      "Erro ao abrir modal do produto. Verifique o console para mais detalhes."
+    );
+  }
+};
 
 /**
  * Pedido Form Page - Página separada para criar/editar pedidos
@@ -5234,11 +7656,25 @@ function initPedidosPage() {
     if (removeBtn) removeBtn.disabled = !hasSelection;
   };
 
-  const renderPedidos = () => {
+  const renderPedidos = async () => {
     if (!listContainer) return;
 
-    const state = storage.load();
-    const pedidos = state.pedidos || [];
+    // Carregar pedidos da API ou localStorage
+    let pedidos = [];
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        const response = await API.getPedidos();
+        pedidos = Array.isArray(response) ? response : response.data || [];
+      } else {
+        const state = storage.load();
+        pedidos = state.pedidos || [];
+      }
+    } catch (error) {
+      console.error("Erro ao carregar pedidos:", error);
+      const state = storage.load();
+      pedidos = state.pedidos || [];
+    }
 
     if (pedidos.length === 0) {
       listContainer.innerHTML = `
@@ -5247,6 +7683,7 @@ function initPedidosPage() {
           <p>Clique em "Novo pedido" para começar.</p>
         </div>
       `;
+      updateActionsState();
       return;
     }
 
@@ -5388,7 +7825,7 @@ function initPedidosPage() {
           checkbox.dispatchEvent(new Event("change", { bubbles: true }));
         }
       });
-      
+
       // Double click para editar
       row.addEventListener("dblclick", (e) => {
         // Não editar se clicou no checkbox ou botão
@@ -5398,7 +7835,7 @@ function initPedidosPage() {
         ) {
           return;
         }
-        
+
         const pedidoId = row.getAttribute("data-id");
         if (pedidoId) {
           // Selecionar o pedido
@@ -5418,9 +7855,17 @@ function initPedidosPage() {
   };
 
   // Event listeners
-  openBtn?.addEventListener("click", () => {
-    window.location.href = "pedido-form.html";
-  });
+  if (openBtn) {
+    console.log("✅ Botão pedidoCriar encontrado, adicionando listener");
+    openBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("✅ Click no botão pedidoCriar detectado");
+      window.location.href = "pedido-form.html";
+    });
+  } else {
+    console.error("❌ Botão #pedidoCriar não encontrado!");
+  }
 
   editBtn?.addEventListener("click", () => {
     if (!validateSingleSelection("edit")) {
@@ -5434,14 +7879,28 @@ function initPedidosPage() {
     window.location.href = "pedido-form.html";
   });
 
-  removeBtn?.addEventListener("click", () => {
+  removeBtn?.addEventListener("click", async () => {
     if (!selectedPedidoId) {
       window.alert("Selecione um pedido para remover.");
       return;
     }
 
-    const state = storage.load();
-    const pedido = state.pedidos?.find((p) => p.id === selectedPedidoId);
+    // Buscar pedido
+    let pedido;
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        pedido = await API.getPedido(selectedPedidoId);
+      } else {
+        const state = storage.load();
+        pedido = state.pedidos?.find((p) => p.id === selectedPedidoId);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar pedido:", error);
+      const state = storage.load();
+      pedido = state.pedidos?.find((p) => p.id === selectedPedidoId);
+    }
+
     if (!pedido) {
       window.alert("Pedido não encontrado.");
       return;
@@ -5455,14 +7914,23 @@ function initPedidosPage() {
 
     if (!confirmacao) return;
 
-    storage.update((draft) => {
-      draft.pedidos =
-        draft.pedidos?.filter((p) => p.id !== selectedPedidoId) || [];
-    });
-
-    selectedPedidoId = "";
-    renderPedidos();
-    window.alert("Pedido removido com sucesso!");
+    try {
+      const API = window.oursalesAPI;
+      if (API) {
+        await API.deletePedido(selectedPedidoId);
+      } else {
+        storage.update((draft) => {
+          draft.pedidos =
+            draft.pedidos?.filter((p) => p.id !== selectedPedidoId) || [];
+        });
+      }
+      selectedPedidoId = "";
+      await renderPedidos();
+      window.alert("Pedido removido com sucesso!");
+    } catch (error) {
+      console.error("Erro ao remover pedido:", error);
+      window.alert("Erro ao remover pedido: " + (error.message || "Erro desconhecido"));
+    }
   });
 
   // Event listener para seleção
@@ -5516,6 +7984,13 @@ function initPedidosPage() {
 }
 
 function initPedidoFormPage() {
+  // Garantir que o scroll não esteja bloqueado (limpeza de resquícios do modal)
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.width = "";
+
   const form = document.querySelector("#pedidoForm");
   if (!form) return;
 
@@ -5555,6 +8030,9 @@ function initPedidoFormPage() {
     window.sessionStorage.removeItem("oursales:editPedido");
   }
 
+  // Tornar pedidoItens acessível globalmente para o modal
+  window.pedidoItens = pedidoItens;
+
   // Funções auxiliares
   const refreshSelects = () => {
     fillClientesSelect(fields.cliente);
@@ -5567,7 +8045,7 @@ function initPedidoFormPage() {
     const desconto = Number.parseFloat(fields.valorDesconto.value) || 0;
 
     let subtotal = 0;
-    pedidoItens.forEach((item) => {
+    window.pedidoItens.forEach((item) => {
       subtotal += (item.precoFinal || 0) * (item.quantidade || 0);
     });
 
@@ -5583,9 +8061,10 @@ function initPedidoFormPage() {
     const totalDescontoEl = document.querySelector("#totalDesconto");
     const totalFinalEl = document.querySelector("#totalFinal");
 
-    if (totalItensEl) totalItensEl.textContent = pedidoItens.length.toFixed(2);
+    if (totalItensEl)
+      totalItensEl.textContent = window.pedidoItens.length.toFixed(2);
     if (totalProdutosEl)
-      totalProdutosEl.textContent = pedidoItens
+      totalProdutosEl.textContent = window.pedidoItens
         .reduce((sum, item) => sum + (item.quantidade || 0), 0)
         .toFixed(2);
     if (totalSemImpostosEl)
@@ -5596,6 +8075,296 @@ function initPedidoFormPage() {
     if (totalDescontoEl) totalDescontoEl.textContent = formatCurrency(desconto);
     if (totalFinalEl) totalFinalEl.textContent = formatCurrency(totalFinal);
   };
+
+  // Função para calcular totais do pedido (tornar acessível globalmente)
+  window.calculateTotalsPedido = calculateTotals;
+
+  // Renderizar itens do pedido
+  function renderPedidoItens() {
+    const tbody = document.querySelector("#pedidoItensList");
+    if (!tbody) return;
+
+    if (window.pedidoItens.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="10" class="empty-state">
+            Nenhum produto adicionado neste pedido!
+          </td>
+        </tr>
+      `;
+
+      // Atualizar total da tabela
+      const tabelaTotalEl = document.querySelector("#tabelaTotalPedido");
+      if (tabelaTotalEl) {
+        tabelaTotalEl.textContent = formatCurrency(0);
+      }
+
+      return;
+    }
+
+    // Buscar informações de indústria para cada produto
+    const industrias = getIndustrias();
+
+    tbody.innerHTML = window.pedidoItens
+      .map((item, index) => {
+        // Buscar indústria do produto
+        const produto = storage
+          .load()
+          .produtos.find((p) => p.id === item.produtoId);
+        const industria = produto
+          ? industrias.find((i) => i.id === produto.industriaId)
+          : null;
+        const industriaNome = industria
+          ? industria.nomeFantasia || industria.razaoSocial || "-"
+          : "-";
+
+        // Descontos específicos do item (formato: [5, 3, 0, 0, 0, 0, 0] -> "5+3+0+0+0+0+0")
+        const descontosItem = item.descontosItem || [0, 0, 0, 0, 0, 0, 0];
+        const descontosItemTexto = descontosItem.join("+");
+        const temDescontosItem = descontosItem.some((d) => d !== 0);
+
+        return `
+        <tr>
+          <td>
+            <input type="checkbox" />
+          </td>
+          <td style="position: relative; vertical-align: top;">
+            <div style="margin-bottom: 4px;">
+              <button 
+                type="button" 
+                onclick="window.editarDescontosItemPedido && window.editarDescontosItemPedido(${index})"
+                style="background: ${
+                  temDescontosItem ? "#3b82f6" : "#f3f4f6"
+                }; color: ${
+          temDescontosItem ? "white" : "#6b7280"
+        }; border: 1px solid ${
+          temDescontosItem ? "#3b82f6" : "#d1d5db"
+        }; cursor: pointer; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 500;"
+                title="Editar descontos específicos do item"
+              >
+                ${temDescontosItem ? descontosItemTexto : "0+0+0+0+0+0+0"}
+              </button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              ${item.codigo || "-"}
+              <button 
+                type="button" 
+                onclick="window.abrirObservacaoItemPedido && window.abrirObservacaoItemPedido(${index})"
+                style="background: none; border: none; cursor: pointer; padding: 2px; font-size: 14px; color: ${
+                  (item.observacaoItem || "").trim().length > 0
+                    ? "#dc2626"
+                    : "#6b7280"
+                };"
+                title="${
+                  (item.observacaoItem || "").trim().length > 0
+                    ? "Editar observação"
+                    : "Adicionar observação"
+                }"
+              >
+                💬
+              </button>
+            </div>
+            ${
+              (item.observacaoItem || "").trim().length > 0
+                ? `
+              <div style="color: #dc2626; font-size: 12px; margin-top: 4px; padding: 4px; background: rgba(220, 38, 38, 0.1); border-radius: 4px; word-break: break-word; white-space: normal; line-height: 1.4;">
+                ${item.observacaoItem}
+              </div>
+            `
+                : ""
+            }
+          </td>
+          <td style="vertical-align: top;">${item.produtoNome || "-"}</td>
+          <td style="vertical-align: top;">${industriaNome}</td>
+          <td style="vertical-align: top;">-</td>
+          <td style="vertical-align: top;">${formatCurrency(
+            (() => {
+              // Calcular preço da tabela dinâmico
+              // Prioridade: descontos específicos do item + descontos aplicados dos quadrados > descontos do modal > preço original
+              let precoTabelaDinamico = item.precoTabela || 0;
+
+              // Se há descontos específicos do item ou descontos aplicados dos quadrados, recalcular
+              const temDescontosItem =
+                item.descontosItem && item.descontosItem.some((d) => d !== 0);
+              const temDescontosQuadrados =
+                item.descontosAplicados && item.descontosAplicados.length > 0;
+              const temDescontosModal =
+                item.descontos && item.descontos.length > 0;
+
+              if (
+                temDescontosItem ||
+                temDescontosQuadrados ||
+                temDescontosModal
+              ) {
+                precoTabelaDinamico =
+                  item.precoComDesconto || precoTabelaDinamico;
+              }
+              return precoTabelaDinamico;
+            })()
+          )}</td>
+          <td style="vertical-align: top;">${formatCurrency(
+            item.precoFinal || 0
+          )}</td>
+          <td style="vertical-align: top;">
+            <input type="number" min="0" step="0.01" value="${
+              item.quantidade || 1
+            }" 
+                   style="width: 80px; padding: 4px;" 
+                   onchange="window.atualizarQuantidadePedido && window.atualizarQuantidadePedido(${index}, this.value)">
+          </td>
+          <td style="vertical-align: top;">0</td>
+          <td style="vertical-align: top;">${formatCurrency(
+            (item.precoFinal || 0) * (item.quantidade || 0)
+          )}</td>
+        </tr>
+      `;
+      })
+      .join("");
+
+    // Atualizar total da tabela
+    const total = window.pedidoItens.reduce(
+      (sum, item) => sum + (item.precoFinal || 0) * (item.quantidade || 0),
+      0
+    );
+    const tabelaTotalEl = document.querySelector("#tabelaTotalPedido");
+    if (tabelaTotalEl) {
+      tabelaTotalEl.textContent = formatCurrency(total);
+    }
+  }
+
+  // Tornar função de renderização acessível globalmente
+  window.renderPedidoItens = renderPedidoItens;
+
+  // Função para atualizar quantidade do item do pedido
+  window.atualizarQuantidadePedido = function (index, quantidade) {
+    if (!window.pedidoItens || !Array.isArray(window.pedidoItens)) {
+      console.error("window.pedidoItens não está disponível");
+      return;
+    }
+    window.pedidoItens[index].quantidade = parseFloat(quantidade) || 0;
+    // Atualizar total do item
+    window.pedidoItens[index].total =
+      window.pedidoItens[index].precoComDesconto *
+      window.pedidoItens[index].quantidade;
+    window.pedidoItens[index].totalBruto =
+      window.pedidoItens[index].precoFinal *
+      window.pedidoItens[index].quantidade;
+    // Sincronizar com pedidoItens local
+    pedidoItens[index] = window.pedidoItens[index];
+    renderPedidoItens();
+    calculateTotals();
+  };
+
+  // Função para remover item do pedido
+  window.removerItemPedido = function (index) {
+    if (!window.pedidoItens || !Array.isArray(window.pedidoItens)) {
+      console.error("window.pedidoItens não está disponível");
+      return;
+    }
+    window.pedidoItens.splice(index, 1);
+    // Sincronizar com pedidoItens local
+    pedidoItens = window.pedidoItens;
+    renderPedidoItens();
+    calculateTotals();
+  };
+
+  window.abrirObservacaoItemPedido = function (index) {
+    if (!window.pedidoItens || !Array.isArray(window.pedidoItens)) {
+      console.error("window.pedidoItens não está disponível");
+      return;
+    }
+    const item = window.pedidoItens[index];
+    const observacaoAtual = item.observacaoItem || "";
+    const novaObservacao = window.prompt(
+      "Observação específica do item:",
+      observacaoAtual
+    );
+
+    if (novaObservacao !== null) {
+      item.observacaoItem = novaObservacao.trim();
+      // Sincronizar com pedidoItens local
+      pedidoItens[index] = window.pedidoItens[index];
+      renderPedidoItens();
+    }
+  };
+
+  window.editarDescontosItemPedido = function (index) {
+    if (!window.pedidoItens || !Array.isArray(window.pedidoItens)) {
+      console.error("window.pedidoItens não está disponível");
+      return;
+    }
+    const item = window.pedidoItens[index];
+    const descontosAtuais = item.descontosItem || [0, 0, 0];
+    const descontosTexto = descontosAtuais.join("+");
+
+    const novoTexto = window.prompt(
+      "Descontos específicos do item (formato: 5+3+0, use valores negativos para acréscimo):",
+      descontosTexto
+    );
+
+    if (novoTexto !== null) {
+      // Parse do texto (ex: "5+3+0" ou "5+-3+0")
+      const partes = novoTexto.split("+").map((p) => parseFloat(p.trim()) || 0);
+      // Garantir que temos 3 valores
+      const descontos = [partes[0] || 0, partes[1] || 0, partes[2] || 0];
+
+      item.descontosItem = descontos;
+
+      // Recalcular preço com os novos descontos específicos do item
+      const precoTabela = item.precoTabela || 0;
+      let novoPrecoComDesconto = precoTabela;
+
+      // Aplicar descontos específicos do item primeiro
+      descontos.forEach((desc) => {
+        if (desc > 0) {
+          novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+        } else if (desc < 0) {
+          novoPrecoComDesconto =
+            novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+        }
+      });
+
+      // Depois aplicar descontos dos quadrados (se houver)
+      if (item.descontosAplicados && item.descontosAplicados.length > 0) {
+        item.descontosAplicados.forEach((desc) => {
+          if (desc > 0) {
+            novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+          } else if (desc < 0) {
+            novoPrecoComDesconto =
+              novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+          }
+        });
+      }
+      // Se não há descontos dos quadrados, aplicar descontos do modal
+      else if (item.descontos && item.descontos.length > 0) {
+        item.descontos.forEach((desc) => {
+          if (desc > 0) {
+            novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+          } else if (desc < 0) {
+            novoPrecoComDesconto =
+              novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+          }
+        });
+      }
+
+      item.precoComDesconto = novoPrecoComDesconto;
+      const ipi = item.ipi || 0;
+      const st = item.st || 0;
+      const valorIPI = (novoPrecoComDesconto * ipi) / 100;
+      const valorST = (novoPrecoComDesconto * st) / 100;
+      item.precoFinal = novoPrecoComDesconto + valorIPI + valorST;
+      item.total = novoPrecoComDesconto * item.quantidade;
+      item.totalBruto = item.precoFinal * item.quantidade;
+
+      // Sincronizar com pedidoItens local
+      pedidoItens[index] = window.pedidoItens[index];
+      renderPedidoItens();
+      calculateTotals();
+    }
+  };
+
+  // Função para calcular totais do pedido (tornar acessível globalmente)
+  window.calculateTotalsPedido = calculateTotals;
 
   // Event Listeners
   form.addEventListener("submit", (e) => {
@@ -5812,9 +8581,462 @@ function initPedidoFormPage() {
   fields.valorAcrescimo?.addEventListener("input", calculateTotals);
   fields.valorDesconto?.addEventListener("input", calculateTotals);
 
-  // Inicialização
-  refreshSelects();
-  fields.dataVenda.value = new Date().toISOString().split("T")[0];
+  // === BUSCA DE PRODUTOS (similar ao orçamento) ===
+  const filtroIndustria = document.querySelector("#filtroIndustria");
+  const filtroTabelaPreco = document.querySelector("#filtroTabelaPreco");
+  const produtoSearch = document.querySelector("#produtoSearch");
+  const produtosSearchResults = document.querySelector(
+    "#produtosSearchResults"
+  );
+  const produtosResultsList = document.querySelector("#produtosResultsList");
+
+  // Carregar indústrias no filtro
+  function carregarIndustriasFiltro() {
+    const industrias = getIndustrias();
+    if (!filtroIndustria) {
+      console.warn("⚠️ filtroIndustria não encontrado");
+      return;
+    }
+    console.log(
+      "🔍 carregarIndustriasFiltro - encontradas",
+      industrias.length,
+      "indústrias"
+    );
+    filtroIndustria.innerHTML = '<option value="">Todas as indústrias</option>';
+    industrias.forEach((ind) => {
+      const option = document.createElement("option");
+      option.value = ind.id;
+      option.textContent =
+        ind.nomeFantasia || ind.razaoSocial || ind.nome || "-";
+      filtroIndustria.appendChild(option);
+    });
+  }
+
+  // Carregar tabelas de preço no filtro
+  function carregarTabelasPrecoFiltro() {
+    if (!filtroTabelaPreco || !filtroIndustria) {
+      console.warn("⚠️ filtroTabelaPreco ou filtroIndustria não encontrado");
+      return;
+    }
+    const industriaId = filtroIndustria.value;
+    filtroTabelaPreco.innerHTML = '<option value="">Todas as tabelas</option>';
+
+    if (!industriaId) {
+      filtroTabelaPreco.disabled = false;
+      // Carregar todas as tabelas
+      const industrias = getIndustrias();
+      let totalTabelas = 0;
+      industrias.forEach((ind) => {
+        const tabelas = ind.tabelasPrecos || [];
+        totalTabelas += tabelas.length;
+        tabelas.forEach((tab) => {
+          const option = document.createElement("option");
+          option.value = tab.id;
+          option.textContent = `${ind.nomeFantasia || ind.razaoSocial} | ${
+            tab.nome
+          }`;
+          filtroTabelaPreco.appendChild(option);
+        });
+      });
+      console.log(
+        "🔍 carregarTabelasPrecoFiltro - carregadas",
+        totalTabelas,
+        "tabelas (todas as indústrias)"
+      );
+      return;
+    }
+
+    filtroTabelaPreco.disabled = false;
+    const industria = getIndustrias().find((i) => i.id === industriaId);
+    const tabelas = industria?.tabelasPrecos || [];
+    console.log(
+      "🔍 carregarTabelasPrecoFiltro - indústria",
+      industriaId,
+      "- encontradas",
+      tabelas.length,
+      "tabelas"
+    );
+    tabelas.forEach((tab) => {
+      const option = document.createElement("option");
+      option.value = tab.id;
+      option.textContent = tab.nome;
+      filtroTabelaPreco.appendChild(option);
+    });
+  }
+
+  // Buscar produtos
+  function buscarProdutos() {
+    if (!produtoSearch || !produtosResultsList || !produtosSearchResults)
+      return;
+
+    const searchTerm = (produtoSearch.value || "").trim().toLowerCase();
+    const industriaId = filtroIndustria?.value || "";
+    const tabelaPrecoId = filtroTabelaPreco?.value || "";
+
+    if (!searchTerm || searchTerm.length < 2) {
+      produtosSearchResults.style.display = "none";
+      return;
+    }
+
+    // Sempre recarregar do localStorage para garantir dados atualizados
+    storage.cache = null;
+    const produtos = storage.load().produtos || [];
+    const industrias = getIndustrias();
+
+    console.log(
+      "🔍 buscarProdutos (pedido) - termo:",
+      searchTerm,
+      "- produtos no sistema:",
+      produtos.length,
+      "- indústrias:",
+      industrias.length
+    );
+
+    let resultados = produtos.filter((produto) => {
+      // Filtrar por termo de busca
+      const matchSearch =
+        (produto.nome || "").toLowerCase().includes(searchTerm) ||
+        (produto.codigo || "").toLowerCase().includes(searchTerm) ||
+        (produto.codigoOriginal || produto.sku || "")
+          .toLowerCase()
+          .includes(searchTerm);
+
+      if (!matchSearch) return false;
+
+      // Filtrar por indústria
+      if (industriaId && produto.industriaId !== industriaId) {
+        return false;
+      }
+
+      // Filtrar por tabela de preço
+      if (tabelaPrecoId && produto.tabelaPreco !== tabelaPrecoId) {
+        // Verificar se o produto está na tabela de preço selecionada
+        const industria = industrias.find(
+          (i) => i.id === (produto.industriaId || industriaId)
+        );
+        const tabela = industria?.tabelasPrecos?.find(
+          (t) => t.id === tabelaPrecoId
+        );
+        if (
+          !tabela ||
+          !tabela.produtos?.some((p) => p.produtoId === produto.id)
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    // Para cada produto, encontrar o preço na tabela de preço
+    resultados = resultados.map((produto) => {
+      const industria = industrias.find((i) => i.id === produto.industriaId);
+      let precoTabela = produto.precoVenda || 0;
+      let tabelaPrecoNome = "";
+      let industriaNome =
+        industria?.nomeFantasia || industria?.razaoSocial || "";
+      let codigoOriginal = produto.codigoOriginal || produto.sku || "-";
+      let unidade = produto.unidadeMedida || "UN";
+      let embalagem = produto.embalagem || produto.quantidadeEmbalagem || "-";
+
+      // Se há tabela de preço selecionada, buscar o preço específico
+      if (tabelaPrecoId) {
+        const tabela = industria?.tabelasPrecos?.find(
+          (t) => t.id === tabelaPrecoId
+        );
+        if (tabela) {
+          tabelaPrecoNome = tabela.nome;
+          const produtoTabela = tabela.produtos?.find(
+            (p) => p.produtoId === produto.id
+          );
+          if (produtoTabela) {
+            precoTabela = produtoTabela.preco || precoTabela;
+          }
+        }
+      } else if (produto.tabelaPreco) {
+        // Usar a tabela de preço do produto
+        const tabela = industria?.tabelasPrecos?.find(
+          (t) => t.id === produto.tabelaPreco
+        );
+        if (tabela) {
+          tabelaPrecoNome = tabela.nome;
+          const produtoTabela = tabela.produtos?.find(
+            (p) => p.produtoId === produto.id
+          );
+          if (produtoTabela) {
+            precoTabela = produtoTabela.preco || precoTabela;
+          }
+        }
+      }
+
+      return {
+        ...produto,
+        precoTabela,
+        tabelaPrecoNome,
+        industriaNome,
+        codigoOriginal,
+        unidade,
+        embalagem,
+      };
+    });
+
+    // Renderizar resultados
+    if (resultados.length === 0) {
+      produtosResultsList.innerHTML = `
+        <div style="padding: var(--space-4); text-align: center; color: var(--text-tertiary);">
+          Nenhum produto encontrado com os filtros selecionados.
+        </div>
+      `;
+      produtosSearchResults.style.display = "block";
+      return;
+    }
+
+    produtosResultsList.innerHTML = resultados
+      .map((produto) => {
+        const tagHtml =
+          produto.tabelaPrecoNome && produto.industriaNome
+            ? `<div style="margin-top: 8px;"><span style="display: inline-block; padding: 4px 12px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; font-size: 12px; color: var(--primary-600);">${produto.industriaNome} | ${produto.tabelaPrecoNome}</span></div>`
+            : "";
+
+        return `
+          <div style="padding: var(--space-3); border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background 0.2s;" 
+               onmouseover="this.style.background='rgba(102, 126, 234, 0.05)'" 
+               onmouseout="this.style.background='white'"
+               data-produto-id="${produto.id}">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <div style="flex: 1;">
+                <div style="display: flex; gap: var(--space-3); margin-bottom: var(--space-2);">
+                  <strong style="color: var(--text-primary);">Cód. ${
+                    produto.codigo || "-"
+                  }</strong>
+                  <span style="color: var(--text-secondary);">Cód. Interno: ${
+                    produto.codigoOriginal || "-"
+                  }</span>
+                  <span style="color: var(--text-secondary);">Unid: ${
+                    produto.unidade || "-"
+                  }</span>
+                  <span style="color: var(--text-secondary);">Emb: ${
+                    produto.embalagem || "-"
+                  }</span>
+                </div>
+                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-2);">
+                  ${produto.nome || produto.descricao || "-"}
+                </div>
+                ${tagHtml}
+              </div>
+              <div style="margin-left: var(--space-4); text-align: right;">
+                <div style="font-size: 18px; font-weight: bold; color: var(--primary-600);">
+                  R$ ${parseFloat(produto.precoTabela || 0)
+                    .toFixed(2)
+                    .replace(".", ",")}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    produtosSearchResults.style.display = "block";
+
+    // Otimizado: usar event delegation (apenas um listener ao invés de N listeners)
+    // Remove listener anterior se existir para evitar duplicatas
+    if (produtosResultsList._clickHandler) {
+      produtosResultsList.removeEventListener(
+        "click",
+        produtosResultsList._clickHandler
+      );
+    }
+    produtosResultsList._clickHandler = (e) => {
+      console.log("🔍 Handler de clique chamado", e.target);
+      const item = e.target.closest("[data-produto-id]");
+      console.log("🔍 Item encontrado:", item);
+      if (item) {
+        // CRÍTICO: Prevenir comportamento padrão e propagação ANTES de qualquer coisa
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        // IMPORTANTE: Salvar posição de scroll e posição do elemento ANTES de qualquer outra operação
+        const scrollY =
+          window.scrollY ||
+          window.pageYOffset ||
+          document.documentElement.scrollTop ||
+          0;
+        const itemRect = item.getBoundingClientRect();
+        console.log("📌 Posição de scroll capturada no clique:", scrollY);
+        console.log("📍 Posição do elemento:", itemRect);
+
+        const produtoId = item.getAttribute("data-produto-id");
+        console.log("🔍 Produto ID:", produtoId);
+        console.log(
+          "🔍 window.abrirProdutoModal existe?",
+          typeof window.abrirProdutoModal
+        );
+        if (produtoId && window.abrirProdutoModal) {
+          console.log("✅ Chamando abrirProdutoModal...");
+          // Chamar IMEDIATAMENTE sem setTimeout para evitar problemas
+          window.abrirProdutoModal(produtoId, scrollY, itemRect);
+        } else {
+          console.error(
+            "❌ Erro: produtoId ou abrirProdutoModal não disponível"
+          );
+        }
+        return false;
+      }
+    };
+    produtosResultsList.addEventListener(
+      "click",
+      produtosResultsList._clickHandler,
+      { capture: true } // Usar capture para garantir que seja processado primeiro
+    );
+  }
+
+  // Event listeners para busca
+  filtroIndustria?.addEventListener("change", () => {
+    carregarTabelasPrecoFiltro();
+    buscarProdutos();
+  });
+
+  filtroTabelaPreco?.addEventListener("change", buscarProdutos);
+
+  produtoSearch?.addEventListener("input", debounce(buscarProdutos, 300));
+
+  // Inicializar busca - usar setTimeout para garantir que o DOM está pronto
+  setTimeout(() => {
+    console.log("🔍 Inicializando filtros de busca de produtos...");
+    console.log("🔍 filtroIndustria existe?", !!filtroIndustria);
+    console.log("🔍 filtroTabelaPreco existe?", !!filtroTabelaPreco);
+    carregarIndustriasFiltro();
+    carregarTabelasPrecoFiltro();
+  }, 100);
+
+  // Event listeners para botões de descontos adicionais
+  const aplicarFiltrosBtn = document.querySelector("#aplicarFiltros");
+  const limparFiltrosBtn = document.querySelector("#limparFiltros");
+
+  aplicarFiltrosBtn?.addEventListener("click", () => {
+    const filtro1 = parseFloat(document.querySelector("#filtro1")?.value || 0);
+    const filtro2 = parseFloat(document.querySelector("#filtro2")?.value || 0);
+    const filtro3 = parseFloat(document.querySelector("#filtro3")?.value || 0);
+    const filtro4 = parseFloat(document.querySelector("#filtro4")?.value || 0);
+    const filtro5 = parseFloat(document.querySelector("#filtro5")?.value || 0);
+    const filtro6 = parseFloat(document.querySelector("#filtro6")?.value || 0);
+    const filtro7 = parseFloat(document.querySelector("#filtro7")?.value || 0);
+
+    // Coletar TODOS os descontos/acréscimos dos quadrados (cumulativos)
+    // Valores positivos = desconto, valores negativos = acréscimo
+    const descontosQuadrados = [
+      filtro1,
+      filtro2,
+      filtro3,
+      filtro4,
+      filtro5,
+      filtro6,
+      filtro7,
+    ].filter((d) => d !== 0); // Aceita valores positivos e negativos
+
+    if (descontosQuadrados.length === 0) {
+      window.alert("Informe pelo menos um desconto ou acréscimo para aplicar.");
+      return;
+    }
+
+    // Aplicar descontos/acréscimos aos itens
+    window.pedidoItens.forEach((item) => {
+      // SEMPRE usar o preço original da tabela como base
+      const precoTabela = item.precoTabela || 0;
+
+      // Primeiro aplicar descontos específicos do item (se houver)
+      let novoPrecoComDesconto = precoTabela;
+      const descontosItem = item.descontosItem || [0, 0, 0];
+      descontosItem.forEach((desc) => {
+        if (desc > 0) {
+          novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+        } else if (desc < 0) {
+          novoPrecoComDesconto =
+            novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+        }
+      });
+
+      // Depois aplicar TODOS os descontos/acréscimos dos quadrados (cumulativo)
+      descontosQuadrados.forEach((desc) => {
+        if (desc > 0) {
+          // Desconto: reduzir o preço
+          novoPrecoComDesconto = novoPrecoComDesconto * (1 - desc / 100);
+        } else if (desc < 0) {
+          // Acréscimo: aumentar o preço
+          novoPrecoComDesconto =
+            novoPrecoComDesconto * (1 + Math.abs(desc) / 100);
+        }
+      });
+
+      item.precoComDesconto = novoPrecoComDesconto;
+
+      // Recalcular IPI e ST sobre o novo preço
+      const ipi = item.ipi || 0;
+      const st = item.st || 0;
+      const valorIPI = (item.precoComDesconto * ipi) / 100;
+      const valorST = (item.precoComDesconto * st) / 100;
+      item.precoFinal = item.precoComDesconto + valorIPI + valorST;
+
+      // Atualizar totais
+      item.total = item.precoComDesconto * item.quantidade;
+      item.totalBruto = item.precoFinal * item.quantidade;
+
+      // Salvar descontos aplicados (todos os descontos dos quadrados)
+      item.descontosAplicados = [...descontosQuadrados];
+    });
+
+    // Sincronizar com pedidoItens local
+    pedidoItens = window.pedidoItens;
+    renderPedidoItens();
+    calculateTotals();
+  });
+
+  limparFiltrosBtn?.addEventListener("click", () => {
+    // Limpar todos os campos de filtro
+    document.querySelector("#filtro1").value = "";
+    document.querySelector("#filtro2").value = "";
+    document.querySelector("#filtro3").value = "";
+    document.querySelector("#filtro4").value = "";
+    document.querySelector("#filtro5").value = "";
+    document.querySelector("#filtro6").value = "";
+    document.querySelector("#filtro7").value = "";
+
+    // Remover TODOS os descontos e voltar ao preço original da tabela
+    window.pedidoItens.forEach((item) => {
+      // Remover TODOS os descontos (quadrados, específicos do item, etc)
+      if (item.descontosAplicados) {
+        delete item.descontosAplicados;
+      }
+      if (item.descontoAdicional) {
+        delete item.descontoAdicional;
+      }
+      if (item.descontosItem) {
+        delete item.descontosItem;
+      }
+
+      // Voltar ao preço original da tabela (SEM nenhum desconto)
+      const precoTabela = item.precoTabela || 0;
+      item.precoComDesconto = precoTabela;
+
+      // Recalcular IPI e ST sobre o novo preço
+      const ipi = item.ipi || 0;
+      const st = item.st || 0;
+      const valorIPI = (item.precoComDesconto * ipi) / 100;
+      const valorST = (item.precoComDesconto * st) / 100;
+      item.precoFinal = item.precoComDesconto + valorIPI + valorST;
+
+      // Atualizar totais
+      item.total = item.precoComDesconto * item.quantidade;
+      item.totalBruto = item.precoFinal * item.quantidade;
+    });
+
+    // Sincronizar com pedidoItens local
+    pedidoItens = window.pedidoItens;
+    renderPedidoItens();
+    calculateTotals();
+  });
 
   // Carregar dados se for edição
   if (editingPedidoId) {
@@ -5840,9 +9062,17 @@ function initPedidoFormPage() {
       fields.observacaoPrivada.value = pedido.observacaoPrivada || "";
       fields.enderecoEntrega.value = pedido.enderecoEntrega || "";
       fields.fatorCubagem.value = pedido.fatorCubagem || "";
+      pedidoItens = pedido.itens || [];
+      // Sincronizar com window.pedidoItens
+      window.pedidoItens = pedidoItens;
+      renderPedidoItens();
     }
   }
 
+  // Inicialização
+  refreshSelects();
+  fields.dataVenda.value = new Date().toISOString().split("T")[0];
+  renderPedidoItens();
   calculateTotals();
 }
 

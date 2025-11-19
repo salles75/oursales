@@ -4,7 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Indústria</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
     <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
   </head>
   <body data-page="industria-form">
     <header>
@@ -14,7 +22,7 @@
           <span>OS</span>
         </div>
         <div class="header-brand">
-          <h1 id="industriaFormTitle">🏭 Indústria - Nova</h1>
+          <h1 id="industriaFormTitle"><i class="ti ti-building-factory"></i> Indústria - Nova</h1>
           <p>
             Cadastre indústrias com informações completas de contato, condições
             comerciais e configurações para melhor relacionamento comercial.
@@ -43,7 +51,7 @@
         <a href="produtos.html" data-page="produtos">Produtos</a>
         <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
-        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
       </div>
     </nav>
 
@@ -74,7 +82,7 @@
                   );
                 "
               >
-                🏢
+                <i class="ti ti-building"></i>
               </div>
               <h3 class="modern-form-section-title">Dados da Empresa</h3>
             </div>
@@ -331,7 +339,7 @@
                   );
                 "
               >
-                📞
+                <i class="ti ti-phone"></i>
               </div>
               <h3 class="modern-form-section-title">Contato</h3>
             </div>
@@ -380,7 +388,7 @@
                   );
                 "
               >
-                👥
+                <i class="ti ti-users"></i>
               </div>
               <h3 class="modern-form-section-title">Contatos</h3>
             </div>
@@ -410,7 +418,7 @@
                 id="industriaContatoAdicionar"
                 class="modern-form-button secondary"
               >
-                <span>➕</span> Adicionar Contato
+                <i class="ti ti-plus"></i> Adicionar Contato
               </button>
             </div>
           </div>
@@ -428,7 +436,7 @@
                   );
                 "
               >
-                💳
+                <i class="ti ti-credit-card"></i>
               </div>
               <h3 class="modern-form-section-title">Condições de Pagamento</h3>
             </div>
@@ -459,7 +467,7 @@
                 id="industriaPagamentoAdicionar"
                 class="modern-form-button secondary"
               >
-                <span>➕</span> Adicionar Condição
+                <i class="ti ti-plus"></i> Adicionar Condição
               </button>
             </div>
           </div>
@@ -477,7 +485,7 @@
                   );
                 "
               >
-                💰
+                <i class="ti ti-currency-dollar"></i>
               </div>
               <h3 class="modern-form-section-title">Tabelas de Preços</h3>
             </div>
@@ -523,7 +531,7 @@
                   );
                 "
               >
-                ⚙️
+                <i class="ti ti-settings"></i>
               </div>
               <h3 class="modern-form-section-title">Configurações</h3>
             </div>
@@ -559,14 +567,14 @@
 
         <div class="modern-form-actions">
           <a href="industrias.html" class="modern-form-button secondary">
-            <span>↩️</span> Cancelar
+            <i class="ti ti-arrow-back"></i> Cancelar
           </a>
           <button
             type="submit"
             id="industriaSalvar"
             class="modern-form-button primary"
           >
-            <span>💾</span> Salvar Indústria
+            <i class="ti ti-device-floppy"></i> Salvar Indústria
           </button>
         </div>
       </form>
@@ -622,5 +630,6 @@
       });
     </script>
     <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
   </body>
 </html>

@@ -31,6 +31,7 @@ import industriasRoutes from "./routes/industrias.routes.js";
 import tabelasPrecosRoutes from "./routes/tabelas-precos.routes.js";
 import configuracoesRoutes from "./routes/configuracoes.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import versionRoutes from "./routes/version.routes.js";
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -38,6 +39,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
+
+// Configurar trust proxy para funcionar corretamente com Nginx
+app.set('trust proxy', true);
 
 // =====================================================
 // Middlewares de Segurança
@@ -169,6 +173,7 @@ app.use("/api/industrias", industriasRoutes);
 app.use("/api/tabelas-precos", tabelasPrecosRoutes);
 app.use("/api/configuracoes", configuracoesRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/version", versionRoutes);
 
 // =====================================================
 // Rota raiz

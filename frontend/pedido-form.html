@@ -4,7 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Novo Pedido</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
     <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/produto-modal.css" />
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
   </head>
   <body data-page="pedido-form">
     <header>
@@ -14,7 +23,7 @@
           <span>OS</span>
         </div>
         <div class="header-brand">
-          <h1 id="pedidoFormTitle">🛒 Pedido - Novo</h1>
+          <h1 id="pedidoFormTitle"><i class="ti ti-shopping-cart"></i> Pedido - Novo</h1>
           <p>
             Preencha as informações do pedido, adicione produtos e controle o
             faturamento.
@@ -43,7 +52,7 @@
         <a href="produtos.html" data-page="produtos">Produtos</a>
         <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
-        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
       </div>
     </nav>
 
@@ -74,7 +83,7 @@
                   );
                 "
               >
-                📋
+                <i class="ti ti-clipboard-list"></i>
               </div>
               <h3 class="modern-form-section-title">Informações Básicas</h3>
             </div>
@@ -104,7 +113,7 @@
                   id="pedidoClienteProcurar"
                   class="modern-form-button secondary"
                 >
-                  <span>🔍</span> Procurar
+                  <i class="ti ti-search"></i> Procurar
                 </button>
               </div>
               <select id="pedidoCliente" class="modern-form-select" required>
@@ -182,18 +191,6 @@
                     class="modern-form-input"
                     style="flex: 1"
                   />
-                  <a
-                    href="#"
-                    id="adicionarAgendaSV"
-                    style="
-                      font-size: var(--font-size-sm);
-                      color: var(--primary-500);
-                      text-decoration: none;
-                      white-space: nowrap;
-                    "
-                  >
-                    📅 Adicionar na Agenda SV
-                  </a>
                 </div>
                 <div class="modern-form-help">Data prevista para entrega</div>
               </div>
@@ -240,27 +237,36 @@
                   );
                 "
               >
-                📦
+                <i class="ti ti-package"></i>
               </div>
               <h3 class="modern-form-section-title">Itens do Pedido</h3>
             </div>
 
-            <div
-              style="
-                background: rgba(255, 243, 205, 0.8);
-                border: 1px solid rgba(255, 193, 7, 0.5);
-                border-radius: var(--radius-lg);
-                padding: var(--space-3);
-                margin-bottom: var(--space-4);
-                color: #856404;
-              "
-            >
-              ⚠️ Agora o campo de importação de produtos está dentro de Mais
-              Ações.
-            </div>
-
+            <!-- Filtros de Busca -->
             <div class="modern-form-grid">
               <div class="modern-form-field">
+                <label for="filtroIndustria" class="modern-form-label"
+                  >Indústria</label
+                >
+                <select id="filtroIndustria" class="modern-form-select">
+                  <option value="">Todas as indústrias</option>
+                </select>
+                <div class="modern-form-help">Filtre por indústria</div>
+              </div>
+              <div class="modern-form-field">
+                <label for="filtroTabelaPreco" class="modern-form-label"
+                  >Tabela de Preço</label
+                >
+                <select id="filtroTabelaPreco" class="modern-form-select">
+                  <option value="">Todas as tabelas</option>
+                </select>
+                <div class="modern-form-help">Filtre por tabela de preço</div>
+              </div>
+            </div>
+
+            <!-- Campo de Busca -->
+            <div class="modern-form-grid">
+              <div class="modern-form-field" style="grid-column: 1 / -1;">
                 <label for="produtoSearch" class="modern-form-label"
                   >Buscar Produto</label
                 >
@@ -268,19 +274,19 @@
                   type="text"
                   id="produtoSearch"
                   class="modern-form-input"
-                  placeholder="Nome do produto, código/código original ou EAN"
+                  placeholder="Nome do produto, código ou código original"
                 />
                 <div class="modern-form-help">Digite para buscar produtos</div>
               </div>
+            </div>
+
+            <!-- Resultados da Busca -->
+            <div id="produtosSearchResults" style="display: none; margin-top: var(--space-4);">
               <div class="modern-form-field">
-                <label class="modern-form-label">&nbsp;</label>
-                <button
-                  type="button"
-                  id="adicionarProduto"
-                  class="modern-form-button secondary"
-                >
-                  <span>➕</span> Adicionar Produto
-                </button>
+                <label class="modern-form-label">Resultados da Busca</label>
+                <div id="produtosResultsList" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: white;">
+                  <!-- Os resultados serão inseridos aqui via JavaScript -->
+                </div>
               </div>
             </div>
 
@@ -397,7 +403,7 @@
                     <th>Código</th>
                     <th>Descrição</th>
                     <th>Fornecedor/Marca</th>
-                    <th>Comissão 👁️</th>
+                    <th>Comissão <i class="ti ti-eye"></i></th>
                     <th>R$ Tabela</th>
                     <th>Preço Final</th>
                     <th>Qtde</th>
@@ -445,7 +451,7 @@
                   );
                 "
               >
-                💰
+                <i class="ti ti-currency-dollar"></i>
               </div>
               <h3 class="modern-form-section-title">Totais do Pedido</h3>
             </div>
@@ -672,7 +678,7 @@
                   );
                 "
               >
-                📝
+                <i class="ti ti-file-text"></i>
               </div>
               <h3 class="modern-form-section-title">
                 Informações Complementares
@@ -699,7 +705,7 @@
                     style="padding: var(--space-2)"
                     title="Copiar condição"
                   >
-                    <span>📋</span>
+                    <i class="ti ti-clipboard"></i>
                   </button>
                 </div>
                 <div class="modern-form-help">Condições de pagamento</div>
@@ -851,31 +857,31 @@
             id="personalizarCampos"
             class="modern-form-button secondary"
           >
-            <span>⚙️</span> Personalizar Campos
+            <i class="ti ti-settings"></i> Personalizar Campos
           </button>
           <button
             type="button"
             id="pedidoVisualizar"
             class="modern-form-button secondary"
           >
-            <span>👁️</span> Visualizar
+            <i class="ti ti-eye"></i> Visualizar
           </button>
           <button
             type="button"
             id="pedidoSalvarEnviar"
             class="modern-form-button secondary"
           >
-            <span>📤</span> Salvar e Enviar
+            <i class="ti ti-send"></i> Salvar e Enviar
           </button>
           <a href="pedidos.html" class="modern-form-button secondary">
-            <span>↩️</span> Cancelar
+            <i class="ti ti-arrow-back"></i> Cancelar
           </a>
           <button
             type="submit"
             id="pedidoSalvar"
             class="modern-form-button primary"
           >
-            <span>💾</span> Salvar Pedido
+            <i class="ti ti-device-floppy"></i> Salvar Pedido
           </button>
         </div>
       </form>
@@ -887,5 +893,6 @@
     </footer>
 
     <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
   </body>
 </html>

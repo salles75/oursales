@@ -536,49 +536,59 @@ export const importarProdutos = asyncHandler(async (req, res) => {
         continue;
       }
 
-      // Verificar se produto já existe
-      const produtoExistente = await prisma.produto.findUnique({
-        where: { codigo: linha.codigo },
+      // Verificar se produto já existe (por código ou SKU)
+      const produtoExistente = await prisma.produto.findFirst({
+        where: {
+          OR: [
+            { codigo: linha.codigo },
+            { sku: linha.codigo },
+          ],
+        },
       });
 
       if (produtoExistente) {
         erros.push({
           linha: i + 1,
-          erro: "Produto com este código já existe",
+          erro: "Produto com este código/SKU já existe",
           dados: linha,
         });
         continue;
       }
 
+      // Processar ST-UF
+      const stUf = linha.stUf || linha["st-uf"] || linha.stuf || linha.st_uf || null;
+      
+      // Preparar observações incluindo ST-UF se existir
+      let observacoes = linha.observacoes || "";
+      if (stUf) {
+        observacoes = observacoes
+          ? `${observacoes}\nST-UF: ${stUf}`
+          : `ST-UF: ${stUf}`;
+      }
+
       // Preparar dados do produto
       const dadosProduto = {
         codigo: linha.codigo,
+        sku: linha.codigo, // Código importado vai para SKU
         nome: linha.nome,
+        descricao: linha.nome, // Nome do produto é usado como descrição
         precoVenda: parseFloat(linha.preco || 0),
-        unidade: linha.unidade || "UNID",
-        embalagem: linha.embalagem || "",
-        fatorEmbalagem: linha.fatorEmbalagem
-          ? parseFloat(linha.fatorEmbalagem)
-          : null,
-        dataLancamento: linha.dataLancamento
-          ? new Date(linha.dataLancamento)
-          : null,
+        unidadeMedida: linha.unidade || "UN",
         ipi: linha.ipi ? parseFloat(linha.ipi) : 0,
         icms: linha.icms ? parseFloat(linha.icms) : null,
         cest: linha.cest || null,
-        cfop: linha.cfop || null,
-        observacoes: linha.observacoes || "",
-        comissaoProduto: linha.comissaoProduto
-          ? parseFloat(linha.comissaoProduto)
-          : null,
-        codigoBarras: linha.codigoBarras || null,
+        ean: linha.codigoBarras || linha.ean || null,
         industriaId,
-        tabelaPrecoId,
         criadoPorId: req.user.id,
         ativo: true,
         estoqueAtual: 0,
         estoqueMinimo: 0,
       };
+      
+      // Adicionar observações se houver (além do nome)
+      if (observacoes && observacoes !== linha.nome) {
+        dadosProduto.descricaoDetalhada = observacoes;
+      }
 
       // Criar produto
       const produto = await prisma.produto.create({
@@ -587,17 +597,61 @@ export const importarProdutos = asyncHandler(async (req, res) => {
           industria: {
             select: {
               id: true,
-              nome: true,
-            },
-          },
-          tabelaPreco: {
-            select: {
-              id: true,
-              nome: true,
+              nomeFantasia: true,
+              razaoSocial: true,
             },
           },
         },
       });
+
+      // Adicionar produto à tabela de preços com o preço e ST-UF
+      const precoTabela = parseFloat(linha.preco || 0);
+      let observacoesTabela = "";
+      if (stUf) {
+        observacoesTabela = `ST-UF: ${stUf}`;
+      }
+      if (linha.observacoes) {
+        observacoesTabela = observacoesTabela
+          ? `${observacoesTabela}\n${linha.observacoes}`
+          : linha.observacoes;
+      }
+
+      // Verificar se produto já está na tabela
+      const produtoNaTabela = await prisma.tabelaPrecoProduto.findUnique({
+        where: {
+          tabelaPrecoId_produtoId: {
+            tabelaPrecoId: tabelaPrecoId,
+            produtoId: produto.id,
+          },
+        },
+      });
+
+      if (produtoNaTabela) {
+        // Atualizar se já existir
+        await prisma.tabelaPrecoProduto.update({
+          where: {
+            tabelaPrecoId_produtoId: {
+              tabelaPrecoId: tabelaPrecoId,
+              produtoId: produto.id,
+            },
+          },
+          data: {
+            preco: precoTabela,
+            observacoes: observacoesTabela || null,
+          },
+        });
+      } else {
+        // Criar novo registro na tabela de preços
+        await prisma.tabelaPrecoProduto.create({
+          data: {
+            tabelaPrecoId: tabelaPrecoId,
+            produtoId: produto.id,
+            preco: precoTabela,
+            observacoes: observacoesTabela || null,
+            ativo: true,
+          },
+        });
+      }
 
       produtosImportados.push(produto);
     } catch (error) {
@@ -612,6 +666,8 @@ export const importarProdutos = asyncHandler(async (req, res) => {
   // Limpar cache
   await cache.delPattern("produtos:list:*");
   await cache.delPattern("produtos:stats");
+  await cache.delPattern("tabelas-precos:list:*");
+  await cache.del(`tabela-preco:${tabelaPrecoId}`);
 
   logger.info(
     `Importação de produtos: ${produtosImportados.length} importados, ${erros.length} erros por ${req.user.email}`

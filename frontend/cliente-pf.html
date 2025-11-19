@@ -4,7 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OurSales • Cliente Pessoa Física</title>
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Critical CSS -->
     <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" data-defer />
+    <!-- Performance Optimizer -->
+    <script src="assets/js/performance-optimizer.js"></script>
   </head>
   <body data-page="cliente-pf">
     <header>
@@ -44,7 +52,7 @@
         <a href="produtos.html" data-page="produtos">Produtos</a>
         <a href="industrias.html" data-page="industrias">Indústrias</a>
         <a href="crm.html" data-page="crm">CRM</a>
-        <a href="configuracoes.html" data-page="configuracoes">⚙️ Mais</a>
+        <a href="configuracoes.html" data-page="configuracoes"><i class="ti ti-settings"></i> Mais</a>
       </div>
     </nav>
 
@@ -61,6 +69,19 @@
           </p>
         </div>
 
+        <div class="modern-form-actions" style="position: sticky; top: 0; z-index: 5; background: var(--bg); padding-top: var(--space-3);">
+          <a href="clientes.html" class="modern-form-button secondary">
+            <i class="ti ti-arrow-back"></i> Cancelar
+          </a>
+          <button
+            type="submit"
+            id="pfSalvarTop"
+            class="modern-form-button primary"
+          >
+            <i class="ti ti-device-floppy"></i> Salvar Cliente
+          </button>
+        </div>
+
         <div class="modern-form-content">
           <!-- Seção: Informações Básicas -->
           <div class="modern-form-section">
@@ -75,7 +96,7 @@
                   );
                 "
               >
-                👤
+                <i class="ti ti-user"></i>
               </div>
               <h3 class="modern-form-section-title">Informações Básicas</h3>
             </div>
@@ -204,7 +225,7 @@
                   );
                 "
               >
-                🏠
+                <i class="ti ti-home"></i>
               </div>
               <h3 class="modern-form-section-title">Endereço</h3>
             </div>
@@ -313,7 +334,7 @@
                   );
                 "
               >
-                📞
+                <i class="ti ti-phone"></i>
               </div>
               <h3 class="modern-form-section-title">Comunicação</h3>
             </div>
@@ -406,7 +427,7 @@
                   );
                 "
               >
-                👥
+                <i class="ti ti-users"></i>
               </div>
               <h3 class="modern-form-section-title">Contatos</h3>
             </div>
@@ -438,7 +459,7 @@
                 id="pfContatoAdicionar"
                 class="modern-form-button secondary"
               >
-                <span>➕</span> Adicionar Contato
+                <i class="ti ti-plus"></i> Adicionar Contato
               </button>
             </div>
           </div>
@@ -456,7 +477,7 @@
                   );
                 "
               >
-                💳
+                <i class="ti ti-credit-card"></i>
               </div>
               <h3 class="modern-form-section-title">Condições de Pagamento</h3>
             </div>
@@ -488,7 +509,7 @@
                 id="pfPagamentoAdicionar"
                 class="modern-form-button secondary"
               >
-                <span>➕</span> Adicionar Condição
+                <i class="ti ti-plus"></i> Adicionar Condição
               </button>
             </div>
           </div>
@@ -506,7 +527,7 @@
                   );
                 "
               >
-                👨‍💼
+                <i class="ti ti-user-check"></i>
               </div>
               <h3 class="modern-form-section-title">Vendedores</h3>
             </div>
@@ -533,7 +554,7 @@
                 id="pfVendedorAdicionar"
                 class="modern-form-button secondary"
               >
-                <span>➕</span> Adicionar Vendedor
+                <i class="ti ti-plus"></i> Adicionar Vendedor
               </button>
             </div>
           </div>
@@ -551,7 +572,7 @@
                   );
                 "
               >
-                🏭
+                <i class="ti ti-building-factory"></i>
               </div>
               <h3 class="modern-form-section-title">Indústrias</h3>
             </div>
@@ -579,7 +600,7 @@
                 id="pfIndustriaAdicionar"
                 class="modern-form-button secondary"
               >
-                <span>➕</span> Adicionar Indústria
+                <i class="ti ti-plus"></i> Adicionar Indústria
               </button>
             </div>
           </div>
@@ -597,7 +618,7 @@
                   );
                 "
               >
-                🚚
+                <i class="ti ti-truck"></i>
               </div>
               <h3 class="modern-form-section-title">Transportadoras</h3>
             </div>
@@ -624,7 +645,7 @@
                 id="pfTransportadoraAdicionar"
                 class="modern-form-button secondary"
               >
-                <span>➕</span> Adicionar Transportadora
+                <i class="ti ti-plus"></i> Adicionar Transportadora
               </button>
             </div>
           </div>
@@ -642,7 +663,7 @@
                   );
                 "
               >
-                📝
+                <i class="ti ti-file-text"></i>
               </div>
               <h3 class="modern-form-section-title">Status e Observações</h3>
             </div>
@@ -697,14 +718,14 @@
 
         <div class="modern-form-actions">
           <a href="clientes.html" class="modern-form-button secondary">
-            <span>↩️</span> Cancelar
+            <i class="ti ti-arrow-back"></i> Cancelar
           </a>
           <button
             type="submit"
             id="pfSalvar"
             class="modern-form-button primary"
           >
-            <span>💾</span> Salvar Cliente
+            <i class="ti ti-device-floppy"></i> Salvar Cliente
           </button>
         </div>
       </form>
@@ -717,5 +738,6 @@
 
     <script src="assets/js/input-masks.js"></script>
     <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/version-check.js" defer></script>
   </body>
 </html>
