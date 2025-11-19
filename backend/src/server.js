@@ -101,15 +101,18 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Servir arquivos estáticos da raiz (para index.html e outros arquivos na raiz)
+app.use(express.static(path.join(__dirname, "../..")));
+
 // Servir arquivos estáticos do frontend
 app.use(express.static(path.join(__dirname, "../../frontend")));
 
 // Servir arquivos estáticos do admin
 app.use("/admin", express.static(path.join(__dirname, "../../frontend/admin")));
 
-// Rota para servir o index.html como página principal
+// Rota para servir o index.html como página principal (da raiz)
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../frontend/index.html"));
+  res.sendFile(path.join(__dirname, "../../index.html"));
 });
 
 // Rota para servir o painel admin
