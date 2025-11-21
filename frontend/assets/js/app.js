@@ -3929,9 +3929,17 @@ function initIndustriaFormPage() {
 
     console.log("Dados a serem salvos:", data);
 
-    const API = window.oursalesAPI;
+    // Aguardar um pouco para garantir que a API esteja carregada
+    let API = window.oursalesAPI;
     if (!API) {
-      window.alert("Erro: API não disponível. Recarregue a página.");
+      // Tentar aguardar um pouco mais se a API ainda não estiver disponível
+      await new Promise(resolve => setTimeout(resolve, 100));
+      API = window.oursalesAPI;
+    }
+
+    if (!API) {
+      window.alert("Erro: API não disponível. Verifique se o arquivo api.js está sendo carregado e recarregue a página.");
+      console.error("window.oursalesAPI não está disponível. Verifique se api.js está sendo carregado antes de app.js");
       return;
     }
 
@@ -3952,9 +3960,10 @@ function initIndustriaFormPage() {
     } catch (error) {
       console.error("Erro ao salvar indústria:", error);
       console.error("Stack trace:", error.stack);
+      const errorMessage = error.response?.data?.message || error.message || "Erro desconhecido";
       window.alert(
         "Erro ao salvar indústria: " +
-          error.message +
+          errorMessage +
           ". Por favor, verifique o console para mais detalhes."
       );
     }
