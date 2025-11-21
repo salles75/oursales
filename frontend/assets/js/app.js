@@ -3933,13 +3933,17 @@ function initIndustriaFormPage() {
     let API = window.oursalesAPI;
     if (!API) {
       // Tentar aguardar um pouco mais se a API ainda não estiver disponível
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       API = window.oursalesAPI;
     }
 
     if (!API) {
-      window.alert("Erro: API não disponível. Verifique se o arquivo api.js está sendo carregado e recarregue a página.");
-      console.error("window.oursalesAPI não está disponível. Verifique se api.js está sendo carregado antes de app.js");
+      window.alert(
+        "Erro: API não disponível. Verifique se o arquivo api.js está sendo carregado e recarregue a página."
+      );
+      console.error(
+        "window.oursalesAPI não está disponível. Verifique se api.js está sendo carregado antes de app.js"
+      );
       return;
     }
 
@@ -3960,7 +3964,8 @@ function initIndustriaFormPage() {
     } catch (error) {
       console.error("Erro ao salvar indústria:", error);
       console.error("Stack trace:", error.stack);
-      const errorMessage = error.response?.data?.message || error.message || "Erro desconhecido";
+      const errorMessage =
+        error.response?.data?.message || error.message || "Erro desconhecido";
       window.alert(
         "Erro ao salvar indústria: " +
           errorMessage +
@@ -5093,7 +5098,12 @@ function initProdutoFormPage() {
 
     const API = window.oursalesAPI;
     if (!API) {
-      window.alert("Erro: API não disponível. Recarregue a página.");
+      window.alert(
+        "Erro: API não disponível. Verifique se o arquivo api.js está sendo carregado e recarregue a página."
+      );
+      console.error(
+        "window.oursalesAPI não está disponível. Verifique se api.js está sendo carregado antes de app.js"
+      );
       return;
     }
 
@@ -6185,7 +6195,12 @@ function initOrcamentoFormPage() {
 
     const API = window.oursalesAPI;
     if (!API) {
-      window.alert("Erro: API não disponível. Recarregue a página.");
+      window.alert(
+        "Erro: API não disponível. Verifique se o arquivo api.js está sendo carregado e recarregue a página."
+      );
+      console.error(
+        "window.oursalesAPI não está disponível. Verifique se api.js está sendo carregado antes de app.js"
+      );
       return;
     }
 
@@ -8426,7 +8441,12 @@ function initPedidoFormPage() {
 
     const API = window.oursalesAPI;
     if (!API) {
-      window.alert("Erro: API não disponível. Recarregue a página.");
+      window.alert(
+        "Erro: API não disponível. Verifique se o arquivo api.js está sendo carregado e recarregue a página."
+      );
+      console.error(
+        "window.oursalesAPI não está disponível. Verifique se api.js está sendo carregado antes de app.js"
+      );
       return;
     }
 
@@ -10279,6 +10299,22 @@ const pageInitializers = {
 };
 
 function init() {
+  // Verificar se api.js foi carregado
+  if (typeof window.oursalesAPI === "undefined") {
+    console.warn("⚠️ api.js ainda não foi carregado. Aguardando...");
+    // Aguardar um pouco e tentar novamente
+    setTimeout(() => {
+      if (typeof window.oursalesAPI === "undefined") {
+        console.error(
+          "❌ api.js não foi carregado. Verifique se o arquivo api.js está sendo carregado antes de app.js"
+        );
+        // Continuar mesmo assim para não quebrar a página
+      }
+      init();
+    }, 100);
+    return;
+  }
+
   seedDataIfEmpty();
   highlightActiveNav();
   const page = document.body.dataset.page;
