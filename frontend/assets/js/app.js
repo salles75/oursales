@@ -1213,12 +1213,24 @@ function initClientePJPage() {
       const API = window.oursalesAPI;
       if (API) {
         const response = await API.getIndustrias();
-        const industrias = Array.isArray(response) ? response : response.data || [];
-        industriasLista = ["Todas as Indústrias", ...industrias.map(ind => ind.nomeFantasia || ind.razaoSocial || ind.nome || '')];
+        const industrias = Array.isArray(response)
+          ? response
+          : response.data || [];
+        industriasLista = [
+          "Todas as Indústrias",
+          ...industrias.map(
+            (ind) => ind.nomeFantasia || ind.razaoSocial || ind.nome || ""
+          ),
+        ];
       } else {
         const data = storage.load();
         const industrias = data.industrias || [];
-        industriasLista = ["Todas as Indústrias", ...industrias.map(ind => ind.nomeFantasia || ind.razaoSocial || ind.nome || '')];
+        industriasLista = [
+          "Todas as Indústrias",
+          ...industrias.map(
+            (ind) => ind.nomeFantasia || ind.razaoSocial || ind.nome || ""
+          ),
+        ];
       }
     } catch (error) {
       console.error("Erro ao carregar indústrias:", error);
@@ -1243,23 +1255,6 @@ function initClientePJPage() {
   // Carregar dados ao inicializar
   carregarIndustrias();
   carregarVendedores();
-
-  const vendedoresLista = [
-    "Ana Souza",
-    "Bruno Oliveira",
-    "Carla Ribeiro",
-    "Diego Martins",
-    "Fernanda Costa",
-  ];
-
-  const industriasLista = [
-    "Todas as Indústrias",
-    "Alimentos",
-    "Bebidas",
-    "Higiene",
-    "Limpeza",
-    "Cosméticos",
-  ];
 
   const buildStaticOptions = (
     values,
@@ -2428,12 +2423,24 @@ function initClientePFPage() {
       const API = window.oursalesAPI;
       if (API) {
         const response = await API.getIndustrias();
-        const industrias = Array.isArray(response) ? response : response.data || [];
-        industriasLista = ["Todas as Indústrias", ...industrias.map(ind => ind.nomeFantasia || ind.razaoSocial || ind.nome || '')];
+        const industrias = Array.isArray(response)
+          ? response
+          : response.data || [];
+        industriasLista = [
+          "Todas as Indústrias",
+          ...industrias.map(
+            (ind) => ind.nomeFantasia || ind.razaoSocial || ind.nome || ""
+          ),
+        ];
       } else {
         const data = storage.load();
         const industrias = data.industrias || [];
-        industriasLista = ["Todas as Indústrias", ...industrias.map(ind => ind.nomeFantasia || ind.razaoSocial || ind.nome || '')];
+        industriasLista = [
+          "Todas as Indústrias",
+          ...industrias.map(
+            (ind) => ind.nomeFantasia || ind.razaoSocial || ind.nome || ""
+          ),
+        ];
       }
     } catch (error) {
       console.error("Erro ao carregar indústrias:", error);
@@ -2458,23 +2465,6 @@ function initClientePFPage() {
   // Carregar dados ao inicializar
   carregarIndustrias();
   carregarVendedores();
-
-  const vendedoresLista = [
-    "Ana Souza",
-    "Bruno Oliveira",
-    "Carla Ribeiro",
-    "Diego Martins",
-    "Fernanda Costa",
-  ];
-
-  const industriasLista = [
-    "Todas as Indústrias",
-    "Alimentos",
-    "Bebidas",
-    "Higiene",
-    "Limpeza",
-    "Cosméticos",
-  ];
 
   const buildStaticOptions = (
     values,
@@ -3331,7 +3321,10 @@ function initTransportadorasPage() {
       await render();
     } catch (error) {
       console.error("Erro ao remover transportadora:", error);
-      window.alert("Erro ao remover transportadora: " + (error.message || "Erro desconhecido"));
+      window.alert(
+        "Erro ao remover transportadora: " +
+          (error.message || "Erro desconhecido")
+      );
     }
   });
 
@@ -3434,7 +3427,9 @@ function initTransportadorasPage() {
       const API = window.oursalesAPI;
       if (API) {
         const response = await API.getTransportadoras();
-        transportadoras = Array.isArray(response) ? response : response.data || [];
+        transportadoras = Array.isArray(response)
+          ? response
+          : response.data || [];
       } else {
         transportadoras = storage.load().transportadoras;
       }
@@ -3546,12 +3541,6 @@ function initIndustriasPage() {
         'input[type="checkbox"][name="industriaSelecionada"]:checked'
       ) || [];
 
-  removeBtn?.addEventListener("click", () => {
-    const checkedBoxes = listContainer?.querySelectorAll(
-      'input[type="checkbox"][name="industriaSelecionada"]:checked'
-    ) || [];
-    
-
     if (checkedBoxes.length === 0) {
       window.alert("Selecione uma ou mais indústrias para remover.");
       return;
@@ -3568,7 +3557,7 @@ function initIndustriasPage() {
     }
 
     const idsToRemove = Array.from(checkedBoxes).map((cb) => cb.value);
-    
+
     try {
       const API = window.oursalesAPI;
       if (API) {
@@ -3587,7 +3576,10 @@ function initIndustriasPage() {
       await render();
     } catch (error) {
       console.error("Erro ao remover indústria(s):", error);
-      window.alert("Erro ao remover indústria(s): " + (error.message || "Erro desconhecido"));
+      window.alert(
+        "Erro ao remover indústria(s): " +
+          (error.message || "Erro desconhecido")
+      );
     }
   });
 
@@ -3890,7 +3882,7 @@ function initIndustriaFormPage() {
   const tabelasLista = document.querySelector("#tabelasLista");
 
   // Submit do formulário
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     console.log("Formulário de indústria submetido");
@@ -3937,166 +3929,26 @@ function initIndustriaFormPage() {
 
     console.log("Dados a serem salvos:", data);
 
+    const API = window.oursalesAPI;
+    if (!API) {
+      window.alert("Erro: API não disponível. Recarregue a página.");
+      return;
+    }
+
     try {
       if (editingIndustriaId) {
         console.log("Editando indústria ID:", editingIndustriaId);
-        storage.update((draft) => {
-          const industria = draft.industrias.find(
-            (item) => item.id === editingIndustriaId
-          );
-          if (industria) {
-            Object.assign(industria, data);
-            console.log("Indústria atualizada:", industria);
-          } else {
-            console.error("Indústria não encontrada para edição");
-            throw new Error("Indústria não encontrada");
-          }
-        });
-
-        // Garantir persistência
-        storage.persist();
-        console.log("Persistência concluída - Atualização");
-
+        await API.updateIndustria(editingIndustriaId, data);
+        console.log("Indústria atualizada com sucesso");
         window.alert("Indústria atualizada com sucesso!");
       } else {
         console.log("Criando nova indústria");
-        const novaId = generateId("ind");
-        console.log("Novo ID gerado:", novaId);
-
-        // Verificar estado antes
-        const beforeState = storage.load();
-        console.log(
-          "📊 Indústrias ANTES de adicionar:",
-          beforeState.industrias.length
-        );
-        console.log("📊 Cache antes:", storage.cache?.industrias?.length || 0);
-
-        storage.update((draft) => {
-          console.log(
-            "🔄 Dentro do update - draft.industrias antes:",
-            draft.industrias?.length || 0
-          );
-          if (!Array.isArray(draft.industrias)) {
-            console.error(
-              "❌ ERRO: draft.industrias não é um array!",
-              draft.industrias
-            );
-            draft.industrias = [];
-          }
-
-          const nova = { id: novaId, ...data };
-          draft.industrias.push(nova);
-
-          console.log("✅ Dentro do update - indústria adicionada:", nova);
-          console.log(
-            "✅ Dentro do update - draft.industrias depois:",
-            draft.industrias.length
-          );
-        });
-
-        // Verificar cache após update
-        console.log(
-          "📊 Cache APÓS update:",
-          storage.cache?.industrias?.length || 0
-        );
-        if (storage.cache?.industrias) {
-          const encontrada = storage.cache.industrias.find(
-            (ind) => ind.id === novaId
-          );
-          console.log(
-            "🔍 Indústria encontrada no cache:",
-            encontrada ? "✅ SIM" : "❌ NÃO"
-          );
-        }
-
-        // Garantir persistência (storage.update já chamou persist, mas vamos verificar)
-        try {
-          storage.persist();
-          console.log("💾 persist() chamado novamente com sucesso");
-
-          // Verificar localStorage diretamente
-          const raw = window.localStorage.getItem("oursales:data");
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            console.log(
-              "📦 Dados no localStorage após persist:",
-              parsed.industrias?.length || 0
-            );
-            const noLocalStorage = parsed.industrias?.find(
-              (ind) => ind.id === novaId
-            );
-            if (noLocalStorage) {
-              console.log(
-                "✅ Indústria encontrada no localStorage:",
-                noLocalStorage
-              );
-            } else {
-              console.error("❌ Indústria NÃO encontrada no localStorage!");
-              console.error(
-                "Todas as indústrias no localStorage:",
-                parsed.industrias
-              );
-              console.error(
-                "🆔 IDs no localStorage:",
-                parsed.industrias?.map((ind) => ind.id) || []
-              );
-              console.error("🆔 ID procurado:", novaId);
-              window.alert(
-                "❌ Erro: Indústria não foi salva. Verifique o console (F12) para mais detalhes."
-              );
-              return;
-            }
-          } else {
-            console.error("❌ ERRO: localStorage está vazio após persist()!");
-            window.alert(
-              "❌ Erro: localStorage está vazio. Verifique o console (F12)."
-            );
-            return;
-          }
-        } catch (persistError) {
-          console.error("❌ ERRO ao chamar persist():", persistError);
-          window.alert("❌ Erro ao salvar: " + persistError.message);
-          return;
-        }
-
-        // Limpar cache para verificar se realmente foi salvo
-        storage.cache = null;
-
-        // Verificar se foi salvo após limpar cache
-        const saved = storage.load();
-        console.log(
-          "📊 Indústrias DEPOIS de limpar cache e recarregar:",
-          saved.industrias.length
-        );
-        const savedIndustria = saved.industrias.find(
-          (ind) => ind.id === novaId
-        );
-
-        if (!savedIndustria) {
-          console.error(
-            "❌ ERRO: Indústria não foi encontrada após recarregar!"
-          );
-          console.error("Todas as indústrias carregadas:", saved.industrias);
-          console.error(
-            "🆔 IDs das indústrias:",
-            saved.industrias.map((ind) => ind.id)
-          );
-          console.error("🆔 ID procurado:", novaId);
-          window.alert(
-            "❌ Erro: Indústria não foi encontrada após salvar. Verifique o console (F12)."
-          );
-          return; // Não redirecionar se não salvou
-        }
-
-        console.log("✅ Indústria confirmada salva:", savedIndustria);
-        console.log("✅ Total de indústrias salvas:", saved.industrias.length);
-        window.alert("✅ Indústria cadastrada com sucesso!");
+        await API.createIndustria(data);
+        console.log("Indústria criada com sucesso");
+        window.alert("Indústria criada com sucesso!");
       }
 
-      // Pequeno delay para garantir que o salvamento foi concluído
-      setTimeout(() => {
-        window.location.href = "industrias.html";
-      }, 300);
+      window.location.href = "industrias.html";
     } catch (error) {
       console.error("Erro ao salvar indústria:", error);
       console.error("Stack trace:", error.stack);
@@ -4686,7 +4538,9 @@ function initProdutosPage() {
       await render();
     } catch (error) {
       console.error("Erro ao remover produto:", error);
-      window.alert("Erro ao remover produto: " + (error.message || "Erro desconhecido"));
+      window.alert(
+        "Erro ao remover produto: " + (error.message || "Erro desconhecido")
+      );
     }
   });
 
@@ -5188,7 +5042,7 @@ function initProdutoFormPage() {
   };
 
   // Submit do formulário
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const data = {
@@ -5228,25 +5082,27 @@ function initProdutoFormPage() {
       descricao: fields.observacoes?.value.trim() || "",
     };
 
-    if (editingProdutoId) {
-      storage.update((draft) => {
-        const produto = draft.produtos.find(
-          (item) => item.id === editingProdutoId
-        );
-        if (produto) {
-          Object.assign(produto, data);
-        }
-      });
-      window.alert("Produto atualizado com sucesso!");
-    } else {
-      storage.update((draft) => {
-        const novo = { id: generateId("pro"), ...data };
-        draft.produtos.push(novo);
-      });
-      window.alert("Produto criado com sucesso!");
+    const API = window.oursalesAPI;
+    if (!API) {
+      window.alert("Erro: API não disponível. Recarregue a página.");
+      return;
     }
 
-    window.location.href = "produtos.html";
+    try {
+      if (editingProdutoId) {
+        await API.updateProduto(editingProdutoId, data);
+        window.alert("Produto atualizado com sucesso!");
+      } else {
+        await API.createProduto(data);
+        window.alert("Produto criado com sucesso!");
+      }
+      window.location.href = "produtos.html";
+    } catch (error) {
+      console.error("Erro ao salvar produto:", error);
+      window.alert(
+        `Erro ao salvar produto: ${error.message || "Erro desconhecido"}`
+      );
+    }
   });
 
   // Event listener para botão Personalizar Campos
@@ -5471,7 +5327,9 @@ function initOrcamentosPage() {
       await render();
     } catch (error) {
       console.error("Erro ao remover orçamento:", error);
-      window.alert("Erro ao remover orçamento: " + (error.message || "Erro desconhecido"));
+      window.alert(
+        "Erro ao remover orçamento: " + (error.message || "Erro desconhecido")
+      );
     }
   });
 
@@ -6270,7 +6128,7 @@ function initOrcamentoFormPage() {
   };
 
   // Event Listeners
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const clienteId = fields.cliente.value;
@@ -6287,43 +6145,56 @@ function initOrcamentoFormPage() {
       return;
     }
 
+    // Mapear itens para o formato esperado pela API
+    const itensFormatados = (window.orcamentoItens || orcamentoItens || []).map(
+      (item) => ({
+        produtoId: item.produtoId,
+        quantidade: Number.parseFloat(item.quantidade) || 0,
+        precoUnitario: Number.parseFloat(
+          item.precoComDesconto || item.precoTabela || 0
+        ),
+        descontoValor: Number.parseFloat(item.descontoValor || 0),
+        descontoPercentual: Number.parseFloat(item.descontoPercentual || 0),
+        observacoes: item.observacoes || null,
+      })
+    );
+
+    if (itensFormatados.length === 0) {
+      window.alert("Adicione pelo menos um item ao orçamento.");
+      return;
+    }
+
     const data = {
       clienteId,
-      clienteNome: cliente.nome,
-      data: fields.data.value || new Date().toISOString().split("T")[0],
-      validade: fields.validade.value,
+      dataValidade: fields.validade.value,
+      itens: itensFormatados,
       descricao: fields.descricao.value.trim(),
       observacoes: fields.observacoes.value.trim(),
       condicaoPagamento: fields.condicaoPagamento?.value.trim() || "",
       status: fields.status?.value || "pendente",
-      valor:
-        Number.parseFloat(
-          document
-            .querySelector("#totalFinal")
-            ?.textContent.replace(/[^\d,]/g, "")
-            .replace(",", ".")
-        ) || 0,
     };
 
-    if (editingOrcamentoId) {
-      storage.update((draft) => {
-        const orcamento = draft.orcamentos.find(
-          (item) => item.id === editingOrcamentoId
-        );
-        if (orcamento) {
-          Object.assign(orcamento, data);
-        }
-      });
-      window.alert("Orçamento atualizado com sucesso!");
-    } else {
-      storage.update((draft) => {
-        const novo = { id: generateId("orc"), ...data };
-        draft.orcamentos.push(novo);
-      });
-      window.alert("Orçamento criado com sucesso!");
+    const API = window.oursalesAPI;
+    if (!API) {
+      window.alert("Erro: API não disponível. Recarregue a página.");
+      return;
     }
 
-    window.location.href = "orcamentos.html";
+    try {
+      if (editingOrcamentoId) {
+        await API.updateOrcamento(editingOrcamentoId, data);
+        window.alert("Orçamento atualizado com sucesso!");
+      } else {
+        await API.createOrcamento(data);
+        window.alert("Orçamento criado com sucesso!");
+      }
+      window.location.href = "orcamentos.html";
+    } catch (error) {
+      console.error("Erro ao salvar orçamento:", error);
+      window.alert(
+        `Erro ao salvar orçamento: ${error.message || "Erro desconhecido"}`
+      );
+    }
   });
 
   // Event listeners para botões adicionais
@@ -6864,10 +6735,79 @@ function initOrcamentoFormPage() {
     calculateTotals();
   });
 
+  // Carregar dados se for edição
+  if (editingOrcamentoId) {
+    const API = window.oursalesAPI;
+    if (API) {
+      API.getOrcamento(editingOrcamentoId)
+        .then((orcamento) => {
+          if (orcamento) {
+            const orcamentoData = orcamento.data || orcamento;
+            formTitle.textContent = `🛒 Orçamento - Editando Nº ${
+              orcamentoData.numero || editingOrcamentoId
+            }`;
+            fields.cliente.value = orcamentoData.clienteId || "";
+            fields.data.value = orcamentoData.data || fields.data.value;
+            fields.validade.value = orcamentoData.dataValidade || "";
+            fields.descricao.value = orcamentoData.descricao || "";
+            fields.observacoes.value = orcamentoData.observacoes || "";
+            fields.condicaoPagamento.value =
+              orcamentoData.condicaoPagamento || "";
+            fields.status.value = orcamentoData.status || "pendente";
+            orcamentoItens = orcamentoData.itens || [];
+            window.orcamentoItens = orcamentoItens;
+            renderOrcamentoItens();
+            calculateTotals();
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao carregar orçamento:", error);
+          // Fallback para localStorage
+          const orcamento = storage
+            .load()
+            .orcamentos.find((item) => item.id === editingOrcamentoId);
+          if (orcamento) {
+            formTitle.textContent = `🛒 Orçamento - Editando Nº ${orcamento.id.toUpperCase()}`;
+            fields.cliente.value = orcamento.clienteId || "";
+            fields.data.value = orcamento.data || fields.data.value;
+            fields.validade.value = orcamento.validade || "";
+            fields.descricao.value = orcamento.descricao || "";
+            fields.observacoes.value = orcamento.observacoes || "";
+            fields.condicaoPagamento.value = orcamento.condicaoPagamento || "";
+            fields.status.value = orcamento.status || "pendente";
+            orcamentoItens = orcamento.itens || [];
+            window.orcamentoItens = orcamentoItens;
+            renderOrcamentoItens();
+            calculateTotals();
+          }
+        });
+    } else {
+      // Modo localStorage
+      const orcamento = storage
+        .load()
+        .orcamentos.find((item) => item.id === editingOrcamentoId);
+      if (orcamento) {
+        formTitle.textContent = `🛒 Orçamento - Editando Nº ${orcamento.id.toUpperCase()}`;
+        fields.cliente.value = orcamento.clienteId || "";
+        fields.data.value = orcamento.data || fields.data.value;
+        fields.validade.value = orcamento.validade || "";
+        fields.descricao.value = orcamento.descricao || "";
+        fields.observacoes.value = orcamento.observacoes || "";
+        fields.condicaoPagamento.value = orcamento.condicaoPagamento || "";
+        fields.status.value = orcamento.status || "pendente";
+        orcamentoItens = orcamento.itens || [];
+        window.orcamentoItens = orcamentoItens;
+        renderOrcamentoItens();
+        calculateTotals();
+      }
+    }
+  }
+
   // Inicialização
   refreshSelects();
   fields.data.value = new Date().toISOString().split("T")[0];
   renderOrcamentoItens();
+  calculateTotals();
 }
 
 /**
@@ -7687,28 +7627,6 @@ window.abrirProdutoModal = function (
   }
 };
 
-  // Carregar dados se for edição
-  if (editingOrcamentoId) {
-    const orcamento = storage
-      .load()
-      .orcamentos.find((item) => item.id === editingOrcamentoId);
-    if (orcamento) {
-      formTitle.textContent = `🛒 Orçamento - Editando Nº ${orcamento.id.toUpperCase()}`;
-      fields.cliente.value = orcamento.clienteId || "";
-      fields.data.value = orcamento.data || fields.data.value;
-      fields.validade.value = orcamento.validade || "";
-      fields.descricao.value = orcamento.descricao || "";
-      fields.observacoes.value = orcamento.observacoes || "";
-      fields.condicaoPagamento.value = orcamento.condicaoPagamento || "";
-      fields.status.value = orcamento.status || "pendente";
-      orcamentoItens = orcamento.itens || [];
-      renderOrcamentoItens();
-    }
-  }
-
-  calculateTotals();
-}
-
 /**
  * Pedido Form Page - Página separada para criar/editar pedidos
  */
@@ -7999,7 +7917,9 @@ function initPedidosPage() {
       window.alert("Pedido removido com sucesso!");
     } catch (error) {
       console.error("Erro ao remover pedido:", error);
-      window.alert("Erro ao remover pedido: " + (error.message || "Erro desconhecido"));
+      window.alert(
+        "Erro ao remover pedido: " + (error.message || "Erro desconhecido")
+      );
     }
   });
 
@@ -8437,7 +8357,7 @@ function initPedidoFormPage() {
   window.calculateTotalsPedido = calculateTotals;
 
   // Event Listeners
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const clienteId = fields.cliente.value;
@@ -8454,16 +8374,29 @@ function initPedidoFormPage() {
       return;
     }
 
+    // Mapear itens para o formato esperado pela API
+    const itensFormatados = (window.pedidoItens || pedidoItens || []).map(
+      (item) => ({
+        produtoId: item.produtoId,
+        quantidade: Number.parseFloat(item.quantidade) || 0,
+        precoUnitario: Number.parseFloat(
+          item.precoComDesconto || item.precoTabela || 0
+        ),
+        descontoValor: Number.parseFloat(item.descontoValor || 0),
+        descontoPercentual: Number.parseFloat(item.descontoPercentual || 0),
+        observacoes: item.observacoes || null,
+      })
+    );
+
+    if (itensFormatados.length === 0) {
+      window.alert("Adicione pelo menos um item ao pedido.");
+      return;
+    }
+
     const data = {
       clienteId,
-      clienteNome: cliente.nome,
       transportadoraId: fields.transportadora.value || "",
-      transportadoraNome: fields.transportadora.value
-        ? storage
-            .load()
-            .transportadoras.find((t) => t.id === fields.transportadora.value)
-            ?.nome || ""
-        : "",
+      itens: itensFormatados,
       dataVenda:
         fields.dataVenda.value || new Date().toISOString().split("T")[0],
       previsaoEntrega: fields.previsaoEntrega.value || "",
@@ -8480,34 +8413,29 @@ function initPedidoFormPage() {
       observacaoPrivada: fields.observacaoPrivada?.value.trim() || "",
       enderecoEntrega: fields.enderecoEntrega?.value.trim() || "",
       fatorCubagem: Number.parseFloat(fields.fatorCubagem?.value) || 0,
-      valor:
-        Number.parseFloat(
-          document
-            .querySelector("#totalFinal")
-            ?.textContent.replace(/[^\d,]/g, "")
-            .replace(",", ".")
-        ) || 0,
     };
 
-    if (editingPedidoId) {
-      storage.update((draft) => {
-        const pedido = draft.pedidos.find(
-          (item) => item.id === editingPedidoId
-        );
-        if (pedido) {
-          Object.assign(pedido, data);
-        }
-      });
-      window.alert("Pedido atualizado com sucesso!");
-    } else {
-      storage.update((draft) => {
-        const novo = { id: generateId("ped"), ...data };
-        draft.pedidos.push(novo);
-      });
-      window.alert("Pedido criado com sucesso!");
+    const API = window.oursalesAPI;
+    if (!API) {
+      window.alert("Erro: API não disponível. Recarregue a página.");
+      return;
     }
 
-    window.location.href = "pedidos.html";
+    try {
+      if (editingPedidoId) {
+        await API.updatePedido(editingPedidoId, data);
+        window.alert("Pedido atualizado com sucesso!");
+      } else {
+        await API.createPedido(data);
+        window.alert("Pedido criado com sucesso!");
+      }
+      window.location.href = "pedidos.html";
+    } catch (error) {
+      console.error("Erro ao salvar pedido:", error);
+      window.alert(
+        `Erro ao salvar pedido: ${error.message || "Erro desconhecido"}`
+      );
+    }
   });
 
   // Event listeners para botões adicionais

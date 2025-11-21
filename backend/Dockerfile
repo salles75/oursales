@@ -21,17 +21,8 @@ FROM base AS dependencies
 COPY package*.json ./
 COPY prisma ./prisma/
 
-<<<<<<< HEAD
 # Instalar dependências
 RUN npm ci --only=production && \
-=======
-<<<<<<< HEAD
-# Instalar TODAS as dependências (incluindo devDependencies para Prisma CLI)
-RUN npm ci && \
-=======
-# Instalar dependências
-RUN npm ci --only=production && \
->>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 >>>>>>> 0a67fba948dc2160744fb2ac5b71dcfa5866c784
     npm cache clean --force
 
@@ -57,53 +48,25 @@ FROM base AS production
 COPY package*.json ./
 COPY prisma ./prisma/
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-# Copiar dependências (incluindo node_modules com Prisma CLI)
-COPY --from=dependencies /app/node_modules ./node_modules
 
-# Copiar Prisma schema para garantir que está disponível
-COPY prisma ./prisma/
-
-# Gerar Prisma Client no stage de produção (garantir que está disponível)
-=======
->>>>>>> 0a67fba948dc2160744fb2ac5b71dcfa5866c784
 # Copiar dependências
 COPY --from=dependencies /app/node_modules ./node_modules
 
 # Gerar Prisma Client no stage de produção
-<<<<<<< HEAD
-=======
->>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
+
 >>>>>>> 0a67fba948dc2160744fb2ac5b71dcfa5866c784
 RUN npx prisma generate
 
 # Copiar código fonte
 COPY src ./src
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-# Instalar netcat para verificar conectividade dos serviços
-RUN apk add --no-cache netcat-openbsd
 
-=======
->>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 >>>>>>> 0a67fba948dc2160744fb2ac5b71dcfa5866c784
 # Criar usuário não-root por segurança
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-# Copiar script de entrada (antes de mudar usuário)
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-=======
->>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 >>>>>>> 0a67fba948dc2160744fb2ac5b71dcfa5866c784
 # Criar diretórios necessários e ajustar permissões
 RUN mkdir -p /app/uploads /app/logs && \
@@ -119,14 +82,7 @@ USER nodejs
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:3000/health || exit 1
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-# Entrypoint para executar script de inicialização
-ENTRYPOINT ["docker-entrypoint.sh"]
 
-=======
->>>>>>> bd72d4b2c5f875288da0994d0209c0dbaebd340f
 >>>>>>> 0a67fba948dc2160744fb2ac5b71dcfa5866c784
 # Comando de inicialização
 CMD ["npm", "start"]
